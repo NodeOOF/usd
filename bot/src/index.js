@@ -1,7 +1,16 @@
 // ============================================================
 //  Cloudflare Worker — Nabz-e Bazaar Bot
-//  نسخه: 13.0
+//  نسخه: 13.3
 //  منبع: itsyebekhe/nabz (۴۷ دارایی)
+//
+//  قابلیت‌ها:
+//    - ۴۷ دارایی (ارز، طلا، سکه، نفت)
+//    - editMessageMedia برای ویرایش عکس + caption
+//    - نوتیف ساعتی برای همه کاربران (پیش‌فرض فعال)
+//    - لغو/فعال‌سازی نوتیف با یک دکمه
+//    - حذف خودکار نوتیف بعد از ۵ دقیقه
+//    - اشتراک زنده دلار (ویرایش پیام هر ۳۰ دقیقه)
+//    - cache buster برای داده‌های تازه
 // ============================================================
 
 // ============================================================
@@ -15,7 +24,8 @@ const CORS_HEADERS = Object.freeze({
   "Access-Control-Max-Age": "86400",
 });
 
-const NABZ_RAW = "https://cdn.jsdelivr.net/gh/itsyebekhe/nabz@main";
+// منابع داده
+const NABZ_RAW = "https://raw.githubusercontent.com/itsyebekhe/nabz/main";
 const NABZ_CDN = "https://cdn.jsdelivr.net/gh/itsyebekhe/nabz@main";
 
 const HISTORY_SOURCES = [
@@ -29,21 +39,39 @@ const MARKET_SOURCES = [
   "https://cdn.statically.io/gh/itsyebekhe/nabz/main/market.json",
 ];
 
+// چارت‌ها
+const CHART_BASE_URLS = [
+  "https://cdn.jsdelivr.net/gh/itsyebekhe/nabz@main",
+  "https://raw.githubusercontent.com/itsyebekhe/nabz/main",
+  "https://cdn.statically.io/gh/itsyebekhe/nabz/main",
+];
+
 const FOOTER = "\n\n━━━━━━━━━━━━━━━━━━━\n🌐 github.com/NodeOOF\n🤖 @dolarazad\\_bot";
 
-const DEFAULT_STALE_MINUTES = 120;
 const DEFAULT_CACHE_SECONDS = 60;
 const FETCH_TIMEOUT_MS = 10000;
 
-const KV_SUB_PREFIX = "sub:";
-const KV_SUB_TTL = 60 * 60 * 24 * 7;
+// KV keys
+const KV_SUB_PREFIX = "sub:";           // اشتراک زنده دلار
+const KV_USER_PREFIX = "user:";         // کاربران ثبت‌شده (نوتیف ساعتی)
+const KV_NOTIFY_PENDING = "notify:pending";
+const KV_LAST_NOTIFY_TIME = "notify:last_time";
+
+// TTL (به ثانیه)
+const KV_SUB_TTL = 60 * 60 * 24 * 7;    // ۷ روز
+const KV_USER_TTL = 60 * 60 * 24 * 30;  // ۳۰ روز
+const KV_PENDING_TTL = 60 * 60;         // ۱ ساعت
+
+// نوتیف
+const NOTIFY_DELETE_AFTER_MINUTES = 5;
+const NOTIFY_INTERVAL_MINUTES = 60;
+const NOTIFY_BATCH_SIZE = 20;
 
 // ============================================================
-//  جدول دارایی‌ها — دقیقاً مطابق nabz
+//  جدول دارایی‌ها
 // ============================================================
 
 const ASSETS = {
-  // ارزهای شاخص
   usd: { title: "دلار آمریکا", icon: "🇺🇸", unit: "تومان", category: "major" },
   eur: { title: "یورو اروپا", icon: "🇪🇺", unit: "تومان", category: "major" },
   aed: { title: "درهم امارات", icon: "🇦🇪", unit: "تومان", category: "major" },
@@ -52,21 +80,15 @@ const ASSETS = {
   cad: { title: "دلار کانادا", icon: "🇨🇦", unit: "تومان", category: "major" },
   aud: { title: "دلار استرالیا", icon: "🇦🇺", unit: "تومان", category: "major" },
   cny: { title: "یوان چین", icon: "🇨🇳", unit: "تومان", category: "major" },
-
-  // طلا و فلزات
   gold_18k: { title: "طلای ۱۸ عیار", icon: "✨", unit: "تومان", category: "gold" },
   gold_mesghal: { title: "مثقال طلا (آبشده)", icon: "⚖️", unit: "تومان", category: "gold" },
   usd_xau: { title: "انس جهانی طلا", icon: "🌐", unit: "دلار", category: "gold" },
   gold_ounce: { title: "انس جهانی طلا", icon: "🌐", unit: "دلار", category: "gold" },
-
-  // سکه‌ها
   coin_emami: { title: "سکه تمام امامی", icon: "🟡", unit: "تومان", category: "coin" },
   coin_bahar: { title: "سکه بهار آزادی", icon: "🟡", unit: "تومان", category: "coin" },
   coin_half: { title: "نیم سکه", icon: "🟡", unit: "تومان", category: "coin" },
   coin_quarter: { title: "ربع سکه", icon: "🟡", unit: "تومان", category: "coin" },
   coin_gram: { title: "سکه گرمی", icon: "🟡", unit: "تومان", category: "coin" },
-
-  // سایر ارزها
   rub: { title: "روبل روسیه", icon: "🇷🇺", unit: "تومان", category: "fiat" },
   iqd: { title: "۱۰۰ دینار عراق", icon: "🇮🇶", unit: "تومان", category: "fiat" },
   myr: { title: "رینگیت مالزی", icon: "🇲🇾", unit: "تومان", category: "fiat" },
@@ -97,8 +119,6 @@ const ASSETS = {
   ars: { title: "پزو آرژانتین", icon: "🇦🇷", unit: "تومان", category: "fiat" },
   brl: { title: "رئال برزیل", icon: "🇧🇷", unit: "تومان", category: "fiat" },
   pkr: { title: "روپیه پاکستان", icon: "🇵🇰", unit: "تومان", category: "fiat" },
-
-  // انرژی
   oil: { title: "نفت خام", icon: "🛢", unit: "دلار", category: "energy" },
 };
 
@@ -108,15 +128,17 @@ const BOT_COMMANDS = [
   { command: "price", description: "💵 دلار + نمودار" },
   { command: "eur", description: "💶 یورو + نمودار" },
   { command: "gold", description: "🥇 طلا + نمودار" },
-  { command: "coins", description: "🪙 سکه‌ها + نمودار" },
+  { command: "coins", description: "🪙 سکه + نمودار" },
   { command: "currencies", description: "💱 ارزها" },
   { command: "oil", description: "🛢 نفت" },
   { command: "history", description: "📊 تاریخچه دلار" },
   { command: "stats", description: "📈 آمار" },
   { command: "compare", description: "📉 مقایسه" },
   { command: "convert", description: "🔄 تبدیل" },
-  { command: "subscribe", description: "🔔 اشتراک خودکار" },
-  { command: "unsubscribe", description: "🔕 غیرفعال‌سازی" },
+  { command: "subscribe", description: "🔔 اشتراک زنده دلار" },
+  { command: "unsubscribe", description: "🔕 لغو اشتراک زنده" },
+  { command: "notify_off", description: "🔕 لغو نوتیف ساعتی" },
+  { command: "notify_on", description: "🔔 فعال‌سازی نوتیف ساعتی" },
   { command: "help", description: "📖 راهنما" },
 ];
 
@@ -125,7 +147,7 @@ const BOT_COMMANDS = [
 // ============================================================
 
 const _cache = new Map();
-const CACHE_TTL_MS = 60 * 1000;
+const CACHE_TTL_MS = 30 * 1000;
 
 function cacheGet(k) {
   const e = _cache.get(k);
@@ -191,10 +213,18 @@ async function fetchJsonSafe(url, timeoutMs = FETCH_TIMEOUT_MS) {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeoutMs);
   try {
-    const resp = await fetch(url, {
+    const bust = `_t=${Math.floor(Date.now() / 60000)}`;
+    const urlWithBust = url + (url.includes("?") ? "&" : "?") + bust;
+
+    const resp = await fetch(urlWithBust, {
       signal: ctrl.signal,
-      headers: { "User-Agent": "Nabz-Worker/13.0", Accept: "application/json" },
-      cf: { cacheTtl: 60, cacheEverything: true },
+      headers: {
+        "User-Agent": "Nabz-Worker/13.3",
+        "Accept": "application/json",
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        "Pragma": "no-cache",
+      },
+      cf: { cacheTtl: 0, cacheEverything: false },
     });
     const text = await resp.text();
     const trimmed = text.trimStart();
@@ -244,9 +274,8 @@ async function fetchMarket(env) {
   return result;
 }
 
-/** URL چارت هر دارایی */
 function chartUrlFor(key) {
-  return `${NABZ_RAW}/charts/${key}.png`;
+  return `${CHART_BASE_URLS[0]}/charts/${key}.png`;
 }
 
 // ============================================================
@@ -285,13 +314,127 @@ function computeChange(history, daysAgo) {
 }
 
 // ============================================================
-//  بخش ۶: API Endpoints
+//  بخش ۶: مدیریت کاربران (برای نوتیف ساعتی)
+// ============================================================
+
+/**
+ * ثبت کاربر جدید (اولین /start)
+ * پیش‌فرض: نوتیف ساعتی فعال
+ */
+async function registerUser(chatId, env) {
+  const key = `${KV_USER_PREFIX}${chatId}`;
+  const existing = await env.RATE_KV.get(key, "json");
+
+  if (!existing) {
+    await env.RATE_KV.put(
+      key,
+      JSON.stringify({
+        chat_id: chatId,
+        registered_at: Date.now(),
+        notify_off: false,
+      }),
+      { expirationTtl: KV_USER_TTL }
+    );
+    console.log(`[user] New: ${chatId}`);
+    return;
+  }
+
+  // TTL را تمدید کن
+  await env.RATE_KV.put(
+    key,
+    JSON.stringify({ ...existing, last_seen: Date.now() }),
+    { expirationTtl: KV_USER_TTL }
+  );
+}
+
+/**
+ * خاموش کردن نوتیف ساعتی برای کاربر
+ */
+async function setNotifyOff(chatId, env) {
+  const key = `${KV_USER_PREFIX}${chatId}`;
+  const user = (await env.RATE_KV.get(key, "json")) || { chat_id: chatId, registered_at: Date.now() };
+  user.notify_off = true;
+  user.notify_off_at = Date.now();
+  await env.RATE_KV.put(key, JSON.stringify(user), { expirationTtl: KV_USER_TTL });
+  console.log(`[user] Notify OFF: ${chatId}`);
+}
+
+/**
+ * روشن کردن نوتیف ساعتی برای کاربر
+ */
+async function setNotifyOn(chatId, env) {
+  const key = `${KV_USER_PREFIX}${chatId}`;
+  const user = (await env.RATE_KV.get(key, "json")) || { chat_id: chatId, registered_at: Date.now() };
+  user.notify_off = false;
+  user.notify_on_at = Date.now();
+  await env.RATE_KV.put(key, JSON.stringify(user), { expirationTtl: KV_USER_TTL });
+  console.log(`[user] Notify ON: ${chatId}`);
+}
+
+/**
+ * بررسی فعال بودن نوتیف ساعتی
+ */
+async function isNotifyEnabled(chatId, env) {
+  const user = await env.RATE_KV.get(`${KV_USER_PREFIX}${chatId}`, "json");
+  return user !== null && user.notify_off !== true;
+}
+
+/**
+ * لیست کاربران فعال (نوتیف روشن)
+ */
+async function getActiveUsers(env) {
+  const users = [];
+  let cursor = undefined;
+
+  do {
+    const list = await env.RATE_KV.list({ prefix: KV_USER_PREFIX, cursor });
+    for (const key of list.keys) {
+      const user = await env.RATE_KV.get(key.name, "json");
+      if (user && user.chat_id && user.notify_off !== true) {
+        users.push(user.chat_id);
+      }
+    }
+    cursor = list.list_complete ? undefined : list.cursor;
+  } while (cursor);
+
+  return users;
+}
+
+// ============================================================
+//  بخش ۷: مدیریت اشتراک زنده دلار (subscribe)
+// ============================================================
+
+async function subscribeUser(chatId, messageId, price, env) {
+  await env.RATE_KV.put(`${KV_SUB_PREFIX}${chatId}`,
+    JSON.stringify({ chat_id: chatId, message_id: messageId, last_price: price, last_updated: Date.now() }),
+    { expirationTtl: KV_SUB_TTL });
+}
+
+async function unsubscribeUser(chatId, env) {
+  await env.RATE_KV.delete(`${KV_SUB_PREFIX}${chatId}`);
+}
+
+async function updateSubscriptionMessage(chatId, newMessageId, price, env) {
+  const key = `${KV_SUB_PREFIX}${chatId}`;
+  const existing = await env.RATE_KV.get(key, "json");
+  await env.RATE_KV.put(key,
+    JSON.stringify({ chat_id: chatId, message_id: newMessageId, last_price: price, last_updated: Date.now(), was_subscribed: existing?.was_subscribed ?? true }),
+    { expirationTtl: KV_SUB_TTL });
+}
+
+async function isSubscribed(chatId, env) {
+  const d = await env.RATE_KV.get(`${KV_SUB_PREFIX}${chatId}`, "json");
+  return d !== null;
+}
+
+// ============================================================
+//  بخش ۸: API Endpoints
 // ============================================================
 
 async function handleRoot() {
   return jsonResponse({
     name: "Nabz-e Bazaar Bot API",
-    version: "13.0",
+    version: "13.3",
     source: "itsyebekhe/nabz",
     endpoints: {
       "GET /rate": "دلار + تغییرات",
@@ -356,7 +499,13 @@ async function handleCompare(env, url) {
 async function handleHealth(env) {
   try {
     const { data, source } = await fetchHistory(env);
-    return jsonResponse({ status: "healthy", source, updated_at: data.updated_at });
+    const users = await getActiveUsers(env).catch(() => []);
+    return jsonResponse({
+      status: "healthy",
+      source,
+      updated_at: data.updated_at,
+      active_users: users.length,
+    });
   } catch (err) {
     return jsonResponse({ status: "unhealthy", error: err.message }, 503);
   }
@@ -375,7 +524,7 @@ h2{text-align:center;font-size:22px;margin-bottom:8px}
 .section:first-of-type{border-top:none;padding-top:0;margin-top:0}
 .row{display:flex;justify-content:space-between;padding:8px 0;font-size:13px;border-bottom:1px solid #f3f4f6}
 .label{color:#555}
-.value{font-weight:700;color:#111;direction:ltr;font-variant-numeric:tabular-nums}
+.value{font-weight:700;color:#111;direction:ltr}
 .unit{font-size:10px;color:#888;margin-right:4px}
 .loading{text-align:center;color:#999;padding:40px}
 .footer{text-align:center;color:#999;font-size:11px;margin-top:20px;padding-top:16px;border-top:1px solid #eee}
@@ -388,21 +537,15 @@ h2{text-align:center;font-size:22px;margin-bottom:8px}
 <script>
 fetch('/market').then(r=>r.json()).then(d=>{
   const fmt=n=>{if(n===null||n===undefined||n==='')return '—';const v=typeof n==='number'?n:parseFloat(n);return isNaN(v)?n:v.toLocaleString('fa-IR')};
-  const AR={usd:'دلار',eur:'یورو',aed:'درهم',try:'لیر ترکیه',gbp:'پوند',cad:'دلار کانادا',aud:'دلار استرالیا',cny:'یوان',jpy:'ین',chf:'فرانک',rub:'روبل',sar:'ریال عربستان',iqd:'دینار عراق',aed:'درهم',kwd:'دینار کویت',omr:'ریال عمان'};
+  const AR={usd:'دلار',eur:'یورو',aed:'درهم',try:'لیر ترکیه',gbp:'پوند',cad:'دلار کانادا',aud:'دلار استرالیا',cny:'یوان',jpy:'ین',chf:'فرانک',rub:'روبل',sar:'ریال عربستان'};
   let h='<div class="section">💵 ارزها</div>';
   Object.keys(AR).forEach(k=>{if(d[k])h+='<div class="row"><span class="label">'+AR[k]+'</span><span class="value">'+fmt(d[k])+'<span class="unit"> تومان</span></span></div>';});
-  h+='<div class="section">🥇 طلا</div>';
-  if(d.gold_18k)h+='<div class="row"><span class="label">۱۸ عیار</span><span class="value">'+fmt(d.gold_18k)+'<span class="unit"> تومان</span></span></div>';
+  h+='<div class="section">🥇 طلا و سکه</div>';
+  if(d.gold_18k)h+='<div class="row"><span class="label">طلای ۱۸ عیار</span><span class="value">'+fmt(d.gold_18k)+'<span class="unit"> تومان</span></span></div>';
   if(d.gold_mesghal)h+='<div class="row"><span class="label">مثقال</span><span class="value">'+fmt(d.gold_mesghal)+'<span class="unit"> تومان</span></span></div>';
   if(d.usd_xau)h+='<div class="row"><span class="label">انس جهانی</span><span class="value">'+d.usd_xau+'<span class="unit"> دلار</span></span></div>';
-  h+='<div class="section">🪙 سکه</div>';
-  if(d.coin_emami)h+='<div class="row"><span class="label">امامی</span><span class="value">'+fmt(d.coin_emami)+'<span class="unit"> تومان</span></span></div>';
-  if(d.coin_bahar)h+='<div class="row"><span class="label">بهار آزادی</span><span class="value">'+fmt(d.coin_bahar)+'<span class="unit"> تومان</span></span></div>';
-  if(d.coin_half)h+='<div class="row"><span class="label">نیم سکه</span><span class="value">'+fmt(d.coin_half)+'<span class="unit"> تومان</span></span></div>';
-  if(d.coin_quarter)h+='<div class="row"><span class="label">ربع سکه</span><span class="value">'+fmt(d.coin_quarter)+'<span class="unit"> تومان</span></span></div>';
-  if(d.coin_gram)h+='<div class="row"><span class="label">سکه گرمی</span><span class="value">'+fmt(d.coin_gram)+'<span class="unit"> تومان</span></span></div>';
-  h+='<div class="section">🛢 انرژی</div>';
-  if(d.oil)h+='<div class="row"><span class="label">نفت خام</span><span class="value">'+d.oil+'<span class="unit"> دلار</span></span></div>';
+  if(d.coin_emami)h+='<div class="row"><span class="label">سکه امامی</span><span class="value">'+fmt(d.coin_emami)+'<span class="unit"> تومان</span></span></div>';
+  if(d.oil)h+='<div class="section">🛢 انرژی</div><div class="row"><span class="label">نفت خام</span><span class="value">'+d.oil+'<span class="unit"> دلار</span></span></div>';
   h+='<div style="text-align:center;color:#999;font-size:11px;margin-top:16px">'+(d.date_shamsi_full||d.updated_at||'')+'</div>';
   document.getElementById('c').innerHTML=h;
 }).catch(()=>document.getElementById('c').innerHTML='<div style="color:red;text-align:center">خطا</div>');
@@ -413,12 +556,16 @@ fetch('/market').then(r=>r.json()).then(d=>{
 }
 
 // ============================================================
-//  بخش ۷: Telegram API
+//  بخش ۹: Telegram API
 // ============================================================
 
 async function telegramAPI(method, body, env) {
   const url = `https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/${method}`;
-  const resp = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  const resp = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
   const result = await resp.json();
   if (!result.ok) console.error(`[telegram] ${method}: ${result.description}`);
   return result;
@@ -442,6 +589,28 @@ async function editMessage(chatId, messageId, text, env, options = {}) {
   }, env);
 }
 
+async function editMessageCaption(chatId, messageId, caption, env, options = {}) {
+  return telegramAPI("editMessageCaption", {
+    chat_id: chatId, message_id: messageId, caption,
+    parse_mode: options.parseMode || "Markdown",
+    reply_markup: options.replyMarkup,
+  }, env);
+}
+
+async function editMessageMedia(chatId, messageId, photoUrl, caption, env, options = {}) {
+  return telegramAPI("editMessageMedia", {
+    chat_id: chatId,
+    message_id: messageId,
+    media: {
+      type: "photo",
+      media: photoUrl,
+      caption: caption,
+      parse_mode: options.parseMode || "Markdown",
+    },
+    reply_markup: options.replyMarkup,
+  }, env);
+}
+
 async function deleteMessage(chatId, messageId, env) {
   return telegramAPI("deleteMessage", { chat_id: chatId, message_id: messageId }, env);
 }
@@ -451,23 +620,43 @@ async function answerCallbackQuery(id, env, text = null) {
 }
 
 async function sendPhoto(chatId, photoUrl, caption, env, options = {}) {
-  return telegramAPI("sendPhoto", {
+  const urlResult = await telegramAPI("sendPhoto", {
     chat_id: chatId, photo: photoUrl, caption,
     parse_mode: options.parseMode || "Markdown",
     reply_markup: options.replyMarkup,
   }, env);
-}
+  if (urlResult.ok) return urlResult;
 
-async function editMessageCaption(chatId, messageId, caption, env, options = {}) {
-  return telegramAPI("editMessageCaption", {
-    chat_id: chatId, message_id: messageId, caption,
-    parse_mode: options.parseMode || "Markdown",
-    reply_markup: options.replyMarkup,
-  }, env);
+  console.warn(`[sendPhoto] URL failed (${urlResult.description}), trying file upload...`);
+  try {
+    const imgResp = await fetch(photoUrl, {
+      headers: { "User-Agent": "Nabz-Worker/13.3" },
+      cf: { cacheTtl: 3600, cacheEverything: true },
+    });
+    if (!imgResp.ok) throw new Error(`HTTP ${imgResp.status}`);
+    const imgBlob = await imgResp.blob();
+    const filename = photoUrl.split("/").pop() || "chart.png";
+
+    const form = new FormData();
+    form.append("chat_id", chatId.toString());
+    form.append("photo", imgBlob, filename);
+    if (caption) form.append("caption", caption);
+    form.append("parse_mode", options.parseMode || "Markdown");
+    if (options.replyMarkup) form.append("reply_markup", JSON.stringify(options.replyMarkup));
+
+    const url = `https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendPhoto`;
+    const resp = await fetch(url, { method: "POST", body: form });
+    const result = await resp.json();
+    if (!result.ok) console.error(`[sendPhoto] file upload failed: ${result.description}`);
+    return result;
+  } catch (err) {
+    console.error(`[sendPhoto] file upload error: ${err.message}`);
+    return urlResult;
+  }
 }
 
 // ============================================================
-//  بخش ۸: Keyboards
+//  بخش ۱۰: Keyboards
 // ============================================================
 
 const MAIN_MENU_KEYBOARD = {
@@ -493,7 +682,8 @@ const MAIN_MENU_KEYBOARD = {
       { text: "📉 مقایسه", callback_data: "cmd:compare" },
       { text: "🔄 تبدیل", callback_data: "cmd:convert" },
     ],
-    [{ text: "🔔 اشتراک خودکار", callback_data: "cmd:subscribe" }],
+    [{ text: "🔔 اشتراک زنده دلار", callback_data: "cmd:subscribe" }],
+    [{ text: "🔕 لغو نوتیف ساعتی", callback_data: "cmd:notify_off" }],
   ],
 };
 
@@ -504,22 +694,61 @@ const PRICE_KEYBOARD = {
       { text: "📊 همه", callback_data: "cmd:all" },
     ],
     [
-      { text: "📊 تاریخچه", callback_data: "cmd:history" },
-      { text: "📈 آمار", callback_data: "cmd:stats" },
+      { text: "🥇 طلا + نمودار", callback_data: "cmd:gold" },
+      { text: "🪙 سکه + نمودار", callback_data: "cmd:coins" },
     ],
     [
-      { text: "🔔 اشتراک", callback_data: "cmd:subscribe" },
+      { text: "💶 یورو + نمودار", callback_data: "cmd:eur" },
+      { text: "🛢 نفت", callback_data: "cmd:oil" },
+    ],
+    [
+      { text: "🔔 اشتراک زنده", callback_data: "cmd:subscribe" },
       { text: "🏠 منو", callback_data: "cmd:menu" },
     ],
   ],
 };
 
 const BACK_KEYBOARD = {
-  inline_keyboard: [[{ text: "🏠 منوی اصلی", callback_data: "cmd:menu" }]],
+  inline_keyboard: [
+    [
+      { text: "💵 دلار", callback_data: "cmd:price" },
+      { text: "🥇 طلا", callback_data: "cmd:gold" },
+      { text: "🪙 سکه", callback_data: "cmd:coins" },
+    ],
+    [
+      { text: "💶 یورو", callback_data: "cmd:eur" },
+      { text: "📊 همه", callback_data: "cmd:all" },
+    ],
+    [{ text: "🏠 منوی اصلی", callback_data: "cmd:menu" }],
+  ],
+};
+
+// ⭐ نوتیف ساعتی با دکمه لغو
+const NOTIFY_KEYBOARD = {
+  inline_keyboard: [
+    [{ text: "🔕 لغو نوتیف ساعتی", callback_data: "cmd:notify_off" }],
+    [
+      { text: "💵 دلار", callback_data: "cmd:price" },
+      { text: "📊 همه قیمت‌ها", callback_data: "cmd:all" },
+    ],
+    [{ text: "🏠 منو", callback_data: "cmd:menu" }],
+  ],
+};
+
+// ⭐ بعد از لغو نوتیف
+const NOTIFY_OFF_KEYBOARD = {
+  inline_keyboard: [
+    [{ text: "🔔 فعال‌سازی نوتیف ساعتی", callback_data: "cmd:notify_on" }],
+    [
+      { text: "💵 دلار", callback_data: "cmd:price" },
+      { text: "📊 همه", callback_data: "cmd:all" },
+    ],
+    [{ text: "🏠 منوی اصلی", callback_data: "cmd:menu" }],
+  ],
 };
 
 // ============================================================
-//  بخش ۹: Message Builders
+//  بخش ۱۱: Message Builders
 // ============================================================
 
 function changeIndicator(ch) {
@@ -535,15 +764,13 @@ function buildPriceCaption(data) {
   const ch30 = computeChange(data.history, 30);
   const price = data.latest?.price || data.latest?.price_toman;
 
-  let msg = `┏━━━━━━━━━━━━━━━━━━━━━━┓\n`;
-  msg += `                                                   💵 *دلار آمریکا*\n`;
-  msg += `┗━━━━━━━━━━━━━━━━━━━━━━┛\n\n`;
+  let msg = `💵 *دلار آمریکا*\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━\n\n`;
   msg += `💰 *${toPersianNumber(price)}* تومان\n\n`;
-  msg += `┌─ 📊 *تغییرات*\n`;
-  msg += `│ ۲۴ ساعت:  ${changeIndicator(ch24)}\n`;
-  msg += `│ ۷ روز:     ${changeIndicator(ch7)}\n`;
-  msg += `│ ۳۰ روز:    ${changeIndicator(ch30)}\n`;
-  msg += `└───────────────────────\n\n`;
+  msg += `📊 *تغییرات*\n`;
+  msg += `• ۲۴ ساعت: ${changeIndicator(ch24)}\n`;
+  msg += `• ۷ روز: ${changeIndicator(ch7)}\n`;
+  msg += `• ۳۰ روز: ${changeIndicator(ch30)}\n\n`;
   msg += `⏱ ${formatTime(data.updated_at)}  •  📅 ${formatDate(data.updated_at)}`;
   msg += FOOTER;
   return msg;
@@ -556,19 +783,18 @@ function buildAllCaption(m) {
     energy: { title: "🛢 انرژی", keys: ["oil"] },
   };
 
-  let msg = `┏━━━━━━━━━━━━━━━━━━━━━━┓\n`;
-  msg += `                                                          📊 *نبض بازار*\n`;
-  msg += `┗━━━━━━━━━━━━━━━━━━━━━━┛\n\n`;
+  let msg = `📊 *نبض بازار*\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━\n\n`;
 
   for (const cat of Object.values(categories)) {
-    msg += `${cat.title}\n`;
+    msg += `*${cat.title}*\n`;
     for (const key of cat.keys) {
       const info = ASSETS[key];
       if (!info) continue;
       const val = m[key];
       if (val === null || val === undefined) continue;
       const unit = info.unit === "دلار" ? "دلار" : "تومان";
-      msg += `├ ${info.title}: *${toPersianNumber(val)}* ${unit}\n`;
+      msg += `• ${info.title}: *${toPersianNumber(val)}* ${unit}\n`;
     }
     msg += `\n`;
   }
@@ -585,9 +811,8 @@ function buildAssetCaption(key, m) {
   const val = m[key];
   const unit = info.unit === "دلار" ? "دلار" : "تومان";
 
-  let msg = `┏━━━━━━━━━━━━━━━━━━━━━━┓\n`;
-  msg += `                                ${info.icon} *${info.title}*\n`;
-  msg += `┗━━━━━━━━━━━━━━━━━━━━━━┛\n\n`;
+  let msg = `${info.icon} *${info.title}*\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━\n\n`;
   msg += `💰 *${toPersianNumber(val)}* ${unit}\n\n`;
   msg += `⏱ ${m.updated_at || "—"}`;
   if (m.date_shamsi_full) msg += `\n📅 ${m.date_shamsi_full}`;
@@ -596,16 +821,15 @@ function buildAssetCaption(key, m) {
 }
 
 function buildCoinsCaption(m) {
-  let msg = `┏━━━━━━━━━━━━━━━━━━━━━━┓\n`;
-  msg += `                                                  🪙 *سکه‌ها*\n`;
-  msg += `┗━━━━━━━━━━━━━━━━━━━━━━┛\n\n`;
+  let msg = `🪙 *سکه‌ها*\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━\n\n`;
   const keys = ["coin_emami","coin_bahar","coin_half","coin_quarter","coin_gram"];
   for (const key of keys) {
     const info = ASSETS[key];
     if (!info) continue;
     const v = m[key];
     if (v === null || v === undefined) continue;
-    msg += `${info.icon} ${info.title}: *${toPersianNumber(v)}* تومان\n`;
+    msg += `• ${info.title}: *${toPersianNumber(v)}* تومان\n`;
   }
   msg += `\n⏱ ${m.updated_at || "—"}`;
   if (m.date_shamsi_full) msg += `\n📅 ${m.date_shamsi_full}`;
@@ -614,12 +838,11 @@ function buildCoinsCaption(m) {
 }
 
 function buildGoldCaption(m) {
-  let msg = `┏━━━━━━━━━━━━━━━━━━━━━━┓\n`;
-  msg += `                                          🥇 *طلا*\n`;
-  msg += `┗━━━━━━━━━━━━━━━━━━━━━━┛\n\n`;
-  if (m.gold_18k) msg += `✨ طلای ۱۸ عیار: *${toPersianNumber(m.gold_18k)}* تومان\n`;
-  if (m.gold_mesghal) msg += `⚖️ مثقال: *${toPersianNumber(m.gold_mesghal)}* تومان\n`;
-  if (m.usd_xau) msg += `🌐 انس جهانی: *${m.usd_xau}* دلار\n`;
+  let msg = `🥇 *طلا*\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━\n\n`;
+  if (m.gold_18k) msg += `• طلای ۱۸ عیار: *${toPersianNumber(m.gold_18k)}* تومان\n`;
+  if (m.gold_mesghal) msg += `• مثقال: *${toPersianNumber(m.gold_mesghal)}* تومان\n`;
+  if (m.usd_xau) msg += `• انس جهانی: *${m.usd_xau}* دلار\n`;
   msg += `\n⏱ ${m.updated_at || "—"}`;
   if (m.date_shamsi_full) msg += `\n📅 ${m.date_shamsi_full}`;
   msg += FOOTER;
@@ -627,16 +850,15 @@ function buildGoldCaption(m) {
 }
 
 function buildCurrenciesCaption(m) {
-  let msg = `┏━━━━━━━━━━━━━━━━━━━━━━┓\n`;
-  msg += `                                         💱 *همه ارزها*\n`;
-  msg += `┗━━━━━━━━━━━━━━━━━━━━━━┛\n\n`;
+  let msg = `💱 *همه ارزها*\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━\n\n`;
   const keys = ["usd","eur","aed","try","gbp","cad","aud","cny","rub","iqd","jpy","sar","kwd","omr","chf","sek","nok","dkk","sgd","hkd"];
   for (const key of keys) {
     const info = ASSETS[key];
     if (!info) continue;
     const v = m[key];
     if (v === null || v === undefined) continue;
-    msg += `${info.icon} ${info.title}: *${toPersianNumber(v)}*\n`;
+    msg += `• ${info.title}: *${toPersianNumber(v)}*\n`;
   }
   msg += `\n⏱ ${m.updated_at || "—"}`;
   msg += FOOTER;
@@ -644,9 +866,8 @@ function buildCurrenciesCaption(m) {
 }
 
 function buildOilCaption(m) {
-  let msg = `┏━━━━━━━━━━━━━━━━━━━━━━┓\n`;
-  msg += `                                               🛢 *نفت خام*\n`;
-  msg += `┗━━━━━━━━━━━━━━━━━━━━━━┛\n\n`;
+  let msg = `🛢 *نفت خام*\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━\n\n`;
   msg += `💰 *${m.oil || "—"}* دلار\n\n`;
   msg += `⏱ ${m.updated_at || "—"}`;
   msg += FOOTER;
@@ -661,16 +882,15 @@ function buildHistoryMessage(data, days = 7) {
   const minP = Math.min(...prices), maxP = Math.max(...prices);
   const range = maxP - minP || 1;
 
-  let msg = `┏━━━━━━━━━━━━━━━━━━━━━━┓\n`;
-  msg += `       📊 *تاریخچه ${toPersianNumber(days)} روز*\n`;
-  msg += `┗━━━━━━━━━━━━━━━━━━━━━━┛\n\n`;
+  let msg = `📊 *تاریخچه ${toPersianNumber(days)} روز دلار*\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━\n\n`;
   history.forEach((item) => {
     const v = safeNumber(item.price || item.price_toman);
     if (v === null) return;
     const ratio = (v - minP) / range;
     const bars = Math.round(ratio * 8);
     const visual = "▰".repeat(bars + 1) + "▱".repeat(Math.max(0, 8 - bars));
-    msg += `\`${item.date.slice(5)}\` ${visual}\n        💰 *${toPersianNumber(v)}*\n`;
+    msg += `\`${item.date.slice(5)}\` ${visual} *${toPersianNumber(v)}*\n`;
   });
   msg += `\n⏱ ${data.updated_at}`;
   msg += FOOTER;
@@ -681,13 +901,11 @@ function buildStatsMessage(data) {
   const stats = computeStats(data.history);
   if (!stats) return `📈 *آمار*\n\n_داده‌ای موجود نیست._` + FOOTER;
 
-  let msg = `┏━━━━━━━━━━━━━━━━━━━━━━┓\n`;
-  msg += `                                              📈 *آمار کلی دلار*\n`;
-  msg += `┗━━━━━━━━━━━━━━━━━━━━━━┛\n\n`;
-  msg += `┌─ 💹 *بازه قیمت*\n`;
-  msg += `│ 🔻 کمینه: *${toPersianNumber(stats.min_price)}*\n`;
-  msg += `│ 🔺 بیشینه: *${toPersianNumber(stats.max_price)}*\n`;
-  msg += `└ 📊 میانگین: *${toPersianNumber(stats.avg_price)}*\n\n`;
+  let msg = `📈 *آمار کلی دلار*\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━\n\n`;
+  msg += `• 🔻 کمینه: *${toPersianNumber(stats.min_price)}*\n`;
+  msg += `• 🔺 بیشینه: *${toPersianNumber(stats.max_price)}*\n`;
+  msg += `• 📊 میانگین: *${toPersianNumber(stats.avg_price)}*\n\n`;
   msg += `📅 تعداد روز: *${toPersianNumber(stats.total_days)}*\n`;
   msg += `🗓 از \`${stats.first_date}\` تا \`${stats.last_date}\``;
   msg += FOOTER;
@@ -700,70 +918,82 @@ function buildCompareMessage(data, days = 30) {
   const arrow = comparison.direction === "up" ? "🔺" : comparison.direction === "down" ? "🔻" : "▪️";
   const sign = comparison.change > 0 ? "+" : comparison.change < 0 ? "−" : "";
 
-  let msg = `┏━━━━━━━━━━━━━━━━━━━━━━┓\n`;
-  msg += `          📊 *مقایسه ${toPersianNumber(days)} روزه*\n`;
-  msg += `┗━━━━━━━━━━━━━━━━━━━━━━┛\n\n`;
-  msg += `┌─ 💰 امروز: *${toPersianNumber(comparison.current)}*\n`;
-  msg += `└─ 📅 ${comparison.past_date}: *${toPersianNumber(comparison.past)}*\n\n`;
+  let msg = `📊 *مقایسه ${toPersianNumber(days)} روزه دلار*\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━\n\n`;
+  msg += `• امروز: *${toPersianNumber(comparison.current)}*\n`;
+  msg += `• ${comparison.past_date}: *${toPersianNumber(comparison.past)}*\n\n`;
   msg += `${arrow} تغییر: *${sign}${toPersianNumber(Math.abs(comparison.change))}* (${comparison.change_percent}%)`;
   msg += FOOTER;
   return msg;
 }
 
-function buildMenuMessage(subscribed) {
-  let msg = `┏━━━━━━━━━━━━━━━━━━━━━━┓\n`;
-  msg += `                                                                  🏠 *منوی اصلی*\n`;
-  msg += `┗━━━━━━━━━━━━━━━━━━━━━━┛\n\n`;
+function buildMenuMessage(subscribed, notifyEnabled) {
+  let msg = `🏠 *منوی اصلی*\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━\n\n`;
   msg += `سلام! 👋\n`;
   msg += `من بات *نبض بازار* هستم.\n\n`;
   msg += `📋 *قابلیت‌ها*\n`;
-  msg += `├ 📊 همه قیمت‌ها\n`;
-  msg += `├ 💵 دلار + نمودار\n`;
-  msg += `├ 💶 یورو + نمودار\n`;
-  msg += `├ 🥇 طلا + نمودار\n`;
-  msg += `├ 🪙 سکه + نمودار\n`;
-  msg += `├ 💱 همه ارزها\n`;
-  msg += `└ 🔄 تبدیل\n\n`;
-  if (subscribed) {
-    msg += `┌─ 🔔 *اشتراک خودکار*\n`;
-    msg += `└ ✅ *فعال* — قیمت هر ۳۰ دقیقه ویرایش می‌شود\n`;
-  } else {
-    msg += `┌─ 💡 *اشتراک خودکار*\n`;
-    msg += `└ غیرفعال — با دکمه زیر فعال کن\n`;
-  }
+  msg += `• 📊 همه قیمت‌ها\n`;
+  msg += `• 💵 دلار + نمودار\n`;
+  msg += `• 💶 یورو + نمودار\n`;
+  msg += `• 🥇 طلا + نمودار\n`;
+  msg += `• 🪙 سکه + نمودار\n`;
+  msg += `• 💱 همه ارزها\n`;
+  msg += `• 🔄 تبدیل\n\n`;
+
+  msg += `🔔 *وضعیت‌ها:*\n`;
+  msg += `• نوتیف ساعتی: ${notifyEnabled ? "✅ فعال" : "🔕 غیرفعال"}\n`;
+  msg += `• اشتراک زنده دلار: ${subscribed ? "✅ فعال" : "❌ غیرفعال"}\n\n`;
+
+  msg += `💡 *راهنما:*\n`;
+  msg += `• «🔔 اشتراک زنده دلار» → پیام دلار هر ۳۰ دقیقه ویرایش می‌شود\n`;
+  msg += `• «🔕 لغو نوتیف ساعتی» → پیام ساعتی دریافت نکن\n`;
+
   msg += FOOTER;
   return msg;
 }
 
 // ============================================================
-//  بخش ۱۰: Subscription
+//  بخش ۱۲: تابع کمکی برای ویرایش با عکس
 // ============================================================
 
-async function subscribeUser(chatId, messageId, price, env) {
-  await env.RATE_KV.put(`${KV_SUB_PREFIX}${chatId}`,
-    JSON.stringify({ chat_id: chatId, message_id: messageId, last_price: price, last_updated: Date.now() }),
-    { expirationTtl: KV_SUB_TTL });
-}
+async function updateWithPhoto(chatId, env, options, assetKey, caption) {
+  const photoUrl = chartUrlFor(assetKey);
 
-async function unsubscribeUser(chatId, env) {
-  await env.RATE_KV.delete(`${KV_SUB_PREFIX}${chatId}`);
-}
+  if (options.editMessageId) {
+    const mediaResult = await editMessageMedia(
+      chatId,
+      options.editMessageId,
+      photoUrl,
+      caption,
+      env,
+      { replyMarkup: options.replyMarkup }
+    );
 
-async function updateSubscriptionMessage(chatId, newMessageId, price, env) {
-  const key = `${KV_SUB_PREFIX}${chatId}`;
-  const existing = await env.RATE_KV.get(key, "json");
-  await env.RATE_KV.put(key,
-    JSON.stringify({ chat_id: chatId, message_id: newMessageId, last_price: price, last_updated: Date.now(), was_subscribed: existing?.was_subscribed ?? true }),
-    { expirationTtl: KV_SUB_TTL });
-}
+    if (mediaResult.ok) return mediaResult;
 
-async function isSubscribed(chatId, env) {
-  const d = await env.RATE_KV.get(`${KV_SUB_PREFIX}${chatId}`, "json");
-  return d !== null;
+    const desc = mediaResult.description || "";
+    console.warn(`[edit] editMessageMedia failed: ${desc}`);
+
+    // اگر پیام قبلی متن بود، اول caption رو امتحان کن
+    if (desc.includes("no caption") || desc.includes("message is not a photo")) {
+      const capResult = await editMessageCaption(chatId, options.editMessageId, caption, env, { replyMarkup: options.replyMarkup });
+      if (capResult.ok) return capResult;
+    }
+
+    await deleteMessage(chatId, options.editMessageId, env).catch(() => {});
+  }
+
+  const photoResult = await sendPhoto(chatId, photoUrl, caption, env, {
+    replyMarkup: options.replyMarkup,
+  });
+  if (photoResult.ok) return photoResult;
+
+  return sendMessage(chatId, caption, env, { replyMarkup: options.replyMarkup });
 }
 
 // ============================================================
-//  بخش ۱۱: Handlers
+//  بخش ۱۳: Handlers
 // ============================================================
 
 async function respondWithRate(chatId, env, options = {}) {
@@ -771,136 +1001,113 @@ async function respondWithRate(chatId, env, options = {}) {
   const caption = buildPriceCaption(data);
   const price = data.latest?.price || data.latest?.price_toman;
 
-  if (options.editMessageId) {
-    const result = await editMessageCaption(chatId, options.editMessageId, caption, env, { replyMarkup: PRICE_KEYBOARD });
-    if (result.ok && options.subscribe) await updateSubscriptionMessage(chatId, options.editMessageId, price, env);
-    if (!result.ok && result.description?.includes("no caption")) {
-      const textResult = await editMessage(chatId, options.editMessageId, caption, env, { replyMarkup: PRICE_KEYBOARD });
-      if (textResult.ok && options.subscribe) await updateSubscriptionMessage(chatId, options.editMessageId, price, env);
-      return textResult;
+  const replyMarkup = options.replyMarkup || PRICE_KEYBOARD;
+  const result = await updateWithPhoto(chatId, env, { ...options, replyMarkup }, "usd", caption);
+
+  if (options.subscribe && result.ok) {
+    if (options.editMessageId) {
+      await updateSubscriptionMessage(chatId, options.editMessageId, price, env);
+    } else if (result.result?.message_id) {
+      await subscribeUser(chatId, result.result.message_id, price, env);
     }
-    return result;
   }
 
-  // send photo with fallback
-  const photoResult = await sendPhoto(chatId, chartUrlFor("usd"), caption, env, { replyMarkup: PRICE_KEYBOARD });
-  if (photoResult.ok) {
-    if (photoResult.result?.message_id && options.subscribe) await subscribeUser(chatId, photoResult.result.message_id, price, env);
-    return photoResult;
-  }
-
-  console.warn(`[rate] photo failed, fallback to text`);
-  const textResult = await sendMessage(chatId, caption, env, { replyMarkup: PRICE_KEYBOARD });
-  if (textResult.ok && textResult.result?.message_id && options.subscribe) await subscribeUser(chatId, textResult.result.message_id, price, env);
-  return textResult;
+  return result;
 }
 
 async function respondWithAsset(chatId, env, assetKey, options = {}) {
   const { data } = await fetchMarket(env);
   const caption = buildAssetCaption(assetKey, data);
-
-  if (options.editMessageId) {
-    const result = await editMessageCaption(chatId, options.editMessageId, caption, env, { replyMarkup: BACK_KEYBOARD });
-    if (!result.ok && result.description?.includes("no caption")) {
-      return editMessage(chatId, options.editMessageId, caption, env, { replyMarkup: BACK_KEYBOARD });
-    }
-    return result;
-  }
-
-  const photoResult = await sendPhoto(chatId, chartUrlFor(assetKey), caption, env, { replyMarkup: BACK_KEYBOARD });
-  if (photoResult.ok) return photoResult;
-  return sendMessage(chatId, caption, env, { replyMarkup: BACK_KEYBOARD });
+  return updateWithPhoto(chatId, env, { ...options, replyMarkup: BACK_KEYBOARD }, assetKey, caption);
 }
 
 async function respondWithAll(chatId, env, options = {}) {
   const { data } = await fetchMarket(env);
   const caption = buildAllCaption(data);
-  if (options.editMessageId) {
-    const r = await editMessageCaption(chatId, options.editMessageId, caption, env, { replyMarkup: BACK_KEYBOARD });
-    if (!r.ok && r.description?.includes("no caption")) return editMessage(chatId, options.editMessageId, caption, env, { replyMarkup: BACK_KEYBOARD });
-    return r;
-  }
-  const r = await sendPhoto(chatId, chartUrlFor("usd"), caption, env, { replyMarkup: BACK_KEYBOARD });
-  if (r.ok) return r;
-  return sendMessage(chatId, caption, env, { replyMarkup: BACK_KEYBOARD });
+  return updateWithPhoto(chatId, env, { ...options, replyMarkup: BACK_KEYBOARD }, "usd", caption);
 }
 
 async function respondWithCoins(chatId, env, options = {}) {
   const { data } = await fetchMarket(env);
   const caption = buildCoinsCaption(data);
-  if (options.editMessageId) {
-    const r = await editMessageCaption(chatId, options.editMessageId, caption, env, { replyMarkup: BACK_KEYBOARD });
-    if (!r.ok && r.description?.includes("no caption")) return editMessage(chatId, options.editMessageId, caption, env, { replyMarkup: BACK_KEYBOARD });
-    return r;
-  }
-  const r = await sendPhoto(chatId, chartUrlFor("coin_emami"), caption, env, { replyMarkup: BACK_KEYBOARD });
-  if (r.ok) return r;
-  return sendMessage(chatId, caption, env, { replyMarkup: BACK_KEYBOARD });
+  return updateWithPhoto(chatId, env, { ...options, replyMarkup: BACK_KEYBOARD }, "coin_emami", caption);
 }
 
 async function respondWithGold(chatId, env, options = {}) {
   const { data } = await fetchMarket(env);
   const caption = buildGoldCaption(data);
-  if (options.editMessageId) {
-    const r = await editMessageCaption(chatId, options.editMessageId, caption, env, { replyMarkup: BACK_KEYBOARD });
-    if (!r.ok && r.description?.includes("no caption")) return editMessage(chatId, options.editMessageId, caption, env, { replyMarkup: BACK_KEYBOARD });
-    return r;
-  }
-  const r = await sendPhoto(chatId, chartUrlFor("gold_18k"), caption, env, { replyMarkup: BACK_KEYBOARD });
-  if (r.ok) return r;
-  return sendMessage(chatId, caption, env, { replyMarkup: BACK_KEYBOARD });
+  return updateWithPhoto(chatId, env, { ...options, replyMarkup: BACK_KEYBOARD }, "gold_18k", caption);
 }
 
 async function respondWithCurrencies(chatId, env, options = {}) {
   const { data } = await fetchMarket(env);
   const caption = buildCurrenciesCaption(data);
-  if (options.editMessageId) {
-    const r = await editMessageCaption(chatId, options.editMessageId, caption, env, { replyMarkup: BACK_KEYBOARD });
-    if (!r.ok && r.description?.includes("no caption")) return editMessage(chatId, options.editMessageId, caption, env, { replyMarkup: BACK_KEYBOARD });
-    return r;
-  }
-  const r = await sendPhoto(chatId, chartUrlFor("eur"), caption, env, { replyMarkup: BACK_KEYBOARD });
-  if (r.ok) return r;
-  return sendMessage(chatId, caption, env, { replyMarkup: BACK_KEYBOARD });
+  return updateWithPhoto(chatId, env, { ...options, replyMarkup: BACK_KEYBOARD }, "eur", caption);
 }
 
 async function respondWithOil(chatId, env, options = {}) {
   const { data } = await fetchMarket(env);
   const msg = buildOilCaption(data);
-  if (options.editMessageId) return editMessage(chatId, options.editMessageId, msg, env, { replyMarkup: BACK_KEYBOARD });
+  if (options.editMessageId) {
+    const r = await editMessage(chatId, options.editMessageId, msg, env, { replyMarkup: BACK_KEYBOARD });
+    if (r.ok) return r;
+    if (!r.description?.includes("no caption")) return r;
+    await deleteMessage(chatId, options.editMessageId, env).catch(() => {});
+  }
   return sendMessage(chatId, msg, env, { replyMarkup: BACK_KEYBOARD });
 }
 
 async function respondWithHistory(chatId, env, days = 7, options = {}) {
   const { data } = await fetchHistory(env);
   const msg = buildHistoryMessage(data, days);
-  if (options.editMessageId) return editMessage(chatId, options.editMessageId, msg, env, { replyMarkup: BACK_KEYBOARD });
+  if (options.editMessageId) {
+    const r = await editMessage(chatId, options.editMessageId, msg, env, { replyMarkup: BACK_KEYBOARD });
+    if (r.ok) return r;
+    if (!r.description?.includes("no caption")) return r;
+    await deleteMessage(chatId, options.editMessageId, env).catch(() => {});
+  }
   return sendMessage(chatId, msg, env, { replyMarkup: BACK_KEYBOARD });
 }
 
 async function respondWithStats(chatId, env, options = {}) {
   const { data } = await fetchHistory(env);
   const msg = buildStatsMessage(data);
-  if (options.editMessageId) return editMessage(chatId, options.editMessageId, msg, env, { replyMarkup: BACK_KEYBOARD });
+  if (options.editMessageId) {
+    const r = await editMessage(chatId, options.editMessageId, msg, env, { replyMarkup: BACK_KEYBOARD });
+    if (r.ok) return r;
+    if (!r.description?.includes("no caption")) return r;
+    await deleteMessage(chatId, options.editMessageId, env).catch(() => {});
+  }
   return sendMessage(chatId, msg, env, { replyMarkup: BACK_KEYBOARD });
 }
 
 async function respondWithCompare(chatId, env, days = 30, options = {}) {
   const { data } = await fetchHistory(env);
   const msg = buildCompareMessage(data, days);
-  if (options.editMessageId) return editMessage(chatId, options.editMessageId, msg, env, { replyMarkup: BACK_KEYBOARD });
+  if (options.editMessageId) {
+    const r = await editMessage(chatId, options.editMessageId, msg, env, { replyMarkup: BACK_KEYBOARD });
+    if (r.ok) return r;
+    if (!r.description?.includes("no caption")) return r;
+    await deleteMessage(chatId, options.editMessageId, env).catch(() => {});
+  }
   return sendMessage(chatId, msg, env, { replyMarkup: BACK_KEYBOARD });
 }
 
 async function respondWithMenu(chatId, env, options = {}) {
   const subscribed = await isSubscribed(chatId, env);
-  const msg = buildMenuMessage(subscribed);
-  if (options.editMessageId) return editMessage(chatId, options.editMessageId, msg, env, { replyMarkup: MAIN_MENU_KEYBOARD });
+  const notifyEnabled = await isNotifyEnabled(chatId, env);
+  const msg = buildMenuMessage(subscribed, notifyEnabled);
+  if (options.editMessageId) {
+    const r = await editMessage(chatId, options.editMessageId, msg, env, { replyMarkup: MAIN_MENU_KEYBOARD });
+    if (r.ok) return r;
+    if (!r.description?.includes("no caption")) return r;
+    await deleteMessage(chatId, options.editMessageId, env).catch(() => {});
+  }
   return sendMessage(chatId, msg, env, { replyMarkup: MAIN_MENU_KEYBOARD });
 }
 
 // ============================================================
-//  بخش ۱۲: پردازش دستورات
+//  بخش ۱۴: پردازش دستورات متنی
 // ============================================================
 
 async function handleBotCommand(message, env, ctx) {
@@ -916,11 +1123,16 @@ async function handleBotCommand(message, env, ctx) {
   })());
 
   try {
+    // ⭐ ثبت کاربر در هر تعامل
+    await registerUser(chatId, env);
+
     if (text === "/start" || text === "/menu") return respondWithMenu(chatId, env);
 
     if (text === "/help") {
       let msg = `📖 *راهنمای بات*\n━━━━━━━━━━━━━━━━━━━\n\n`;
-      BOT_COMMANDS.forEach((c) => { msg += `/${c.command}\n   ${c.description}\n`; });
+      BOT_COMMANDS.forEach((c) => { msg += `/${c.command} — ${c.description}\n`; });
+      msg += `\n💡 *نکته:* به‌صورت پیش‌فرض، هر ساعت یک نوتیف قیمت دریافت می‌کنی.\n`;
+      msg += `برای لغو: /notify\\_off`;
       msg += FOOTER;
       return sendMessage(chatId, msg, env, { replyMarkup: MAIN_MENU_KEYBOARD });
     }
@@ -936,11 +1148,12 @@ async function handleBotCommand(message, env, ctx) {
     if (text === "/stats") return respondWithStats(chatId, env);
     if (text === "/compare") return respondWithCompare(chatId, env, 30);
 
+    // ⭐ اشتراک زنده دلار
     if (text === "/subscribe") {
       const msg = await respondWithRate(chatId, env, { subscribe: true });
       if (msg.ok) {
         return sendMessage(chatId,
-          `✅ *اشتراک فعال شد*\n\n` +
+          `✅ *اشتراک زنده دلار فعال شد*\n\n` +
           `از این پس قیمت دلار هر ۳۰ دقیقه بررسی و در صورت تغییر، *همین پیام* ویرایش می‌شود.\n\n` +
           `🔕 لغو: /unsubscribe` + FOOTER, env);
       }
@@ -949,9 +1162,31 @@ async function handleBotCommand(message, env, ctx) {
 
     if (text === "/unsubscribe") {
       await unsubscribeUser(chatId, env);
-      return sendMessage(chatId, `🔕 *اشتراک غیرفعال شد*\n\nدیگر پیام قیمت برایت ویرایش نمی‌شود.` + FOOTER, env, { replyMarkup: MAIN_MENU_KEYBOARD });
+      return sendMessage(chatId,
+        `🔕 *اشتراک زنده دلار غیرفعال شد*\n\nدیگر پیام دلار برایت ویرایش نمی‌شود.` + FOOTER,
+        env, { replyMarkup: MAIN_MENU_KEYBOARD });
     }
 
+    // ⭐ نوتیف ساعتی
+    if (text === "/notify_off") {
+      await setNotifyOff(chatId, env);
+      return sendMessage(chatId,
+        `🔕 *نوتیف ساعتی لغو شد*\n\n` +
+        `دیگر پیام ساعتی قیمت دریافت نمی‌کنی.\n\n` +
+        `💡 برای فعال‌سازی: /notify\\_on` + FOOTER,
+        env, { replyMarkup: NOTIFY_OFF_KEYBOARD });
+    }
+
+    if (text === "/notify_on") {
+      await setNotifyOn(chatId, env);
+      return sendMessage(chatId,
+        `🔔 *نوتیف ساعتی فعال شد*\n\n` +
+        `از این پس هر ساعت قیمت جدید برایت ارسال می‌شود.\n\n` +
+        `🔕 برای لغو: /notify\\_off` + FOOTER,
+        env, { replyMarkup: MAIN_MENU_KEYBOARD });
+    }
+
+    // تبدیل
     if (text.startsWith("/convert")) {
       const arg = text.replace("/convert", "").trim();
       const amount = parseFloat(arg);
@@ -978,6 +1213,10 @@ async function handleBotCommand(message, env, ctx) {
   }
 }
 
+// ============================================================
+//  بخش ۱۵: Callback Query Handler
+// ============================================================
+
 async function handleCallbackQuery(cb, env, ctx) {
   const chatId = cb.message.chat.id;
   const messageId = cb.message.message_id;
@@ -987,6 +1226,9 @@ async function handleCallbackQuery(cb, env, ctx) {
   try {
     if (!data.startsWith("cmd:")) return;
     const action = data.slice(4);
+
+    // ⭐ ثبت کاربر
+    await registerUser(chatId, env);
 
     switch (action) {
       case "menu": return respondWithMenu(chatId, env, { editMessageId: messageId });
@@ -1000,20 +1242,43 @@ async function handleCallbackQuery(cb, env, ctx) {
       case "history": return respondWithHistory(chatId, env, 7, { editMessageId: messageId });
       case "stats": return respondWithStats(chatId, env, { editMessageId: messageId });
       case "compare": return respondWithCompare(chatId, env, 30, { editMessageId: messageId });
+
       case "subscribe":
         await unsubscribeUser(chatId, env);
         return respondWithRate(chatId, env, { editMessageId: messageId, subscribe: true });
+
+      case "notify_off":
+        await setNotifyOff(chatId, env);
+        return editMessage(
+          chatId, messageId,
+          `🔕 *نوتیف ساعتی لغو شد*\n\n` +
+          `دیگر پیام ساعتی قیمت دریافت نمی‌کنی.\n\n` +
+          `💡 برای فعال‌سازی مجدد، دکمه زیر را بزن.` + FOOTER,
+          env, { replyMarkup: NOTIFY_OFF_KEYBOARD }
+        );
+
+      case "notify_on":
+        await setNotifyOn(chatId, env);
+        return editMessage(
+          chatId, messageId,
+          `🔔 *نوتیف ساعتی فعال شد*\n\n` +
+          `از این پس هر ساعت قیمت جدید برایت ارسال می‌شود.\n\n` +
+          `💡 برای لغو، دکمه زیر را بزن.` + FOOTER,
+          env, { replyMarkup: MAIN_MENU_KEYBOARD }
+        );
+
       case "convert":
         return editMessage(chatId, messageId,
           `🔄 *تبدیل دلار به تومان*\n\nدستور \`/convert <عدد>\` را بفرست.\n\nمثال: \`/convert 100\`` + FOOTER,
           env, { replyMarkup: BACK_KEYBOARD });
+
       default: return;
     }
   } catch (err) { console.error(`[callback] ERROR: ${err.message}`); }
 }
 
 // ============================================================
-//  بخش ۱۳: Webhook
+//  بخش ۱۶: Webhook
 // ============================================================
 
 async function handleWebhook(request, env, ctx) {
@@ -1033,49 +1298,193 @@ async function handleWebhook(request, env, ctx) {
 }
 
 // ============================================================
-//  بخش ۱۴: Cron
+//  بخش ۱۷: Cron — نوتیف ساعتی + cleanup + ویرایش subscribers
 // ============================================================
 
+/**
+ * ارسال نوتیف ساعتی به همه کاربران فعال
+ */
+async function sendHourlyNotification(env) {
+  console.log(`[notify] Starting hourly notification...`);
+
+  const { data } = await fetchHistory(env);
+  const price = data.latest?.price || data.latest?.price_toman;
+  if (!price) {
+    console.error(`[notify] No price`);
+    return;
+  }
+
+  const users = await getActiveUsers(env);
+  console.log(`[notify] ${users.length} active users`);
+
+  if (users.length === 0) return;
+
+  const caption = buildPriceCaption(data);
+  const photoUrl = chartUrlFor("usd");
+  const pending = (await env.RATE_KV.get(KV_NOTIFY_PENDING, "json")) || [];
+
+  let sent = 0, failed = 0;
+
+  for (let i = 0; i < users.length; i++) {
+    const chatId = users[i];
+    try {
+      const result = await sendPhoto(chatId, photoUrl, caption, env, {
+        replyMarkup: NOTIFY_KEYBOARD,
+      });
+
+      if (result.ok && result.result?.message_id) {
+        pending.push({
+          chat_id: chatId,
+          message_id: result.result.message_id,
+          sent_at: Date.now(),
+        });
+        sent++;
+      } else {
+        const desc = result.description || "";
+        if (desc.includes("blocked") || desc.includes("chat not found") || desc.includes("deactivated") || desc.includes("kicked")) {
+          await env.RATE_KV.delete(`${KV_USER_PREFIX}${chatId}`);
+          console.log(`[notify] Removed blocked: ${chatId}`);
+        }
+        failed++;
+      }
+    } catch (err) {
+      console.error(`[notify] ${chatId}: ${err.message}`);
+      failed++;
+    }
+
+    // rate limit
+    if (i > 0 && i % NOTIFY_BATCH_SIZE === 0) {
+      await sleep(1000);
+    } else {
+      await sleep(50);
+    }
+  }
+
+  await env.RATE_KV.put(KV_NOTIFY_PENDING, JSON.stringify(pending), {
+    expirationTtl: KV_PENDING_TTL,
+  });
+
+  console.log(`[notify] Sent: ${sent}, Failed: ${failed}, Pending: ${pending.length}`);
+}
+
+/**
+ * حذف نوتیف‌های قدیمی‌تر از ۵ دقیقه
+ */
+async function cleanupOldNotifications(env) {
+  const pending = (await env.RATE_KV.get(KV_NOTIFY_PENDING, "json")) || [];
+  if (pending.length === 0) return;
+
+  const now = Date.now();
+  const keep = [];
+  let deleted = 0;
+
+  for (const n of pending) {
+    const ageMin = (now - n.sent_at) / 60000;
+    if (ageMin >= NOTIFY_DELETE_AFTER_MINUTES) {
+      try {
+        await deleteMessage(n.chat_id, n.message_id, env);
+        deleted++;
+      } catch {}
+    } else {
+      keep.push(n);
+    }
+    await sleep(30);
+  }
+
+  if (keep.length > 0) {
+    await env.RATE_KV.put(KV_NOTIFY_PENDING, JSON.stringify(keep), {
+      expirationTtl: KV_PENDING_TTL,
+    });
+  } else {
+    await env.RATE_KV.delete(KV_NOTIFY_PENDING);
+  }
+
+  if (deleted > 0) console.log(`[cleanup] Deleted: ${deleted}, Kept: ${keep.length}`);
+}
+
+/**
+ * ویرایش پیام subscribers (اشتراک زنده دلار)
+ */
+async function updateSubscribers(env) {
+  const { data } = await fetchHistory(env);
+  const newPrice = data.latest?.price || data.latest?.price_toman;
+
+  const list = await env.RATE_KV.list({ prefix: KV_SUB_PREFIX });
+  if (list.keys.length === 0) return;
+
+  console.log(`[subs] ${list.keys.length} subscribers`);
+
+  let edited = 0, deleted = 0, skipped = 0;
+  for (const key of list.keys) {
+    const sub = await env.RATE_KV.get(key.name, "json");
+    if (!sub) continue;
+    if (sub.last_price === newPrice) { skipped++; continue; }
+
+    const caption = buildPriceCaption(data);
+    try {
+      let result = await editMessageMedia(
+        sub.chat_id,
+        sub.message_id,
+        chartUrlFor("usd"),
+        caption,
+        env,
+        { replyMarkup: PRICE_KEYBOARD }
+      );
+
+      if (!result.ok && result.description?.includes("no caption")) {
+        result = await editMessage(sub.chat_id, sub.message_id, caption, env, { replyMarkup: PRICE_KEYBOARD });
+      }
+
+      if (result.ok) {
+        await env.RATE_KV.put(key.name, JSON.stringify({ ...sub, last_price: newPrice, last_updated: Date.now() }), { expirationTtl: KV_SUB_TTL });
+        edited++;
+      } else {
+        const desc = result.description || "";
+        if (desc.includes("not found") || desc.includes("can't be edited") || desc.includes("chat not found")) {
+          await env.RATE_KV.delete(key.name);
+          deleted++;
+        }
+      }
+    } catch (err) {
+      console.error(`[subs] ${sub.chat_id}: ${err.message}`);
+    }
+    await sleep(50);
+  }
+  console.log(`[subs] Edited: ${edited}, Deleted: ${deleted}, Skipped: ${skipped}`);
+}
+
+/**
+ * Cron handler
+ */
 async function handleScheduled(controller, env, ctx) {
   console.log(`[cron] ${controller.cron}`);
   if (!env.RATE_KV) return;
 
-  try {
-    const { data } = await fetchHistory(env);
-    const newPrice = data.latest?.price || data.latest?.price_toman;
-    const list = await env.RATE_KV.list({ prefix: KV_SUB_PREFIX });
+  // ۱. همیشه: پاک‌سازی نوتیف‌های قدیمی
+  await cleanupOldNotifications(env);
 
-    let edited = 0, deleted = 0, skipped = 0;
-    for (const key of list.keys) {
-      const sub = await env.RATE_KV.get(key.name, "json");
-      if (!sub) continue;
-      if (sub.last_price === newPrice) { skipped++; continue; }
+  // ۲. اگر دقیقه ۵ UTC بود → نوتیف ساعتی
+  const now = new Date();
+  const currentMinute = now.getUTCMinutes();
 
-      const caption = buildPriceCaption(data);
-      try {
-        let result = await editMessageCaption(sub.chat_id, sub.message_id, caption, env, { replyMarkup: PRICE_KEYBOARD });
-        if (!result.ok && result.description?.includes("no caption")) {
-          result = await editMessage(sub.chat_id, sub.message_id, caption, env, { replyMarkup: PRICE_KEYBOARD });
-        }
-        if (result.ok) {
-          await env.RATE_KV.put(key.name, JSON.stringify({ ...sub, last_price: newPrice, last_updated: Date.now() }), { expirationTtl: KV_SUB_TTL });
-          edited++;
-        } else {
-          const desc = result.description || "";
-          if (desc.includes("not found") || desc.includes("can't be edited") || desc.includes("chat not found")) {
-            await env.RATE_KV.delete(key.name);
-            deleted++;
-          }
-        }
-      } catch (err) { console.error(`[cron] ${sub.chat_id}: ${err.message}`); }
-      await sleep(50);
+  if (currentMinute === 5) {
+    const lastNotify = parseInt((await env.RATE_KV.get(KV_LAST_NOTIFY_TIME)) || "0", 10);
+    const minutesSinceLast = (Date.now() - lastNotify) / 60000;
+
+    if (minutesSinceLast >= 55) {
+      await sendHourlyNotification(env);
+      await env.RATE_KV.put(KV_LAST_NOTIFY_TIME, String(Date.now()));
+    } else {
+      console.log(`[cron] Notify skip, only ${Math.round(minutesSinceLast)}m`);
     }
-    console.log(`[cron] Edited: ${edited}, Deleted: ${deleted}, Skipped: ${skipped}`);
-  } catch (err) { console.error(`[cron] Fatal: ${err.message}`); }
+  }
+
+  // ۳. همیشه: ویرایش subscribers
+  await updateSubscribers(env);
 }
 
 // ============================================================
-//  بخش ۱۵: Setup & Router
+//  بخش ۱۸: Setup & Router
 // ============================================================
 
 async function handleSetup(env) {
