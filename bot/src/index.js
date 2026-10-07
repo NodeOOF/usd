@@ -1,6 +1,6 @@
 // ============================================================
 //  Cloudflare Worker — Nabz-e Bazaar Bot + GitHub Trigger
-//  نسخه: 14.0
+//  نسخه: 14.2
 //  منبع داده: NodeOOF/nabz (fork)
 //
 //  قابلیت‌ها:
@@ -25,7 +25,7 @@ const CORS_HEADERS = Object.freeze({
   "Access-Control-Max-Age": "86400",
 });
 
-// ⭐ منبع داده: fork خودت (NodeOOF/nabz)
+// ⭐ منبع داده: fork خودت (NodeOOF/USD)
 const NABZ_RAW = "https://raw.githubusercontent.com/NodeOOF/usd/main";
 const NABZ_CDN = "https://cdn.jsdelivr.net/gh/NodeOOF/usd@main";
 
