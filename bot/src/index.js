@@ -1,7 +1,7 @@
 // ============================================================
-//  Cloudflare Worker — Nabz-e Bazaar Bot
-//  نسخه: 13.3
-//  منبع: itsyebekhe/nabz (۴۷ دارایی)
+//  Cloudflare Worker — Nabz-e Bazaar Bot + GitHub Trigger
+//  نسخه: 14.0
+//  منبع داده: NodeOOF/nabz (fork)
 //
 //  قابلیت‌ها:
 //    - ۴۷ دارایی (ارز، طلا، سکه، نفت)
@@ -10,6 +10,7 @@
 //    - لغو/فعال‌سازی نوتیف با یک دکمه
 //    - حذف خودکار نوتیف بعد از ۵ دقیقه
 //    - اشتراک زنده دلار (ویرایش پیام هر ۳۰ دقیقه)
+//    - ⭐ Trigger GitHub Action برای scraping
 //    - cache buster برای داده‌های تازه
 // ============================================================
 
@@ -24,9 +25,9 @@ const CORS_HEADERS = Object.freeze({
   "Access-Control-Max-Age": "86400",
 });
 
-// منابع داده
-const NABZ_RAW = "https://raw.githubusercontent.com/itsyebekhe/nabz/main";
-const NABZ_CDN = "https://cdn.jsdelivr.net/gh/itsyebekhe/nabz@main";
+// ⭐ منبع داده: fork خودت (NodeOOF/nabz)
+const NABZ_RAW = "https://raw.githubusercontent.com/NodeOOF/usd/main";
+const NABZ_CDN = "https://cdn.jsdelivr.net/gh/NodeOOF/usd@main";
 
 const HISTORY_SOURCES = [
   `${NABZ_RAW}/api/history_usd.json`,
@@ -36,14 +37,11 @@ const HISTORY_SOURCES = [
 const MARKET_SOURCES = [
   `${NABZ_RAW}/market.json`,
   `${NABZ_CDN}/market.json`,
-  "https://cdn.statically.io/gh/itsyebekhe/nabz/main/market.json",
 ];
 
-// چارت‌ها
 const CHART_BASE_URLS = [
-  "https://cdn.jsdelivr.net/gh/itsyebekhe/nabz@main",
-  "https://raw.githubusercontent.com/itsyebekhe/nabz/main",
-  "https://cdn.statically.io/gh/itsyebekhe/nabz/main",
+  "https://cdn.jsdelivr.net/gh/NodeOOF/usd@main",
+  "https://raw.githubusercontent.com/NodeOOF/usd/main",
 ];
 
 const FOOTER = "\n\n━━━━━━━━━━━━━━━━━━━\n🌐 github.com/NodeOOF\n🤖 @dolarazad\\_bot";
@@ -52,15 +50,15 @@ const DEFAULT_CACHE_SECONDS = 60;
 const FETCH_TIMEOUT_MS = 10000;
 
 // KV keys
-const KV_SUB_PREFIX = "sub:";           // اشتراک زنده دلار
-const KV_USER_PREFIX = "user:";         // کاربران ثبت‌شده (نوتیف ساعتی)
+const KV_SUB_PREFIX = "sub:";
+const KV_USER_PREFIX = "user:";
 const KV_NOTIFY_PENDING = "notify:pending";
 const KV_LAST_NOTIFY_TIME = "notify:last_time";
 
-// TTL (به ثانیه)
-const KV_SUB_TTL = 60 * 60 * 24 * 7;    // ۷ روز
-const KV_USER_TTL = 60 * 60 * 24 * 30;  // ۳۰ روز
-const KV_PENDING_TTL = 60 * 60;         // ۱ ساعت
+// TTL
+const KV_SUB_TTL = 60 * 60 * 24 * 7;
+const KV_USER_TTL = 60 * 60 * 24 * 30;
+const KV_PENDING_TTL = 60 * 60;
 
 // نوتیف
 const NOTIFY_DELETE_AFTER_MINUTES = 5;
@@ -219,7 +217,7 @@ async function fetchJsonSafe(url, timeoutMs = FETCH_TIMEOUT_MS) {
     const resp = await fetch(urlWithBust, {
       signal: ctrl.signal,
       headers: {
-        "User-Agent": "Nabz-Worker/13.3",
+        "User-Agent": "Nabz-Worker/14.0",
         "Accept": "application/json",
         "Cache-Control": "no-cache, no-store, must-revalidate",
         "Pragma": "no-cache",
@@ -279,7 +277,49 @@ function chartUrlFor(key) {
 }
 
 // ============================================================
-//  بخش ۵: پردازش داده
+//  بخش ۵: ⭐ GitHub Trigger
+// ============================================================
+
+async function triggerWorkflow(env) {
+  const owner = env.GITHUB_OWNER;
+  const repo = env.GITHUB_REPO;
+  const workflow = env.GITHUB_WORKFLOW;
+  const branch = env.GITHUB_BRANCH || "main";
+
+  if (!owner || !repo || !workflow) {
+    throw new Error("GITHUB_OWNER/REPO/WORKFLOW not configured");
+  }
+
+  const url = `https://api.github.com/repos/${owner}/${repo}/actions/workflows/${workflow}/dispatches`;
+  console.log(`[trigger] Dispatching: ${owner}/${repo}/${workflow}@${branch}`);
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${env.GITHUB_TOKEN}`,
+      "Accept": "application/vnd.github+json",
+      "User-Agent": "nabz-trigger-worker",
+      "Content-Type": "application/json",
+      "X-GitHub-Api-Version": "2022-11-28",
+    },
+    body: JSON.stringify({ ref: branch }),
+  });
+
+  if (res.status !== 204 && res.status !== 200) {
+    const text = await respText(res);
+    throw new Error(`GitHub ${res.status}: ${text}`);
+  }
+
+  console.log(`[trigger] Success (${res.status})`);
+  return { status: res.status, workflow, branch };
+}
+
+async function respText(res) {
+  try { return (await res.text()).slice(0, 200); } catch { return ""; }
+}
+
+// ============================================================
+//  بخش ۶: پردازش داده
 // ============================================================
 
 function computeStats(history) {
@@ -314,13 +354,9 @@ function computeChange(history, daysAgo) {
 }
 
 // ============================================================
-//  بخش ۶: مدیریت کاربران (برای نوتیف ساعتی)
+//  بخش ۷: مدیریت کاربران (نوتیف)
 // ============================================================
 
-/**
- * ثبت کاربر جدید (اولین /start)
- * پیش‌فرض: نوتیف ساعتی فعال
- */
 async function registerUser(chatId, env) {
   const key = `${KV_USER_PREFIX}${chatId}`;
   const existing = await env.RATE_KV.get(key, "json");
@@ -339,7 +375,6 @@ async function registerUser(chatId, env) {
     return;
   }
 
-  // TTL را تمدید کن
   await env.RATE_KV.put(
     key,
     JSON.stringify({ ...existing, last_seen: Date.now() }),
@@ -347,9 +382,6 @@ async function registerUser(chatId, env) {
   );
 }
 
-/**
- * خاموش کردن نوتیف ساعتی برای کاربر
- */
 async function setNotifyOff(chatId, env) {
   const key = `${KV_USER_PREFIX}${chatId}`;
   const user = (await env.RATE_KV.get(key, "json")) || { chat_id: chatId, registered_at: Date.now() };
@@ -359,9 +391,6 @@ async function setNotifyOff(chatId, env) {
   console.log(`[user] Notify OFF: ${chatId}`);
 }
 
-/**
- * روشن کردن نوتیف ساعتی برای کاربر
- */
 async function setNotifyOn(chatId, env) {
   const key = `${KV_USER_PREFIX}${chatId}`;
   const user = (await env.RATE_KV.get(key, "json")) || { chat_id: chatId, registered_at: Date.now() };
@@ -371,17 +400,11 @@ async function setNotifyOn(chatId, env) {
   console.log(`[user] Notify ON: ${chatId}`);
 }
 
-/**
- * بررسی فعال بودن نوتیف ساعتی
- */
 async function isNotifyEnabled(chatId, env) {
   const user = await env.RATE_KV.get(`${KV_USER_PREFIX}${chatId}`, "json");
   return user !== null && user.notify_off !== true;
 }
 
-/**
- * لیست کاربران فعال (نوتیف روشن)
- */
 async function getActiveUsers(env) {
   const users = [];
   let cursor = undefined;
@@ -401,7 +424,7 @@ async function getActiveUsers(env) {
 }
 
 // ============================================================
-//  بخش ۷: مدیریت اشتراک زنده دلار (subscribe)
+//  بخش ۸: مدیریت اشتراک زنده دلار
 // ============================================================
 
 async function subscribeUser(chatId, messageId, price, env) {
@@ -428,14 +451,14 @@ async function isSubscribed(chatId, env) {
 }
 
 // ============================================================
-//  بخش ۸: API Endpoints
+//  بخش ۹: API Endpoints
 // ============================================================
 
 async function handleRoot() {
   return jsonResponse({
     name: "Nabz-e Bazaar Bot API",
-    version: "13.3",
-    source: "itsyebekhe/nabz",
+    version: "14.0",
+    source: "NodeOOF/nabz",
     endpoints: {
       "GET /rate": "دلار + تغییرات",
       "GET /market": "همه ۴۷ دارایی",
@@ -444,6 +467,7 @@ async function handleRoot() {
       "GET /compare?days=N": "مقایسه",
       "GET /health": "سلامت",
       "GET /ui": "صفحه وب",
+      "GET /trigger": "⭐ Trigger GitHub Action",
       "POST /webhook": "وبهوک تلگرام",
     },
   });
@@ -502,12 +526,28 @@ async function handleHealth(env) {
     const users = await getActiveUsers(env).catch(() => []);
     return jsonResponse({
       status: "healthy",
+      version: "14.0",
       source,
       updated_at: data.updated_at,
       active_users: users.length,
+      trigger_configured: !!(env.GITHUB_OWNER && env.GITHUB_REPO && env.GITHUB_WORKFLOW && env.GITHUB_TOKEN),
     });
   } catch (err) {
     return jsonResponse({ status: "unhealthy", error: err.message }, 503);
+  }
+}
+
+async function handleTrigger(env) {
+  try {
+    const result = await triggerWorkflow(env);
+    return jsonResponse({
+      success: true,
+      message: "✅ Workflow triggered",
+      ...result,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (err) {
+    return errorResponse("Trigger failed", 500, err.message);
   }
 }
 
@@ -556,7 +596,7 @@ fetch('/market').then(r=>r.json()).then(d=>{
 }
 
 // ============================================================
-//  بخش ۹: Telegram API
+//  بخش ۱۰: Telegram API
 // ============================================================
 
 async function telegramAPI(method, body, env) {
@@ -627,10 +667,10 @@ async function sendPhoto(chatId, photoUrl, caption, env, options = {}) {
   }, env);
   if (urlResult.ok) return urlResult;
 
-  console.warn(`[sendPhoto] URL failed (${urlResult.description}), trying file upload...`);
+  console.warn(`[sendPhoto] URL failed, trying file upload...`);
   try {
     const imgResp = await fetch(photoUrl, {
-      headers: { "User-Agent": "Nabz-Worker/13.3" },
+      headers: { "User-Agent": "Nabz-Worker/14.0" },
       cf: { cacheTtl: 3600, cacheEverything: true },
     });
     if (!imgResp.ok) throw new Error(`HTTP ${imgResp.status}`);
@@ -656,7 +696,7 @@ async function sendPhoto(chatId, photoUrl, caption, env, options = {}) {
 }
 
 // ============================================================
-//  بخش ۱۰: Keyboards
+//  بخش ۱۱: Keyboards
 // ============================================================
 
 const MAIN_MENU_KEYBOARD = {
@@ -723,7 +763,6 @@ const BACK_KEYBOARD = {
   ],
 };
 
-// ⭐ نوتیف ساعتی با دکمه لغو
 const NOTIFY_KEYBOARD = {
   inline_keyboard: [
     [{ text: "🔕 لغو نوتیف ساعتی", callback_data: "cmd:notify_off" }],
@@ -735,7 +774,6 @@ const NOTIFY_KEYBOARD = {
   ],
 };
 
-// ⭐ بعد از لغو نوتیف
 const NOTIFY_OFF_KEYBOARD = {
   inline_keyboard: [
     [{ text: "🔔 فعال‌سازی نوتیف ساعتی", callback_data: "cmd:notify_on" }],
@@ -748,7 +786,7 @@ const NOTIFY_OFF_KEYBOARD = {
 };
 
 // ============================================================
-//  بخش ۱۱: Message Builders
+//  بخش ۱۲: Message Builders
 // ============================================================
 
 function changeIndicator(ch) {
@@ -821,8 +859,7 @@ function buildAssetCaption(key, m) {
 }
 
 function buildCoinsCaption(m) {
-  let msg = `🪙 *سکه‌ها*\n`;
-  msg += `━━━━━━━━━━━━━━━━━━━\n\n`;
+  let msg = `🪙 *سکه‌ها*\n━━━━━━━━━━━━━━━━━━━\n\n`;
   const keys = ["coin_emami","coin_bahar","coin_half","coin_quarter","coin_gram"];
   for (const key of keys) {
     const info = ASSETS[key];
@@ -838,8 +875,7 @@ function buildCoinsCaption(m) {
 }
 
 function buildGoldCaption(m) {
-  let msg = `🥇 *طلا*\n`;
-  msg += `━━━━━━━━━━━━━━━━━━━\n\n`;
+  let msg = `🥇 *طلا*\n━━━━━━━━━━━━━━━━━━━\n\n`;
   if (m.gold_18k) msg += `• طلای ۱۸ عیار: *${toPersianNumber(m.gold_18k)}* تومان\n`;
   if (m.gold_mesghal) msg += `• مثقال: *${toPersianNumber(m.gold_mesghal)}* تومان\n`;
   if (m.usd_xau) msg += `• انس جهانی: *${m.usd_xau}* دلار\n`;
@@ -850,8 +886,7 @@ function buildGoldCaption(m) {
 }
 
 function buildCurrenciesCaption(m) {
-  let msg = `💱 *همه ارزها*\n`;
-  msg += `━━━━━━━━━━━━━━━━━━━\n\n`;
+  let msg = `💱 *همه ارزها*\n━━━━━━━━━━━━━━━━━━━\n\n`;
   const keys = ["usd","eur","aed","try","gbp","cad","aud","cny","rub","iqd","jpy","sar","kwd","omr","chf","sek","nok","dkk","sgd","hkd"];
   for (const key of keys) {
     const info = ASSETS[key];
@@ -866,8 +901,7 @@ function buildCurrenciesCaption(m) {
 }
 
 function buildOilCaption(m) {
-  let msg = `🛢 *نفت خام*\n`;
-  msg += `━━━━━━━━━━━━━━━━━━━\n\n`;
+  let msg = `🛢 *نفت خام*\n━━━━━━━━━━━━━━━━━━━\n\n`;
   msg += `💰 *${m.oil || "—"}* دلار\n\n`;
   msg += `⏱ ${m.updated_at || "—"}`;
   msg += FOOTER;
@@ -901,8 +935,7 @@ function buildStatsMessage(data) {
   const stats = computeStats(data.history);
   if (!stats) return `📈 *آمار*\n\n_داده‌ای موجود نیست._` + FOOTER;
 
-  let msg = `📈 *آمار کلی دلار*\n`;
-  msg += `━━━━━━━━━━━━━━━━━━━\n\n`;
+  let msg = `📈 *آمار کلی دلار*\n━━━━━━━━━━━━━━━━━━━\n\n`;
   msg += `• 🔻 کمینه: *${toPersianNumber(stats.min_price)}*\n`;
   msg += `• 🔺 بیشینه: *${toPersianNumber(stats.max_price)}*\n`;
   msg += `• 📊 میانگین: *${toPersianNumber(stats.avg_price)}*\n\n`;
@@ -918,8 +951,7 @@ function buildCompareMessage(data, days = 30) {
   const arrow = comparison.direction === "up" ? "🔺" : comparison.direction === "down" ? "🔻" : "▪️";
   const sign = comparison.change > 0 ? "+" : comparison.change < 0 ? "−" : "";
 
-  let msg = `📊 *مقایسه ${toPersianNumber(days)} روزه دلار*\n`;
-  msg += `━━━━━━━━━━━━━━━━━━━\n\n`;
+  let msg = `📊 *مقایسه ${toPersianNumber(days)} روزه دلار*\n━━━━━━━━━━━━━━━━━━━\n\n`;
   msg += `• امروز: *${toPersianNumber(comparison.current)}*\n`;
   msg += `• ${comparison.past_date}: *${toPersianNumber(comparison.past)}*\n\n`;
   msg += `${arrow} تغییر: *${sign}${toPersianNumber(Math.abs(comparison.change))}* (${comparison.change_percent}%)`;
@@ -928,8 +960,7 @@ function buildCompareMessage(data, days = 30) {
 }
 
 function buildMenuMessage(subscribed, notifyEnabled) {
-  let msg = `🏠 *منوی اصلی*\n`;
-  msg += `━━━━━━━━━━━━━━━━━━━\n\n`;
+  let msg = `🏠 *منوی اصلی*\n━━━━━━━━━━━━━━━━━━━\n\n`;
   msg += `سلام! 👋\n`;
   msg += `من بات *نبض بازار* هستم.\n\n`;
   msg += `📋 *قابلیت‌ها*\n`;
@@ -940,21 +971,18 @@ function buildMenuMessage(subscribed, notifyEnabled) {
   msg += `• 🪙 سکه + نمودار\n`;
   msg += `• 💱 همه ارزها\n`;
   msg += `• 🔄 تبدیل\n\n`;
-
   msg += `🔔 *وضعیت‌ها:*\n`;
   msg += `• نوتیف ساعتی: ${notifyEnabled ? "✅ فعال" : "🔕 غیرفعال"}\n`;
   msg += `• اشتراک زنده دلار: ${subscribed ? "✅ فعال" : "❌ غیرفعال"}\n\n`;
-
   msg += `💡 *راهنما:*\n`;
   msg += `• «🔔 اشتراک زنده دلار» → پیام دلار هر ۳۰ دقیقه ویرایش می‌شود\n`;
-  msg += `• «🔕 لغو نوتیف ساعتی» → پیام ساعتی دریافت نکن\n`;
-
+  msg += `• «🔕 لغو نوتیف ساعتی» → پیام ساعتی دریافت نکن`;
   msg += FOOTER;
   return msg;
 }
 
 // ============================================================
-//  بخش ۱۲: تابع کمکی برای ویرایش با عکس
+//  بخش ۱۳: تابع کمکی
 // ============================================================
 
 async function updateWithPhoto(chatId, env, options, assetKey, caption) {
@@ -975,7 +1003,6 @@ async function updateWithPhoto(chatId, env, options, assetKey, caption) {
     const desc = mediaResult.description || "";
     console.warn(`[edit] editMessageMedia failed: ${desc}`);
 
-    // اگر پیام قبلی متن بود، اول caption رو امتحان کن
     if (desc.includes("no caption") || desc.includes("message is not a photo")) {
       const capResult = await editMessageCaption(chatId, options.editMessageId, caption, env, { replyMarkup: options.replyMarkup });
       if (capResult.ok) return capResult;
@@ -993,7 +1020,7 @@ async function updateWithPhoto(chatId, env, options, assetKey, caption) {
 }
 
 // ============================================================
-//  بخش ۱۳: Handlers
+//  بخش ۱۴: Handlers
 // ============================================================
 
 async function respondWithRate(chatId, env, options = {}) {
@@ -1107,7 +1134,7 @@ async function respondWithMenu(chatId, env, options = {}) {
 }
 
 // ============================================================
-//  بخش ۱۴: پردازش دستورات متنی
+//  بخش ۱۵: پردازش دستورات متنی
 // ============================================================
 
 async function handleBotCommand(message, env, ctx) {
@@ -1123,7 +1150,6 @@ async function handleBotCommand(message, env, ctx) {
   })());
 
   try {
-    // ⭐ ثبت کاربر در هر تعامل
     await registerUser(chatId, env);
 
     if (text === "/start" || text === "/menu") return respondWithMenu(chatId, env);
@@ -1131,7 +1157,7 @@ async function handleBotCommand(message, env, ctx) {
     if (text === "/help") {
       let msg = `📖 *راهنمای بات*\n━━━━━━━━━━━━━━━━━━━\n\n`;
       BOT_COMMANDS.forEach((c) => { msg += `/${c.command} — ${c.description}\n`; });
-      msg += `\n💡 *نکته:* به‌صورت پیش‌فرض، هر ساعت یک نوتیف قیمت دریافت می‌کنی.\n`;
+      msg += `\n💡 *نکته:* هر ساعت یک نوتیف قیمت دریافت می‌کنی.\n`;
       msg += `برای لغو: /notify\\_off`;
       msg += FOOTER;
       return sendMessage(chatId, msg, env, { replyMarkup: MAIN_MENU_KEYBOARD });
@@ -1148,7 +1174,6 @@ async function handleBotCommand(message, env, ctx) {
     if (text === "/stats") return respondWithStats(chatId, env);
     if (text === "/compare") return respondWithCompare(chatId, env, 30);
 
-    // ⭐ اشتراک زنده دلار
     if (text === "/subscribe") {
       const msg = await respondWithRate(chatId, env, { subscribe: true });
       if (msg.ok) {
@@ -1167,7 +1192,6 @@ async function handleBotCommand(message, env, ctx) {
         env, { replyMarkup: MAIN_MENU_KEYBOARD });
     }
 
-    // ⭐ نوتیف ساعتی
     if (text === "/notify_off") {
       await setNotifyOff(chatId, env);
       return sendMessage(chatId,
@@ -1186,7 +1210,6 @@ async function handleBotCommand(message, env, ctx) {
         env, { replyMarkup: MAIN_MENU_KEYBOARD });
     }
 
-    // تبدیل
     if (text.startsWith("/convert")) {
       const arg = text.replace("/convert", "").trim();
       const amount = parseFloat(arg);
@@ -1214,7 +1237,7 @@ async function handleBotCommand(message, env, ctx) {
 }
 
 // ============================================================
-//  بخش ۱۵: Callback Query Handler
+//  بخش ۱۶: Callback Query Handler
 // ============================================================
 
 async function handleCallbackQuery(cb, env, ctx) {
@@ -1227,7 +1250,6 @@ async function handleCallbackQuery(cb, env, ctx) {
     if (!data.startsWith("cmd:")) return;
     const action = data.slice(4);
 
-    // ⭐ ثبت کاربر
     await registerUser(chatId, env);
 
     switch (action) {
@@ -1278,7 +1300,7 @@ async function handleCallbackQuery(cb, env, ctx) {
 }
 
 // ============================================================
-//  بخش ۱۶: Webhook
+//  بخش ۱۷: Webhook
 // ============================================================
 
 async function handleWebhook(request, env, ctx) {
@@ -1298,25 +1320,18 @@ async function handleWebhook(request, env, ctx) {
 }
 
 // ============================================================
-//  بخش ۱۷: Cron — نوتیف ساعتی + cleanup + ویرایش subscribers
+//  بخش ۱۸: Cron
 // ============================================================
 
-/**
- * ارسال نوتیف ساعتی به همه کاربران فعال
- */
 async function sendHourlyNotification(env) {
   console.log(`[notify] Starting hourly notification...`);
 
   const { data } = await fetchHistory(env);
   const price = data.latest?.price || data.latest?.price_toman;
-  if (!price) {
-    console.error(`[notify] No price`);
-    return;
-  }
+  if (!price) { console.error(`[notify] No price`); return; }
 
   const users = await getActiveUsers(env);
   console.log(`[notify] ${users.length} active users`);
-
   if (users.length === 0) return;
 
   const caption = buildPriceCaption(data);
@@ -1352,7 +1367,6 @@ async function sendHourlyNotification(env) {
       failed++;
     }
 
-    // rate limit
     if (i > 0 && i % NOTIFY_BATCH_SIZE === 0) {
       await sleep(1000);
     } else {
@@ -1367,9 +1381,6 @@ async function sendHourlyNotification(env) {
   console.log(`[notify] Sent: ${sent}, Failed: ${failed}, Pending: ${pending.length}`);
 }
 
-/**
- * حذف نوتیف‌های قدیمی‌تر از ۵ دقیقه
- */
 async function cleanupOldNotifications(env) {
   const pending = (await env.RATE_KV.get(KV_NOTIFY_PENDING, "json")) || [];
   if (pending.length === 0) return;
@@ -1402,9 +1413,6 @@ async function cleanupOldNotifications(env) {
   if (deleted > 0) console.log(`[cleanup] Deleted: ${deleted}, Kept: ${keep.length}`);
 }
 
-/**
- * ویرایش پیام subscribers (اشتراک زنده دلار)
- */
 async function updateSubscribers(env) {
   const { data } = await fetchHistory(env);
   const newPrice = data.latest?.price || data.latest?.price_toman;
@@ -1454,20 +1462,37 @@ async function updateSubscribers(env) {
 }
 
 /**
- * Cron handler
+ * ⭐ Cron Handler ترکیبی
+ *
+ * cron: "7,22,37,52 * * * *"
+ *   :07 → trigger GitHub + نوتیف + cleanup
+ *   :22 → چک داده + ویرایش subscribers + cleanup
+ *   :37 → trigger GitHub + cleanup
+ *   :52 → چک داده + ویرایش subscribers + cleanup
  */
 async function handleScheduled(controller, env, ctx) {
   console.log(`[cron] ${controller.cron}`);
   if (!env.RATE_KV) return;
 
-  // ۱. همیشه: پاک‌سازی نوتیف‌های قدیمی
-  await cleanupOldNotifications(env);
-
-  // ۲. اگر دقیقه ۵ UTC بود → نوتیف ساعتی
   const now = new Date();
   const currentMinute = now.getUTCMinutes();
+  console.log(`[cron] UTC minute: ${currentMinute}`);
 
-  if (currentMinute === 5) {
+  // ⭐ همیشه: پاک‌سازی نوتیف‌های قدیمی
+  await cleanupOldNotifications(env);
+
+  // ⭐ دقیقه :07 و :37 → Trigger GitHub Action
+  if (currentMinute === 7 || currentMinute === 37) {
+    try {
+      await triggerWorkflow(env);
+    } catch (err) {
+      console.error(`[cron] Trigger failed: ${err.message}`);
+      // خطا نادیده گرفته می‌شود، cron بعدی تلاش می‌کند
+    }
+  }
+
+  // ⭐ دقیقه :07 → نوتیف ساعتی
+  if (currentMinute === 7) {
     const lastNotify = parseInt((await env.RATE_KV.get(KV_LAST_NOTIFY_TIME)) || "0", 10);
     const minutesSinceLast = (Date.now() - lastNotify) / 60000;
 
@@ -1475,16 +1500,16 @@ async function handleScheduled(controller, env, ctx) {
       await sendHourlyNotification(env);
       await env.RATE_KV.put(KV_LAST_NOTIFY_TIME, String(Date.now()));
     } else {
-      console.log(`[cron] Notify skip, only ${Math.round(minutesSinceLast)}m`);
+      console.log(`[cron] Notify skip, ${Math.round(minutesSinceLast)}m`);
     }
   }
 
-  // ۳. همیشه: ویرایش subscribers
+  // ⭐ همیشه: ویرایش subscribers
   await updateSubscribers(env);
 }
 
 // ============================================================
-//  بخش ۱۸: Setup & Router
+//  بخش ۱۹: Setup & Router
 // ============================================================
 
 async function handleSetup(env) {
@@ -1499,6 +1524,8 @@ async function route(request, env, ctx) {
 
   if (path === "/webhook" && method === "POST") return handleWebhook(request, env, ctx);
   if (path === "/setup") return handleSetup(env);
+  if (path === "/trigger") return handleTrigger(env);
+
   if (method !== "GET") return errorResponse("Method not allowed", 405);
 
   switch (path) {
