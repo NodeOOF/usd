@@ -10,7 +10,7 @@
 <br/>
 
 > [!NOTE]
-> 📅 **تاریخ:** ۱۴ مهر ۱۴۰۵ (2026-10-06) &nbsp;|&nbsp; ⏱ **ساعت آخرین بروزرسانی:** **۲۲:۵۷** (به وقت تهران)
+> 📅 **تاریخ:** ۱۵ مهر ۱۴۰۵ (2026-10-07) &nbsp;|&nbsp; ⏱ **ساعت آخرین بروزرسانی:** **۰۴:۱۲** (به وقت تهران)
 
 <br/>
 
@@ -37,12 +37,12 @@
 <tr>
 <td align="center">🇺🇸</td>
 <td><b>دلار آمریکا</b></td>
-<td align="left"><b>۲۶۹،۷۰۸ تومان</b></td>
+<td align="left"><b>۲۶۹،۶۸۶ تومان</b></td>
 </tr>
 <tr>
 <td align="center">🇪🇺</td>
 <td><b>یورو اروپا</b></td>
-<td align="left"><b>۳۰۳،۷۰۰ تومان</b></td>
+<td align="left"><b>۳۰۳،۴۰۰ تومان</b></td>
 </tr>
 <tr>
 <td align="center">🇦🇪</td>
@@ -52,22 +52,22 @@
 <tr>
 <td align="center">🇹🇷</td>
 <td><b>لیر ترکیه</b></td>
-<td align="left"><b>۵،۵۷۰ تومان</b></td>
+<td align="left"><b>۵،۵۶۰ تومان</b></td>
 </tr>
 <tr>
 <td align="center">🇬🇧</td>
 <td><b>پوند انگلیس</b></td>
-<td align="left"><b>۳۵۴،۵۰۰ تومان</b></td>
+<td align="left"><b>۳۵۴،۲۰۰ تومان</b></td>
 </tr>
 <tr>
 <td align="center">🇨🇦</td>
 <td><b>دلار کانادا</b></td>
-<td align="left"><b>۱۸۹،۸۰۰ تومان</b></td>
+<td align="left"><b>۱۸۹،۷۰۰ تومان</b></td>
 </tr>
 <tr>
 <td align="center">🇦🇺</td>
 <td><b>دلار استرالیا</b></td>
-<td align="left"><b>۱۸۸،۴۰۰ تومان</b></td>
+<td align="left"><b>۱۸۸،۳۰۰ تومان</b></td>
 </tr>
 <tr>
 <td align="center">🇨🇳</td>
@@ -117,7 +117,7 @@
 <tr>
 <td align="center">🌐</td>
 <td><b>انس جهانی طلا</b></td>
-<td align="left"><b>۴،۱۷۶.۳۳ دلار</b></td>
+<td align="left"><b>۴،۱۶۰.۹۷ دلار</b></td>
 </tr>
 
 <!-- کامودیتی -->
@@ -127,7 +127,7 @@
 <tr>
 <td align="center">⛽</td>
 <td><b>نفت خام برنت / اوپک</b></td>
-<td align="left"><b>۸۹.۶۴ دلار</b></td>
+<td align="left"><b>۹۰.۲۸ دلار</b></td>
 </tr>
 
 </tbody>
@@ -158,12 +158,12 @@
 
 * **قیمت‌های زنده تمامی ۳۷ ارز و مسکوکات:**
   ```text
-  https://raw.githubusercontent.com/itsyebekhe/nabz/main/market.json
+  https://raw.githubusercontent.com/NodeOOF/usd/main/market.json
   ```
 
 * **آرشیو تاریخی هر دارایی:**
   ```text
-  https://raw.githubusercontent.com/itsyebekhe/nabz/main/api/history_<symbol>.json
+  https://raw.githubusercontent.com/NodeOOF/usd/main/api/history_<symbol>.json
   ```
   *(نمونه: `history_usd.json`, `history_eur.json`, `history_coin_emami.json`, `history_usd_xau.json`)*
 
