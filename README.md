@@ -10,7 +10,7 @@
 <br/>
 
 > [!NOTE]
-> 📅 **تاریخ:** ۱۵ مهر ۱۴۰۵ (2026-10-07) &nbsp;|&nbsp; ⏱ **ساعت آخرین بروزرسانی:** **۱۰:۰۸** (به وقت تهران)
+> 📅 **تاریخ:** ۱۵ مهر ۱۴۰۵ (2026-10-07) &nbsp;|&nbsp; ⏱ **ساعت آخرین بروزرسانی:** **۱۰:۳۸** (به وقت تهران)
 
 <br/>
 
@@ -42,7 +42,7 @@
 <tr>
 <td align="center">🇪🇺</td>
 <td><b>یورو اروپا</b></td>
-<td align="left"><b>۳۰۲،۷۰۰ تومان</b></td>
+<td align="left"><b>۳۰۲،۸۰۰ تومان</b></td>
 </tr>
 <tr>
 <td align="center">🇦🇪</td>
@@ -57,17 +57,17 @@
 <tr>
 <td align="center">🇬🇧</td>
 <td><b>پوند انگلیس</b></td>
-<td align="left"><b>۳۵۳،۶۰۰ تومان</b></td>
+<td align="left"><b>۳۵۳،۸۰۰ تومان</b></td>
 </tr>
 <tr>
 <td align="center">🇨🇦</td>
 <td><b>دلار کانادا</b></td>
-<td align="left"><b>۱۸۹،۶۰۰ تومان</b></td>
+<td align="left"><b>۱۸۹،۷۰۰ تومان</b></td>
 </tr>
 <tr>
 <td align="center">🇦🇺</td>
 <td><b>دلار استرالیا</b></td>
-<td align="left"><b>۱۸۷،۹۰۰ تومان</b></td>
+<td align="left"><b>۱۸۸،۰۰۰ تومان</b></td>
 </tr>
 <tr>
 <td align="center">🇨🇳</td>
@@ -107,17 +107,17 @@
 <tr>
 <td align="center">✨</td>
 <td><b>طلای ۱۸ عیار (هر گرم)</b></td>
-<td align="left"><b>۲۶،۵۹۴،۰۳۰ تومان</b></td>
+<td align="left"><b>۲۶،۵۷۰،۹۴۰ تومان</b></td>
 </tr>
 <tr>
 <td align="center">⚖️</td>
 <td><b>مثقال طلا (آبشده)</b></td>
-<td align="left"><b>۱۱۵،۲۰۰،۰۰۰ تومان</b></td>
+<td align="left"><b>۱۱۵،۱۰۰،۰۰۰ تومان</b></td>
 </tr>
 <tr>
 <td align="center">🌐</td>
 <td><b>انس جهانی طلا</b></td>
-<td align="left"><b>۴،۱۳۰.۸۵ دلار</b></td>
+<td align="left"><b>۴،۱۳۲.۷۸ دلار</b></td>
 </tr>
 
 <!-- کامودیتی -->
@@ -127,7 +127,7 @@
 <tr>
 <td align="center">⛽</td>
 <td><b>نفت خام برنت / اوپک</b></td>
-<td align="left"><b>۹۰.۲۴ دلار</b></td>
+<td align="left"><b>۹۰.۰۹ دلار</b></td>
 </tr>
 
 </tbody>
