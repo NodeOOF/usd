@@ -1,10 +1,10 @@
 name: Fetch Market Rates
 
 on:
-  # ⭐ فقط workflow_dispatch - چون Worker ما trigger می‌کند
+  # ⭐ فقط workflow_dispatch (چون Worker trigger می‌کند)
   workflow_dispatch:
 
-# اجازه commit و push به ریپو
+# اجازه commit و push
 permissions:
   contents: write
 
@@ -27,12 +27,11 @@ jobs:
           fetch-depth: 1
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      # ۲. نصب Python
+      # ۲. نصب Python (بدون cache: pip)
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: pip
 
       # ۳. نصب پکیج‌ها
       - name: Install dependencies
@@ -44,27 +43,27 @@ jobs:
       - name: Run fetch script
         run: python fetch_rates.py
 
-      # ۵. Commit و push تغییرات
+      # ۵. Commit و push
       - name: Commit and push changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           # اضافه کردن همه فایل‌های خروجی
-          git add market.json
+          git add market.json 2>/dev/null || true
           git add api/ 2>/dev/null || true
           git add charts/ 2>/dev/null || true
           git add share/ 2>/dev/null || true
           git add index.html 2>/dev/null || true
-          git add README.md
-          git add usd_chart.png 2>/dev/null || true
+          git add README.md 2>/dev/null || true
           git add *.png 2>/dev/null || true
+          git add usd_chart.png 2>/dev/null || true
 
           # بررسی تغییرات
           if git diff --staged --quiet; then
             echo "📭 No changes to commit."
           else
-            git commit -m "chore(auto): update rates, charts and history [skip ci]"
+            git commit -m "chore(auto): update rates [skip ci]"
             git push
             echo "✅ Changes committed and pushed"
           fi
