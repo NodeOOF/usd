@@ -1,467 +1,935 @@
 <!DOCTYPE html>
-<html lang="fa" dir="rtl" class="scroll-smooth">
+<html lang="fa" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نبض بازار | نرخ لحظه‌ای و نمودار ارز، طلا و سکه</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<meta name="theme-color" content="#0b0f19">
+<title>نبض بازار | قیمت لحظه‌ای</title>
 
-    <!-- Default Open Graph / Twitter Card for Telegram -->
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="نبض بازار | قیمت لحظه‌ای ارز، طلا و سکه">
-    <meta property="og:description" content="مرجع آزاد و زنده قیمت ۳۷ ارز فیات، انواع سکه، طلا و نفت به همراه نمودار و تاریخچه قیمت‌ها">
-    <meta property="og:image" content="usd_chart.png">
-    <meta name="twitter:card" content="summary_large_image">
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="نبض بازار | قیمت لحظه‌ای ارز، طلا و سکه">
+<meta property="og:description" content="مرجع آزاد و زنده قیمت ارز، طلا، سکه و نفت">
+<meta property="og:image" content="usd_chart.png">
+<meta name="twitter:card" content="summary_large_image">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<!-- Favicon inline (بدون درخواست اضافی) -->
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: { fontFamily: { sans: ['Vazirmatn', 'sans-serif'] } }
-            }
-        }
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Preconnect (سریع‌تر) -->
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 
-    <style>
-        body { font-family: 'Vazirmatn', sans-serif; background-color: #0b0f19; color: #f1f5f9; }
-        .glass-card { background: rgba(17, 24, 39, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
-        .glass-card-hover:hover { border-color: rgba(59, 130, 246, 0.5); transform: translateY(-2px); transition: all 0.2s ease-in-out; }
-    </style>
+<!-- Font با display=swap (بدون مسدود شدن) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;800&display=swap" rel="stylesheet">
+
+<style>
+/* ===== Reset & Base ===== */
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  font-family:'Vazirmatn',system-ui,-apple-system,sans-serif;
+  background:#0b0f19;
+  color:#f1f5f9;
+  min-height:100vh;
+  line-height:1.5;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ===== Layout ===== */
+.wrap{max-width:1200px;margin:0 auto;padding:0 12px}
+.container{display:flex;flex-direction:column;min-height:100vh}
+main{flex:1;padding:12px 0;display:flex;flex-direction:column;gap:12px}
+
+/* ===== Header ===== */
+header{
+  position:sticky;top:0;z-index:50;
+  background:rgba(11,15,25,.85);
+  backdrop-filter:saturate(180%) blur(20px);
+  -webkit-backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:1px solid #1e293b;
+}
+.header-inner{
+  max-width:1200px;margin:0 auto;
+  padding:10px 12px;
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+}
+.logo{display:flex;align-items:center;gap:8px;text-decoration:none;color:#fff}
+.logo-icon{
+  width:34px;height:34px;border-radius:10px;
+  background:rgba(59,130,246,.15);
+  border:1px solid rgba(59,130,246,.3);
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;
+}
+.logo-text{font-size:14px;font-weight:800;letter-spacing:-.3px}
+.updated{text-align:left;font-size:10px;line-height:1.3}
+.updated-label{color:#64748b;font-size:9px}
+.updated-value{color:#cbd5e1;font-weight:600;font-size:11px;direction:ltr}
+
+/* ===== Cards ===== */
+.card{
+  background:rgba(17,24,39,.75);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:16px;
+  padding:14px;
+}
+
+/* ===== Spotlight ===== */
+.spotlight{border-radius:16px;padding:14px}
+.spotlight-head{
+  display:flex;flex-direction:column;gap:10px;
+  padding-bottom:12px;
+  border-bottom:1px solid rgba(30,41,59,.8);
+}
+.asset-info{display:flex;align-items:center;gap:10px}
+.asset-icon{font-size:28px;line-height:1}
+.asset-title{font-size:17px;font-weight:800;color:#fff;line-height:1.2}
+.asset-symbol{font-size:10px;color:#60a5fa;font-family:monospace;letter-spacing:.5px}
+.price-block{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+.price-label{font-size:10px;color:#64748b}
+.price-value{
+  font-size:26px;font-weight:900;color:#fff;
+  font-family:'Vazirmatn',monospace;
+  direction:ltr;
+  line-height:1.1;
+}
+.price-unit{font-size:12px;color:#94a3b8}
+
+/* ===== Buttons ===== */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  padding:8px 12px;
+  font-family:inherit;
+  font-size:11px;font-weight:600;
+  border-radius:10px;
+  border:1px solid #334155;
+  background:#1e293b;
+  color:#cbd5e1;
+  cursor:pointer;
+  transition:all .15s;
+  min-height:36px;
+  touch-action:manipulation;
+}
+.btn:hover{background:#334155;color:#fff}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:#2563eb;border-color:#2563eb;color:#fff}
+.btn-primary:hover{background:#1d4ed8}
+.btn svg{width:14px;height:14px}
+
+/* ===== Timeframe ===== */
+.tf-wrap{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.tf-title{font-size:11px;font-weight:700;color:#cbd5e1;display:flex;align-items:center;gap:6px}
+.tf-count{
+  font-size:10px;font-weight:400;color:#64748b;
+  background:#1e293b;padding:2px 8px;border-radius:99px;
+}
+.tf-bar{
+  display:flex;gap:2px;padding:3px;
+  background:#0f172a;border:1px solid #1e293b;border-radius:12px;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
+.tf-bar::-webkit-scrollbar{display:none}
+.tf-btn{
+  flex:1;min-width:52px;
+  padding:6px 8px;
+  font-family:inherit;
+  font-size:11px;font-weight:600;
+  border-radius:9px;
+  background:transparent;
+  color:#64748b;
+  border:none;
+  cursor:pointer;
+  transition:all .15s;
+  white-space:nowrap;
+  touch-action:manipulation;
+}
+.tf-btn.active{background:#2563eb;color:#fff}
+.tf-btn:active{transform:scale(.95)}
+
+/* ===== Chart ===== */
+.chart-wrap{
+  position:relative;
+  margin-top:10px;
+  height:220px;
+  width:100%;
+}
+.chart-loader{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;color:#94a3b8;
+  background:rgba(15,23,42,.6);
+  border-radius:12px;
+  z-index:2;
+}
+.chart-loader.hidden{display:none}
+
+/* ===== Categories ===== */
+.cat-row{
+  display:flex;gap:6px;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+  padding-bottom:2px;
+  margin-bottom:10px;
+}
+.cat-row::-webkit-scrollbar{display:none}
+.cat-btn{
+  flex-shrink:0;
+  padding:8px 14px;
+  font-family:inherit;
+  font-size:11px;font-weight:600;
+  border-radius:10px;
+  background:#1e293b;
+  color:#94a3b8;
+  border:1px solid #334155;
+  cursor:pointer;
+  transition:all .15s;
+  white-space:nowrap;
+  touch-action:manipulation;
+  min-height:36px;
+}
+.cat-btn.active{background:#2563eb;color:#fff;border-color:#2563eb}
+.cat-btn:active{transform:scale(.97)}
+
+/* ===== Search ===== */
+.search-wrap{position:relative;margin-bottom:10px}
+.search-input{
+  width:100%;
+  padding:10px 36px 10px 12px;
+  font-family:inherit;
+  font-size:13px;
+  color:#fff;
+  background:#0f172a;
+  border:1px solid #334155;
+  border-radius:12px;
+  outline:none;
+  transition:border-color .15s;
+}
+.search-input:focus{border-color:#2563eb}
+.search-icon{
+  position:absolute;
+  right:12px;top:50%;
+  transform:translateY(-50%);
+  font-size:13px;
+  color:#64748b;
+  pointer-events:none;
+}
+
+/* ===== Grid ===== */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:8px;
+}
+@media(min-width:480px){.grid{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:768px){.grid{grid-template-columns:repeat(4,1fr)}}
+@media(min-width:1024px){.grid{grid-template-columns:repeat(5,1fr)}}
+
+.asset-card{
+  padding:10px;
+  background:rgba(17,24,39,.75);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:12px;
+  cursor:pointer;
+  transition:all .15s;
+  position:relative;
+  overflow:hidden;
+  min-height:90px;
+  display:flex;flex-direction:column;justify-content:space-between;
+  touch-action:manipulation;
+}
+.asset-card:active{transform:scale(.97)}
+.asset-card.selected{
+  border-color:#3b82f6;
+  box-shadow:0 0 0 1px #3b82f6,0 4px 16px rgba(59,130,246,.2);
+  background:rgba(30,58,138,.15);
+}
+.asset-card-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.asset-card-icon{font-size:18px;line-height:1}
+.asset-card-symbol{
+  font-size:9px;font-family:monospace;
+  color:#94a3b8;
+  background:rgba(30,41,59,.8);
+  padding:2px 5px;border-radius:5px;
+}
+.asset-card-name{
+  font-size:11px;font-weight:600;color:#cbd5e1;
+  margin-bottom:4px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.asset-card-price{
+  font-size:12px;font-weight:800;color:#fff;
+  font-family:'Vazirmatn',monospace;
+  direction:ltr;
+  display:flex;align-items:baseline;gap:3px;
+  flex-wrap:wrap;
+}
+.asset-card-unit{font-size:9px;color:#64748b;font-weight:400}
+
+/* ===== Calculator ===== */
+.calc-wrap{
+  display:flex;flex-direction:column;gap:10px;
+}
+@media(min-width:640px){
+  .calc-wrap{flex-direction:row;align-items:center;max-width:560px}
+}
+.calc-input-wrap{position:relative;flex:1}
+.calc-input{
+  width:100%;
+  padding:12px 12px 12px 60px;
+  font-family:inherit;
+  font-size:15px;
+  font-weight:600;
+  color:#fff;
+  background:#0f172a;
+  border:1px solid #334155;
+  border-radius:12px;
+  outline:none;
+  direction:ltr;
+  text-align:left;
+}
+.calc-input:focus{border-color:#2563eb}
+.calc-unit{
+  position:absolute;left:12px;top:50%;
+  transform:translateY(-50%);
+  font-size:11px;color:#64748b;
+  pointer-events:none;
+}
+.calc-result{
+  padding:12px 16px;
+  background:rgba(59,130,246,.1);
+  border:1px solid rgba(59,130,246,.25);
+  border-radius:12px;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  min-width:180px;
+}
+.calc-result-label{font-size:11px;color:#94a3b8}
+.calc-result-value{
+  font-size:15px;font-weight:800;
+  color:#60a5fa;
+  font-family:'Vazirmatn',monospace;
+  direction:ltr;
+}
+
+/* ===== Section Title ===== */
+.section-title{
+  font-size:13px;font-weight:800;color:#fff;
+  margin-bottom:10px;
+  display:flex;align-items:center;gap:6px;
+}
+.section-desc{font-size:11px;color:#94a3b8;margin-bottom:12px;line-height:1.6}
+
+/* ===== API List ===== */
+.api-list{display:flex;flex-wrap:wrap;gap:6px}
+.api-link{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:6px 10px;
+  font-size:11px;font-weight:600;
+  background:#1e293b;
+  color:#cbd5e1;
+  border:1px solid #334155;
+  border-radius:8px;
+  text-decoration:none;
+  transition:all .15s;
+  touch-action:manipulation;
+}
+.api-link:hover{background:#334155;color:#fff}
+.api-link:active{transform:scale(.97)}
+
+/* ===== Toast ===== */
+.toast{
+  position:fixed;
+  bottom:20px;right:20px;
+  z-index:100;
+  padding:10px 16px;
+  font-size:12px;font-weight:600;
+  background:#2563eb;color:#fff;
+  border-radius:12px;
+  box-shadow:0 10px 30px rgba(0,0,0,.4);
+  opacity:0;
+  transform:translateY(10px);
+  transition:all .3s;
+  pointer-events:none;
+}
+.toast.show{opacity:1;transform:translateY(0)}
+
+/* ===== Footer ===== */
+footer{
+  border-top:1px solid #1e293b;
+  padding:20px 12px;
+  text-align:center;
+  font-size:11px;
+  color:#64748b;
+  margin-top:20px;
+}
+footer a{color:#60a5fa;text-decoration:none}
+footer a:hover{text-decoration:underline}
+
+/* ===== Mobile Optimizations ===== */
+@media(max-width:640px){
+  .container{padding:0 8px}
+  .price-value{font-size:24px}
+  .asset-title{font-size:16px}
+  .chart-wrap{height:200px}
+  main{gap:10px}
+  .card{padding:12px;border-radius:14px}
+  .spotlight{padding:12px}
+}
+
+/* ===== Loading skeleton ===== */
+.skeleton{
+  background:linear-gradient(90deg,#1e293b 25%,#334155 50%,#1e293b 75%);
+  background-size:200% 100%;
+  animation:skeleton 1.5s infinite;
+  border-radius:6px;
+  color:transparent !important;
+}
+@keyframes skeleton{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* ===== Reduce motion ===== */
+@media(prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms !important;transition-duration:.01ms !important}
+  html{scroll-behavior:auto}
+}
+</style>
 </head>
-<body class="min-h-screen flex flex-col selection:bg-blue-600 selection:text-white">
+<body>
 
-    <!-- Top Navigation Header -->
-    <header class="border-b border-slate-800 glass-card sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-6">
-                <a href="#" class="flex items-center gap-2.5">
-                    <div class="w-9 h-9 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 font-bold text-lg">
-                        📈
-                    </div>
-                    <span class="text-base sm:text-lg font-black tracking-tight text-white">نبض بازار</span>
-                </a>
+<div class="container">
 
-                <!-- Desktop Navigation Menu -->
-                <nav class="hidden md:flex items-center gap-5 text-xs font-semibold text-slate-300">
-                    <a href="#" class="hover:text-blue-400 transition">خانه</a>
-                    <a href="#calculator" class="hover:text-blue-400 transition">ماشین‌حساب</a>
-                    <a href="https://t.me/dolarazad_bot" target="_blank" rel="noopener" class="flex items-center gap-1.5 text-blue-400 hover:text-blue-300 transition">
-                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.18.718-1.545 6.471-2.247 9.421-.297 1.248-.87 1.442-1.42.923l-3.87-2.855-1.868 1.8c-.207.2-.38.37-.779.37l.278-3.945 7.18-6.49c.313-.278-.068-.433-.487-.155l-8.874 5.589-3.824-1.196c-.832-.26-.848-.832.174-1.233l14.938-5.759c.692-.25 1.298.165 1.056 1.43z"/></svg>
-                        تلگرام
-                    </a>
-                </nav>
-            </div>
+<!-- Header -->
+<header>
+  <div class="header-inner">
+    <a href="#" class="logo">
+      <div class="logo-icon">📈</div>
+      <span class="logo-text">نبض بازار</span>
+    </a>
+    <div class="updated">
+      <div class="updated-label">آخرین بروزرسانی</div>
+      <div id="lastUpdated" class="updated-value">...</div>
+    </div>
+  </div>
+</header>
 
-            <!-- Last Updated Badge -->
-            <div class="text-left text-xs">
-                <div class="text-slate-400 text-[10px]">آخرین بروزرسانی:</div>
-                <div id="lastUpdated" class="text-slate-200 font-semibold tracking-wide text-xs">در حال دریافت...</div>
-            </div>
+<!-- Main -->
+<main class="wrap">
+
+  <!-- Spotlight -->
+  <section id="spotlightSection" class="spotlight card">
+    <div class="spotlight-head">
+      <div class="asset-info">
+        <span id="activeIcon" class="asset-icon">🇺🇸</span>
+        <div>
+          <div id="activeTitle" class="asset-title">دلار آمریکا</div>
+          <div id="activeSymbol" class="asset-symbol">USD / TOMAN</div>
         </div>
-    </header>
-
-    <!-- Main Content -->
-    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-
-        <!-- Active Spotlight & Chart -->
-        <section id="spotlightSection" class="glass-card rounded-2xl p-5 sm:p-7 shadow-2xl relative overflow-hidden">
-            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5 border-b border-slate-800/80 pb-5">
-                <div class="flex items-center gap-3">
-                    <span id="activeIcon" class="text-3xl sm:text-4xl">🇺🇸</span>
-                    <div>
-                        <h2 id="activeTitle" class="text-xl sm:text-2xl font-black text-white">دلار آمریکا</h2>
-                        <span id="activeSymbol" class="text-xs font-mono text-blue-400 tracking-wider">USD / TOMAN</span>
-                    </div>
-                </div>
-
-                <div class="flex flex-wrap items-baseline gap-4">
-                    <div>
-                        <span class="text-[11px] text-slate-400 block">قیمت لحظه‌ای:</span>
-                        <div class="flex items-baseline gap-1.5">
-                            <span id="activePrice" class="text-3xl sm:text-4xl font-black text-white font-mono">---</span>
-                            <span id="activeUnit" class="text-sm font-medium text-slate-400">تومان</span>
-                        </div>
-                    </div>
-
-                    <button onclick="copyShareLink()" class="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                        کپی لینک اشتراک در تلگرام
-                    </button>
-                </div>
-            </div>
-
-            <!-- Timeframe Filter -->
-            <div class="flex flex-wrap items-center justify-between gap-3 mt-5">
-                <div class="text-xs font-bold text-slate-300 flex items-center gap-2">
-                    <span>روند تغییرات</span>
-                    <span id="recordCountBadge" class="text-[11px] font-normal text-slate-400 bg-slate-800 px-2 py-0.5 rounded-full"></span>
-                </div>
-
-                <div class="inline-flex p-1 rounded-xl bg-slate-900 border border-slate-800 text-xs font-medium">
-                    <button onclick="changeTimeframe(7)" data-days="7" class="tf-btn px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition">۷ روز</button>
-                    <button onclick="changeTimeframe(30)" data-days="30" class="tf-btn px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition">۱ ماه</button>
-                    <button onclick="changeTimeframe(180)" data-days="180" class="tf-btn px-2.5 py-1 rounded-lg bg-blue-600 text-white shadow transition">۶ ماه</button>
-                    <button onclick="changeTimeframe(365)" data-days="365" class="tf-btn px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition">۱ سال</button>
-                    <button onclick="changeTimeframe('all')" data-days="all" class="tf-btn px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition">همه</button>
-                </div>
-            </div>
-
-            <!-- Chart Canvas -->
-            <div class="mt-3 relative h-[300px] sm:h-[360px] w-full">
-                <canvas id="mainChart"></canvas>
-                <div id="chartLoader" class="absolute inset-0 bg-slate-950/60 backdrop-blur-sm rounded-xl flex items-center justify-center text-xs text-slate-300 font-medium">
-                    در حال بارگذاری تاریخچه...
-                </div>
-            </div>
-        </section>
-
-        <!-- Category Filter & Search -->
-        <section class="space-y-4">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div class="flex flex-wrap gap-1.5 text-xs font-semibold">
-                    <button onclick="setCategory('all')" id="cat-all" class="cat-btn px-3.5 py-2 rounded-xl bg-blue-600 text-white shadow">همه شاخص‌ها</button>
-                    <button onclick="setCategory('major')" id="cat-major" class="cat-btn px-3.5 py-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white">ارزهای شاخص</button>
-                    <button onclick="setCategory('gold')" id="cat-gold" class="cat-btn px-3.5 py-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white">طلا و سکه</button>
-                    <button onclick="setCategory('fiat')" id="cat-fiat" class="cat-btn px-3.5 py-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white">سایر ارزها</button>
-                </div>
-
-                <div class="relative min-w-[240px]">
-                    <input type="text" id="searchInput" oninput="filterCards()" placeholder="جستجوی نام یا نماد..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
-                    <span class="absolute left-3 top-2.5 text-slate-500 text-xs">🔍</span>
-                </div>
-            </div>
-
-            <!-- Cards Grid -->
-            <div id="marketGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3"></div>
-        </section>
-
-        <!-- Calculator Section -->
-        <section id="calculator" class="glass-card rounded-2xl p-6 border border-slate-800">
-            <h3 class="text-base font-extrabold text-white mb-2 flex items-center gap-2">
-                🧮 ماشین‌حساب تبدیل سریع
-            </h3>
-            <p class="text-xs text-slate-400 mb-4">مبلغ خود را به تومان وارد کنید تا مقدار معادل در شاخص انتخابی بالا محاسبه شود:</p>
-
-            <div class="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center max-w-xl">
-                <div class="relative flex-1">
-                    <input type="text" id="calcInput" value="100,000,000" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white font-mono text-base focus:outline-none focus:border-blue-500 text-left" dir="ltr">
-                    <span class="absolute right-3 top-3.5 text-xs text-slate-400 pointer-events-none">تومان</span>
-                </div>
-                <div class="bg-blue-600/10 border border-blue-500/20 rounded-xl px-5 py-3 flex items-center justify-between sm:justify-start gap-3 min-w-[200px]">
-                    <span class="text-xs text-slate-400">معادل دریافتی:</span>
-                    <span id="calcResult" class="text-base font-black text-blue-400 font-mono">---</span>
-                </div>
-            </div>
-        </section>
-    </main>
-
-
-    <!-- Toast Notification -->
-    <div id="toast" class="fixed bottom-6 right-6 z-50 bg-blue-600 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-xl transition-all duration-300 opacity-0 pointer-events-none transform translate-y-2">
-        لینک کارت تلگرام کپی شد! 📋
+      </div>
+      <div class="price-block">
+        <span class="price-label">قیمت لحظه‌ای</span>
+        <span id="activePrice" class="price-value">---</span>
+        <span id="activeUnit" class="price-unit">تومان</span>
+        <button onclick="copyShareLink()" class="btn" aria-label="کپی لینک">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+          کپی
+        </button>
+      </div>
     </div>
 
-    <script>
-        const ALL_ASSETS = {
-            "usd": { title: "دلار آمریکا", symbol: "USD", icon: "🇺🇸", category: "major", color: "#3b82f6", unit: "تومان" },
-            "eur": { title: "یورو اروپا", symbol: "EUR", icon: "🇪🇺", category: "major", color: "#10b981", unit: "تومان" },
-            "aed": { title: "درهم امارات", symbol: "AED", icon: "🇦🇪", category: "major", color: "#6366f1", unit: "تومان" },
-            "try": { title: "لیر ترکیه", symbol: "TRY", icon: "🇹🇷", category: "major", color: "#ef4444", unit: "تومان" },
-            "gbp": { title: "پوند انگلیس", symbol: "GBP", icon: "🇬🇧", category: "major", color: "#8b5cf6", unit: "تومان" },
-            "cad": { title: "دلار کانادا", symbol: "CAD", icon: "🇨🇦", category: "major", color: "#ec4899", unit: "تومان" },
-            "aud": { title: "دلار استرالیا", symbol: "AUD", icon: "🇦🇺", category: "major", color: "#06b6d4", unit: "تومان" },
-            "cny": { title: "یوان چین", symbol: "CNY", icon: "🇨🇳", category: "major", color: "#f97316", unit: "تومان" },
+    <div class="tf-wrap">
+      <div class="tf-title">
+        <span>روند تغییرات</span>
+        <span id="recordCountBadge" class="tf-count"></span>
+      </div>
+      <div class="tf-bar">
+        <button onclick="changeTimeframe(7)" data-days="7" class="tf-btn">۷ روز</button>
+        <button onclick="changeTimeframe(30)" data-days="30" class="tf-btn">۱ ماه</button>
+        <button onclick="changeTimeframe(180)" data-days="180" class="tf-btn active">۶ ماه</button>
+        <button onclick="changeTimeframe(365)" data-days="365" class="tf-btn">۱ سال</button>
+        <button onclick="changeTimeframe('all')" data-days="all" class="tf-btn">همه</button>
+      </div>
+    </div>
 
-            "gold_18k": { title: "طلای ۱۸ عیار", symbol: "GOLD_18K", icon: "✨", category: "gold", color: "#facc15", unit: "تومان" },
-            "gold_mesghal": { title: "مثقال طلا", symbol: "MESGHAL", icon: "⚖️", category: "gold", color: "#fbbf24", unit: "تومان" },
-            "coin_emami": { title: "سکه امامی", symbol: "COIN_EMAMI", icon: "🟡", category: "gold", color: "#f59e0b", unit: "تومان" },
-            "coin_bahar": { title: "سکه بهار آزادی", symbol: "COIN_BAHAR", icon: "🟡", category: "gold", color: "#d97706", unit: "تومان" },
-            "coin_half": { title: "نیم سکه", symbol: "COIN_HALF", icon: "🟡", category: "gold", color: "#eab308", unit: "تومان" },
-            "coin_quarter": { title: "ربع سکه", symbol: "COIN_QUARTER", icon: "🟡", category: "gold", color: "#ca8a04", unit: "تومان" },
-            "coin_gram": { title: "سکه گرمی", symbol: "COIN_GRAM", icon: "🟡", category: "gold", color: "#a16207", unit: "تومان" },
-            "usd_xau": { title: "انس جهانی طلا", symbol: "XAU", icon: "🌐", category: "gold", color: "#34d399", unit: "دلار" },
+    <div class="chart-wrap">
+      <canvas id="mainChart"></canvas>
+      <div id="chartLoader" class="chart-loader">در حال بارگذاری...</div>
+    </div>
+  </section>
 
-            "rub": { title: "روبل روسیه", symbol: "RUB", icon: "🇷🇺", category: "fiat", color: "#64748b", unit: "تومان" },
-            "iqd": { title: "۱۰۰ دینار عراق", symbol: "IQD", icon: "🇮🇶", category: "fiat", color: "#64748b", unit: "تومان" },
-            "myr": { title: "رینگیت مالزی", symbol: "MYR", icon: "🇲🇾", category: "fiat", color: "#64748b", unit: "تومان" },
-            "gel": { title: "لاری گرجستان", symbol: "GEL", icon: "🇬🇪", category: "fiat", color: "#64748b", unit: "تومان" },
-            "azn": { title: "منات آذربایجان", symbol: "AZN", icon: "🇦🇿", category: "fiat", color: "#64748b", unit: "تومان" },
-            "amd": { title: "۱۰۰ درام ارمنستان", symbol: "AMD", icon: "🇦🇲", category: "fiat", color: "#64748b", unit: "تومان" },
-            "thb": { title: "بات تایلند", symbol: "THB", icon: "🇹🇭", category: "fiat", color: "#64748b", unit: "تومان" },
-            "omr": { title: "ریال عمان", symbol: "OMR", icon: "🇴🇲", category: "fiat", color: "#64748b", unit: "تومان" },
-            "inr": { title: "روپیه هند", symbol: "INR", icon: "🇮🇳", category: "fiat", color: "#64748b", unit: "تومان" },
-            "pkr": { title: "روپیه پاکستان", symbol: "PKR", icon: "🇵🇰", category: "fiat", color: "#64748b", unit: "تومان" },
-            "jpy": { title: "۱۰۰ ین ژاپن", symbol: "JPY", icon: "🇯🇵", category: "fiat", color: "#64748b", unit: "تومان" },
-            "sar": { title: "ریال عربستان", symbol: "SAR", icon: "🇸🇦", category: "fiat", color: "#64748b", unit: "تومان" },
-            "afn": { title: "افغانی افغانستان", symbol: "AFN", icon: "🇦🇫", category: "fiat", color: "#64748b", unit: "تومان" },
-            "sek": { title: "کرون سوئد", symbol: "SEK", icon: "🇸🇪", category: "fiat", color: "#64748b", unit: "تومان" },
-            "chf": { title: "فرانک سوئیس", symbol: "CHF", icon: "🇨🇭", category: "fiat", color: "#64748b", unit: "تومان" },
-            "qar": { title: "ریال قطر", symbol: "QAR", icon: "🇶🇦", category: "fiat", color: "#64748b", unit: "تومان" },
-            "krw": { title: "۱۰۰ وون کره", symbol: "KRW", icon: "🇰🇷", category: "fiat", color: "#64748b", unit: "تومان" },
-            "nok": { title: "کرون نروژ", symbol: "NOK", icon: "🇳🇴", category: "fiat", color: "#64748b", unit: "تومان" },
-            "nzd": { title: "دلار نیوزیلند", symbol: "NZD", icon: "🇳🇿", category: "fiat", color: "#64748b", unit: "تومان" },
-            "sgd": { title: "دلار سنگاپور", symbol: "SGD", icon: "🇸🇬", category: "fiat", color: "#64748b", unit: "تومان" },
-            "hkd": { title: "دلار هنگ کنگ", symbol: "HKD", icon: "🇭🇰", category: "fiat", color: "#64748b", unit: "تومان" },
-            "kwd": { title: "دینار کویت", symbol: "KWD", icon: "🇰🇼", category: "fiat", color: "#64748b", unit: "تومان" },
-            "dkk": { title: "کرون دانمارک", symbol: "DKK", icon: "🇩🇰", category: "fiat", color: "#64748b", unit: "تومان" },
-            "bhd": { title: "دینار بحرین", symbol: "BHD", icon: "🇧🇭", category: "fiat", color: "#64748b", unit: "تومان" },
-            "tjs": { title: "سامانی تاجیکستان", symbol: "TJS", icon: "🇹🇯", category: "fiat", color: "#64748b", unit: "تومان" },
-            "tmt": { title: "منات ترکمنستان", symbol: "TMT", icon: "🇹🇲", category: "fiat", color: "#64748b", unit: "تومان" },
-            "kgs": { title: "سام قرقیزستان", symbol: "KGS", icon: "🇰🇬", category: "fiat", color: "#64748b", unit: "تومان" },
-            "syp": { title: "۱۰۰ لیر سوریه", symbol: "SYP", icon: "🇸🇾", category: "fiat", color: "#64748b", unit: "تومان" },
-            "brl": { title: "رئال برزیل", symbol: "BRL", icon: "🇧🇷", category: "fiat", color: "#64748b", unit: "تومان" },
-            "ars": { title: "پزو آرژانتین", symbol: "ARS", icon: "🇦🇷", category: "fiat", color: "#64748b", unit: "تومان" },
-        };
+  <!-- Category & Search -->
+  <section>
+    <div class="cat-row">
+      <button onclick="setCategory('all')" id="cat-all" class="cat-btn active">همه</button>
+      <button onclick="setCategory('major')" id="cat-major" class="cat-btn">ارزهای شاخص</button>
+      <button onclick="setCategory('gold')" id="cat-gold" class="cat-btn">طلا و سکه</button>
+      <button onclick="setCategory('fiat')" id="cat-fiat" class="cat-btn">سایر ارزها</button>
+    </div>
 
-        let marketData = {};
-        let activeAssetKey = "usd";
-        let activeHistory = [];
-        let currentTimeframe = 180;
-        let currentCategory = "all";
-        let chartInstance = null;
+    <div class="search-wrap">
+      <input type="search" id="searchInput" oninput="filterCards()" placeholder="جستجو..." class="search-input" inputmode="search">
+      <span class="search-icon">🔍</span>
+    </div>
 
-        const toPersianDigits = (n) => String(n).replace(/[0-9]/g, d => ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'][+d]);
-        const formatNumber = (num, isFloat = false) => {
-            if (num === null || num === undefined || isNaN(num)) return "---";
-            const formatted = isFloat ? Number(num).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : Number(num).toLocaleString('en-US');
-            return toPersianDigits(formatted);
-        };
+    <div id="marketGrid" class="grid"></div>
+  </section>
 
-        async function initApp() {
-            const hash = window.location.hash.replace('#', '').trim();
-            if (hash && ALL_ASSETS[hash]) activeAssetKey = hash;
+  <!-- Calculator -->
+  <section id="calculator" class="card">
+    <h3 class="section-title">🧮 ماشین‌حساب تبدیل</h3>
+    <p class="section-desc">مبلغ به تومان را وارد کن تا معادل در شاخص انتخابی بالا محاسبه شود.</p>
+    <div class="calc-wrap">
+      <div class="calc-input-wrap">
+        <input type="text" id="calcInput" value="100,000,000" class="calc-input" inputmode="numeric">
+        <span class="calc-unit">تومان</span>
+      </div>
+      <div class="calc-result">
+        <span class="calc-result-label">معادل</span>
+        <span id="calcResult" class="calc-result-value">---</span>
+      </div>
+    </div>
+  </section>
 
-            window.addEventListener('hashchange', () => {
-                const newHash = window.location.hash.replace('#', '').trim();
-                if (newHash && ALL_ASSETS[newHash] && newHash !== activeAssetKey) selectAsset(newHash, false);
-            });
+  <!-- API Docs -->
+  <section class="card">
+    <h3 class="section-title">🚀 API رایگان</h3>
+    <p class="section-desc">داده‌ها در قالب JSON آماده فراخوانی بدون کلید دسترسی:</p>
+    <div id="apiList" class="api-list"></div>
+  </section>
 
-            await fetchMarketSummary();
-            renderMarketGrid();
-            renderApiDocs();
-            await loadActiveAssetHistory();
-            initCalculator();
-        }
+</main>
 
-        async function fetchMarketSummary() {
-            try {
-                const res = await fetch('./market.json?t=' + Date.now());
-                if (!res.ok) throw new Error("fetch error");
-                marketData = await res.json();
-                document.getElementById('lastUpdated').textContent = `${marketData.date_shamsi || ''} - ${toPersianDigits(marketData.time || '--:--')}`;
-            } catch (err) {
-                document.getElementById('lastUpdated').textContent = "در حال بارگذاری...";
-            }
-        }
+<!-- Footer -->
+<footer>
+  ساخته‌شده با ❤️ | <a href="https://t.me/dolarazad_bot" target="_blank" rel="noopener">@dolarazad_bot</a>
+</footer>
 
-        function renderMarketGrid() {
-            const grid = document.getElementById('marketGrid');
-            grid.innerHTML = '';
-            const searchVal = document.getElementById('searchInput').value.trim().toLowerCase();
+</div>
 
-            for (const [key, cfg] of Object.entries(ALL_ASSETS)) {
-                if (currentCategory !== 'all' && cfg.category !== currentCategory) continue;
-                if (searchVal && !cfg.title.toLowerCase().includes(searchVal) && !cfg.symbol.toLowerCase().includes(searchVal)) continue;
+<!-- Toast -->
+<div id="toast" class="toast">لینک کپی شد! 📋</div>
 
-                // Support both usd_xau and gold_ounce key lookups
-                const price = (key === "usd_xau") ? (marketData.usd_xau || marketData.gold_ounce) : marketData[key];
-                const unit = cfg.unit || "تومان";
-                const isSelected = (key === activeAssetKey);
+<!-- Chart.js با defer (بدون مسدود کردن) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
 
-                const card = document.createElement('div');
-                card.id = `card-${key}`;
-                card.className = `glass-card glass-card-hover rounded-xl p-3 cursor-pointer relative overflow-hidden transition ${isSelected ? 'ring-2 ring-blue-500 bg-blue-900/10' : ''}`;
-                card.onclick = () => selectAsset(key, true);
+<script>
+// ============================================================
+//  تنظیمات
+// ============================================================
+const ALL_ASSETS = {
+  usd:{title:"دلار آمریکا",symbol:"USD",icon:"🇺🇸",category:"major",color:"#3b82f6",unit:"تومان"},
+  eur:{title:"یورو",symbol:"EUR",icon:"🇪🇺",category:"major",color:"#10b981",unit:"تومان"},
+  aed:{title:"درهم امارات",symbol:"AED",icon:"🇦🇪",category:"major",color:"#6366f1",unit:"تومان"},
+  try:{title:"لیر ترکیه",symbol:"TRY",icon:"🇹🇷",category:"major",color:"#ef4444",unit:"تومان"},
+  gbp:{title:"پوند انگلیس",symbol:"GBP",icon:"🇬🇧",category:"major",color:"#8b5cf6",unit:"تومان"},
+  cad:{title:"دلار کانادا",symbol:"CAD",icon:"🇨🇦",category:"major",color:"#ec4899",unit:"تومان"},
+  aud:{title:"دلار استرالیا",symbol:"AUD",icon:"🇦🇺",category:"major",color:"#06b6d4",unit:"تومان"},
+  cny:{title:"یوان چین",symbol:"CNY",icon:"🇨🇳",category:"major",color:"#f97316",unit:"تومان"},
+  gold_18k:{title:"طلای ۱۸ عیار",symbol:"GOLD_18K",icon:"✨",category:"gold",color:"#facc15",unit:"تومان"},
+  gold_mesghal:{title:"مثقال طلا",symbol:"MESGHAL",icon:"⚖️",category:"gold",color:"#fbbf24",unit:"تومان"},
+  coin_emami:{title:"سکه امامی",symbol:"COIN_EMAMI",icon:"🟡",category:"gold",color:"#f59e0b",unit:"تومان"},
+  coin_bahar:{title:"سکه بهار",symbol:"COIN_BAHAR",icon:"🟡",category:"gold",color:"#d97706",unit:"تومان"},
+  coin_half:{title:"نیم سکه",symbol:"COIN_HALF",icon:"🟡",category:"gold",color:"#eab308",unit:"تومان"},
+  coin_quarter:{title:"ربع سکه",symbol:"COIN_QUARTER",icon:"🟡",category:"gold",color:"#ca8a04",unit:"تومان"},
+  coin_gram:{title:"سکه گرمی",symbol:"COIN_GRAM",icon:"🟡",category:"gold",color:"#a16207",unit:"تومان"},
+  usd_xau:{title:"انس جهانی طلا",symbol:"XAU",icon:"🌐",category:"gold",color:"#34d399",unit:"دلار"},
+  rub:{title:"روبل روسیه",symbol:"RUB",icon:"🇷🇺",category:"fiat",color:"#64748b",unit:"تومان"},
+  iqd:{title:"دینار عراق",symbol:"IQD",icon:"🇮🇶",category:"fiat",color:"#64748b",unit:"تومان"},
+  myr:{title:"رینگیت مالزی",symbol:"MYR",icon:"🇲🇾",category:"fiat",color:"#64748b",unit:"تومان"},
+  gel:{title:"لاری گرجستان",symbol:"GEL",icon:"🇬🇪",category:"fiat",color:"#64748b",unit:"تومان"},
+  azn:{title:"منات آذربایجان",symbol:"AZN",icon:"🇦🇿",category:"fiat",color:"#64748b",unit:"تومان"},
+  amd:{title:"درام ارمنستان",symbol:"AMD",icon:"🇦🇲",category:"fiat",color:"#64748b",unit:"تومان"},
+  thb:{title:"بات تایلند",symbol:"THB",icon:"🇹🇭",category:"fiat",color:"#64748b",unit:"تومان"},
+  omr:{title:"ریال عمان",symbol:"OMR",icon:"🇴🇲",category:"fiat",color:"#64748b",unit:"تومان"},
+  inr:{title:"روپیه هند",symbol:"INR",icon:"🇮🇳",category:"fiat",color:"#64748b",unit:"تومان"},
+  pkr:{title:"روپیه پاکستان",symbol:"PKR",icon:"🇵🇰",category:"fiat",color:"#64748b",unit:"تومان"},
+  jpy:{title:"ین ژاپن",symbol:"JPY",icon:"🇯🇵",category:"fiat",color:"#64748b",unit:"تومان"},
+  sar:{title:"ریال عربستان",symbol:"SAR",icon:"🇸🇦",category:"fiat",color:"#64748b",unit:"تومان"},
+  afn:{title:"افغانی",symbol:"AFN",icon:"🇦🇫",category:"fiat",color:"#64748b",unit:"تومان"},
+  sek:{title:"کرون سوئد",symbol:"SEK",icon:"🇸🇪",category:"fiat",color:"#64748b",unit:"تومان"},
+  chf:{title:"فرانک سوئیس",symbol:"CHF",icon:"🇨🇭",category:"fiat",color:"#64748b",unit:"تومان"},
+  qar:{title:"ریال قطر",symbol:"QAR",icon:"🇶🇦",category:"fiat",color:"#64748b",unit:"تومان"},
+  krw:{title:"وون کره",symbol:"KRW",icon:"🇰🇷",category:"fiat",color:"#64748b",unit:"تومان"},
+  nok:{title:"کرون نروژ",symbol:"NOK",icon:"🇳🇴",category:"fiat",color:"#64748b",unit:"تومان"},
+  nzd:{title:"دلار نیوزیلند",symbol:"NZD",icon:"🇳🇿",category:"fiat",color:"#64748b",unit:"تومان"},
+  sgd:{title:"دلار سنگاپور",symbol:"SGD",icon:"🇸🇬",category:"fiat",color:"#64748b",unit:"تومان"},
+  hkd:{title:"دلار هنگ‌کنگ",symbol:"HKD",icon:"🇭🇰",category:"fiat",color:"#64748b",unit:"تومان"},
+  kwd:{title:"دینار کویت",symbol:"KWD",icon:"🇰🇼",category:"fiat",color:"#64748b",unit:"تومان"},
+  dkk:{title:"کرون دانمارک",symbol:"DKK",icon:"🇩🇰",category:"fiat",color:"#64748b",unit:"تومان"},
+  bhd:{title:"دینار بحرین",symbol:"BHD",icon:"🇧🇭",category:"fiat",color:"#64748b",unit:"تومان"},
+  tjs:{title:"سامانی تاجیکستان",symbol:"TJS",icon:"🇹🇯",category:"fiat",color:"#64748b",unit:"تومان"},
+  tmt:{title:"منات ترکمنستان",symbol:"TMT",icon:"🇹🇲",category:"fiat",color:"#64748b",unit:"تومان"},
+  kgs:{title:"سام قرقیزستان",symbol:"KGS",icon:"🇰🇬",category:"fiat",color:"#64748b",unit:"تومان"},
+  syp:{title:"لیر سوریه",symbol:"SYP",icon:"🇸🇾",category:"fiat",color:"#64748b",unit:"تومان"},
+  brl:{title:"رئال برزیل",symbol:"BRL",icon:"🇧🇷",category:"fiat",color:"#64748b",unit:"تومان"},
+  ars:{title:"پزو آرژانتین",symbol:"ARS",icon:"🇦🇷",category:"fiat",color:"#64748b",unit:"تومان"},
+};
 
-                card.innerHTML = `
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-xl">${cfg.icon}</span>
-                        <span class="text-[10px] font-mono text-slate-400 bg-slate-800/80 px-1.5 py-0.5 rounded">${cfg.symbol}</span>
-                    </div>
-                    <div class="text-xs font-semibold text-slate-300 truncate mb-1">${cfg.title}</div>
-                    <div class="flex items-baseline gap-1">
-                        <span class="text-sm sm:text-base font-black text-white font-mono">${formatNumber(price, cfg.unit === 'دلار')}</span>
-                        <span class="text-[10px] text-slate-400">${unit}</span>
-                    </div>
-                `;
-                grid.appendChild(card);
-            }
-        }
+let marketData = {};
+let activeAssetKey = "usd";
+let activeHistory = [];
+let currentTimeframe = 180;
+let currentCategory = "all";
+let chartInstance = null;
+let chartJsLoaded = false;
 
-        function setCategory(cat) {
-            currentCategory = cat;
-            document.querySelectorAll('.cat-btn').forEach(btn => {
-                btn.className = "cat-btn px-3.5 py-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white transition";
-            });
-            document.getElementById(`cat-${cat}`).className = "cat-btn px-3.5 py-2 rounded-xl bg-blue-600 text-white shadow transition";
-            renderMarketGrid();
-        }
+// ============================================================
+//  ابزارها
+// ============================================================
+const FA_DIGITS = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
+const toPersianDigits = (n) => String(n).replace(/[0-9]/g, d => FA_DIGITS[+d]);
 
-        function filterCards() {
-            renderMarketGrid();
-        }
+function formatNumber(num, isFloat = false) {
+  if (num === null || num === undefined || isNaN(num)) return "---";
+  const n = Number(num);
+  const formatted = isFloat
+    ? n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})
+    : n.toLocaleString('en-US');
+  return toPersianDigits(formatted);
+}
 
-        async function selectAsset(key, updateHash = true) {
-            if (!ALL_ASSETS[key]) return;
-            activeAssetKey = key;
-            if (updateHash) window.location.hash = key;
+// ============================================================
+//  Init
+// ============================================================
+async function initApp() {
+  const hash = window.location.hash.slice(1).trim();
+  if (hash && ALL_ASSETS[hash]) activeAssetKey = hash;
 
-            document.querySelectorAll('#marketGrid > div').forEach(el => el.classList.remove('ring-2', 'ring-blue-500', 'bg-blue-900/10'));
-            const activeCard = document.getElementById(`card-${key}`);
-            if (activeCard) activeCard.classList.add('ring-2', 'ring-blue-500', 'bg-blue-900/10');
+  // بارگذاری همزمان
+  await fetchMarketSummary();
+  renderMarketGrid();
+  renderApiDocs();
+  loadActiveAssetHistory();
+  initCalculator();
 
-            if (window.innerWidth < 1024) document.getElementById('spotlightSection').scrollIntoView({ behavior: 'smooth' });
-            await loadActiveAssetHistory();
-            updateCalculator();
-        }
+  // بارگذاری Chart.js به صورت lazy
+  loadChartJs();
+}
 
-        async function loadActiveAssetHistory() {
-            const cfg = ALL_ASSETS[activeAssetKey];
-            const unit = cfg.unit || "تومان";
-            const currentPrice = (activeAssetKey === "usd_xau") ? (marketData.usd_xau || marketData.gold_ounce) : marketData[activeAssetKey];
+function loadChartJs() {
+  if (chartJsLoaded) return;
+  if (typeof Chart !== 'undefined') {
+    chartJsLoaded = true;
+    renderChart();
+    return;
+  }
+  // اگر Chart.js هنوز لود نشده، صبر کن
+  const checkChart = setInterval(() => {
+    if (typeof Chart !== 'undefined') {
+      chartJsLoaded = true;
+      clearInterval(checkChart);
+      renderChart();
+    }
+  }, 100);
+  setTimeout(() => clearInterval(checkChart), 5000);
+}
 
-            document.getElementById('activeTitle').textContent = cfg.title;
-            document.getElementById('activeIcon').textContent = cfg.icon;
-            document.getElementById('activeSymbol').textContent = `${cfg.symbol} / ${unit.toUpperCase()}`;
-            document.getElementById('activeUnit').textContent = unit;
-            document.getElementById('activePrice').textContent = formatNumber(currentPrice, unit === "دلار");
+// ============================================================
+//  Fetch Market
+// ============================================================
+async function fetchMarketSummary() {
+  try {
+    const res = await fetch('./market.json?t=' + Date.now());
+    if (!res.ok) throw new Error("fetch error");
+    marketData = await res.json();
+    const dateStr = marketData.date_shamsi || '';
+    const timeStr = toPersianDigits(marketData.time || '--:--');
+    document.getElementById('lastUpdated').textContent = `${dateStr} ${timeStr}`;
+  } catch (err) {
+    document.getElementById('lastUpdated').textContent = "خطا";
+  }
+}
 
-            const loader = document.getElementById('chartLoader');
-            loader.classList.remove('hidden');
+// ============================================================
+//  Render Grid
+// ============================================================
+function renderMarketGrid() {
+  const grid = document.getElementById('marketGrid');
+  if (!grid) return;
 
-            try {
-                const res = await fetch(`./api/history_${activeAssetKey}.json?t=` + Date.now());
-                if (!res.ok) throw new Error("History fetch error");
-                const json = await res.json();
-                activeHistory = json.history || [];
-                document.getElementById('recordCountBadge').textContent = `${toPersianDigits(activeHistory.length)} روز سابقه`;
-                renderChart();
-            } catch (err) {
-                activeHistory = [];
-                if (chartInstance) chartInstance.destroy();
-            } finally {
-                loader.classList.add('hidden');
-            }
-        }
+  const searchVal = (document.getElementById('searchInput')?.value || '').trim().toLowerCase();
+  const fragment = document.createDocumentFragment();
 
-        function renderChart() {
-            if (!activeHistory.length) return;
-            const cfg = ALL_ASSETS[activeAssetKey];
-            const unit = cfg.unit || "تومان";
-            const ctx = document.getElementById('mainChart').getContext('2d');
+  for (const [key, cfg] of Object.entries(ALL_ASSETS)) {
+    if (currentCategory !== 'all' && cfg.category !== currentCategory) continue;
+    if (searchVal && !cfg.title.toLowerCase().includes(searchVal) && !cfg.symbol.toLowerCase().includes(searchVal)) continue;
 
-            let filtered = (currentTimeframe !== 'all') ? activeHistory.slice(-currentTimeframe) : [...activeHistory];
-            const labels = filtered.map(item => item.date);
-            const dataPoints = filtered.map(item => item.price);
+    const price = (key === "usd_xau") ? (marketData.usd_xau || marketData.gold_ounce) : marketData[key];
+    const unit = cfg.unit || "تومان";
+    const isSelected = (key === activeAssetKey);
 
-            const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-            gradient.addColorStop(0, `${cfg.color || '#3b82f6'}40`);
-            gradient.addColorStop(1, `${cfg.color || '#3b82f6'}00`);
+    const card = document.createElement('div');
+    card.id = `card-${key}`;
+    card.className = `asset-card${isSelected ? ' selected' : ''}`;
+    card.dataset.key = key;
+    card.innerHTML = `
+      <div class="asset-card-head">
+        <span class="asset-card-icon">${cfg.icon}</span>
+        <span class="asset-card-symbol">${cfg.symbol}</span>
+      </div>
+      <div class="asset-card-name">${cfg.title}</div>
+      <div class="asset-card-price">
+        ${formatNumber(price, unit === 'دلار')}
+        <span class="asset-card-unit">${unit}</span>
+      </div>
+    `;
+    fragment.appendChild(card);
+  }
 
-            if (chartInstance) chartInstance.destroy();
+  grid.innerHTML = '';
+  grid.appendChild(fragment);
+}
 
-            chartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: cfg.title,
-                        data: dataPoints,
-                        borderColor: cfg.color || '#3b82f6',
-                        borderWidth: 2,
-                        pointRadius: filtered.length > 50 ? 0 : 3,
-                        pointHoverRadius: 5,
-                        backgroundColor: gradient,
-                        fill: true,
-                        tension: 0.25
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: { mode: 'index', intersect: false },
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            rtl: true,
-                            backgroundColor: '#0f172a',
-                            titleFont: { family: 'Vazirmatn' },
-                            bodyFont: { family: 'Vazirmatn', weight: 'bold' },
-                            padding: 10,
-                            displayColors: false,
-                            callbacks: { label: (ctx) => `${cfg.title}: ${formatNumber(ctx.parsed.y, unit === 'دلار')} ${unit}` }
-                        }
-                    },
-                    scales: {
-                        x: { grid: { display: false }, ticks: { color: '#64748b', font: { family: 'Vazirmatn', size: 10 }, maxTicksLimit: 7 } },
-                        y: { position: 'right', grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b', font: { family: 'Vazirmatn', size: 10 }, callback: (val) => toPersianDigits(Number(val).toLocaleString()) } }
-                    }
-                }
-            });
-        }
+// استفاده از event delegation (سریع‌تر از onclick روی هر کارت)
+document.addEventListener('click', (e) => {
+  const card = e.target.closest('.asset-card');
+  if (card && card.dataset.key) {
+    selectAsset(card.dataset.key, true);
+  }
+});
 
-        function changeTimeframe(days) {
-            currentTimeframe = days;
-            document.querySelectorAll('.tf-btn').forEach(btn => {
-                btn.className = (btn.getAttribute('data-days') === String(days)) ? "tf-btn px-2.5 py-1 rounded-lg bg-blue-600 text-white shadow transition" : "tf-btn px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition";
-            });
-            renderChart();
-        }
+// ============================================================
+//  Category
+// ============================================================
+function setCategory(cat) {
+  currentCategory = cat;
+  document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
+  document.getElementById(`cat-${cat}`)?.classList.add('active');
+  renderMarketGrid();
+}
 
-        // Copies social share page link for instant Telegram / Twitter preview card
-        function copyShareLink() {
-            const shareUrl = `${window.location.origin}${window.location.pathname.replace('index.html', '')}share/${activeAssetKey}.html`;
-            navigator.clipboard.writeText(shareUrl).then(() => {
-                const toast = document.getElementById('toast');
-                toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-2');
-                setTimeout(() => toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-2'), 2500);
-            });
-        }
+function filterCards() {
+  renderMarketGrid();
+}
 
-        function initCalculator() {
-            const input = document.getElementById('calcInput');
-            input.addEventListener('input', () => {
-                const raw = input.value.replace(/[^0-9]/g, '');
-                input.value = raw ? Number(raw).toLocaleString('en-US') : '';
-                updateCalculator();
-            });
-            updateCalculator();
-        }
+// ============================================================
+//  Select Asset
+// ============================================================
+async function selectAsset(key, updateHash = true) {
+  if (!ALL_ASSETS[key]) return;
+  activeAssetKey = key;
+  if (updateHash) history.replaceState(null, '', `#${key}`);
 
-        function updateCalculator() {
-            const inputVal = parseFloat(document.getElementById('calcInput').value.replace(/,/g, '')) || 0;
-            const currentPrice = (activeAssetKey === "usd_xau") ? (marketData.usd_xau || marketData.gold_ounce) : marketData[activeAssetKey];
-            const resultEl = document.getElementById('calcResult');
-            const cfg = ALL_ASSETS[activeAssetKey];
+  document.querySelectorAll('.asset-card').forEach(el => el.classList.remove('selected'));
+  document.getElementById(`card-${key}`)?.classList.add('selected');
 
-            if (inputVal <= 0 || !currentPrice) {
-                resultEl.textContent = '---';
-                return;
-            }
+  if (window.innerWidth < 1024) {
+    document.getElementById('spotlightSection')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  await loadActiveAssetHistory();
+  updateCalculator();
+}
 
-            const amount = inputVal / currentPrice;
-            resultEl.textContent = `${toPersianDigits(amount.toLocaleString('en-US', { maximumFractionDigits: 3 }))} ${cfg.symbol}`;
-        }
+// ============================================================
+//  History
+// ============================================================
+async function loadActiveAssetHistory() {
+  const cfg = ALL_ASSETS[activeAssetKey];
+  const unit = cfg.unit || "تومان";
+  const currentPrice = (activeAssetKey === "usd_xau")
+    ? (marketData.usd_xau || marketData.gold_ounce)
+    : marketData[activeAssetKey];
 
-        function renderApiDocs() {
-            const list = document.getElementById('apiList');
-            list.innerHTML = '';
-            for (const [key, cfg] of Object.entries(ALL_ASSETS)) {
-                const a = document.createElement('a');
-                a.href = `./api/history_${key}.json`;
-                a.target = '_blank';
-                a.className = "px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition flex items-center gap-1";
-                a.innerHTML = `<span>${cfg.icon}</span> <span>${cfg.title}</span>`;
-                list.appendChild(a);
-            }
-        }
+  document.getElementById('activeTitle').textContent = cfg.title;
+  document.getElementById('activeIcon').textContent = cfg.icon;
+  document.getElementById('activeSymbol').textContent = `${cfg.symbol} / ${unit.toUpperCase()}`;
+  document.getElementById('activeUnit').textContent = unit;
+  document.getElementById('activePrice').textContent = formatNumber(currentPrice, unit === "دلار");
 
-        window.addEventListener('DOMContentLoaded', initApp);
-    </script>
+  const loader = document.getElementById('chartLoader');
+  if (loader) loader.classList.remove('hidden');
+
+  try {
+    const res = await fetch(`./api/history_${activeAssetKey}.json?t=` + Date.now());
+    if (!res.ok) throw new Error("History fetch error");
+    const json = await res.json();
+    activeHistory = json.history || [];
+    const badge = document.getElementById('recordCountBadge');
+    if (badge) badge.textContent = `${toPersianDigits(activeHistory.length)} روز`;
+    if (chartJsLoaded) renderChart();
+  } catch (err) {
+    activeHistory = [];
+    if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+  } finally {
+    if (loader) loader.classList.add('hidden');
+  }
+}
+
+// ============================================================
+//  Chart
+// ============================================================
+function renderChart() {
+  if (!activeHistory.length || typeof Chart === 'undefined') return;
+
+  const cfg = ALL_ASSETS[activeAssetKey];
+  const unit = cfg.unit || "تومان";
+  const canvas = document.getElementById('mainChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  const filtered = (currentTimeframe !== 'all')
+    ? activeHistory.slice(-currentTimeframe)
+    : [...activeHistory];
+
+  const labels = filtered.map(item => item.date);
+  const dataPoints = filtered.map(item => item.price);
+
+  const gradient = ctx.createLinearGradient(0, 0, 0, 220);
+  gradient.addColorStop(0, `${cfg.color || '#3b82f6'}40`);
+  gradient.addColorStop(1, `${cfg.color || '#3b82f6'}00`);
+
+  if (chartInstance) chartInstance.destroy();
+
+  chartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: cfg.title,
+        data: dataPoints,
+        borderColor: cfg.color || '#3b82f6',
+        borderWidth: 2,
+        pointRadius: filtered.length > 60 ? 0 : 2,
+        pointHoverRadius: 4,
+        backgroundColor: gradient,
+        fill: true,
+        tension: 0.25,
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 300 },
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          rtl: true,
+          backgroundColor: '#0f172a',
+          titleFont: { family: 'Vazirmatn', size: 11 },
+          bodyFont: { family: 'Vazirmatn', size: 12, weight: 'bold' },
+          padding: 8,
+          displayColors: false,
+          callbacks: {
+            label: (c) => `${formatNumber(c.parsed.y, unit === 'دلار')} ${unit}`,
+          },
+        },
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: {
+            color: '#64748b',
+            font: { family: 'Vazirmatn', size: 9 },
+            maxTicksLimit: 5,
+          },
+        },
+        y: {
+          position: 'right',
+          grid: { color: 'rgba(255,255,255,0.05)' },
+          ticks: {
+            color: '#64748b',
+            font: { family: 'Vazirmatn', size: 9 },
+            maxTicksLimit: 5,
+            callback: (v) => toPersianDigits(Number(v).toLocaleString()),
+          },
+        },
+      },
+    },
+  });
+}
+
+function changeTimeframe(days) {
+  currentTimeframe = days;
+  document.querySelectorAll('.tf-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.days === String(days));
+  });
+  renderChart();
+}
+
+// ============================================================
+//  Share
+// ============================================================
+function copyShareLink() {
+  const base = `${location.origin}${location.pathname.replace('index.html', '').replace(/\/$/, '')}`;
+  const shareUrl = `${base}/share/${activeAssetKey}.html`;
+  navigator.clipboard.writeText(shareUrl).then(() => {
+    const toast = document.getElementById('toast');
+    if (!toast) return;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2200);
+  }).catch(() => {
+    alert('لینک: ' + shareUrl);
+  });
+}
+
+// ============================================================
+//  Calculator
+// ============================================================
+function initCalculator() {
+  const input = document.getElementById('calcInput');
+  if (!input) return;
+  input.addEventListener('input', () => {
+    const raw = input.value.replace(/[^0-9]/g, '');
+    input.value = raw ? Number(raw).toLocaleString('en-US') : '';
+    updateCalculator();
+  }, { passive: true });
+  updateCalculator();
+}
+
+function updateCalculator() {
+  const input = document.getElementById('calcInput');
+  const resultEl = document.getElementById('calcResult');
+  if (!input || !resultEl) return;
+
+  const inputVal = parseFloat(input.value.replace(/,/g, '')) || 0;
+  const currentPrice = (activeAssetKey === "usd_xau")
+    ? (marketData.usd_xau || marketData.gold_ounce)
+    : marketData[activeAssetKey];
+  const cfg = ALL_ASSETS[activeAssetKey];
+
+  if (inputVal <= 0 || !currentPrice) {
+    resultEl.textContent = '---';
+    return;
+  }
+
+  const amount = inputVal / currentPrice;
+  resultEl.textContent = `${toPersianDigits(amount.toLocaleString('en-US', {maximumFractionDigits:3}))} ${cfg.symbol}`;
+}
+
+// ============================================================
+//  API Docs
+// ============================================================
+function renderApiDocs() {
+  const list = document.getElementById('apiList');
+  if (!list) return;
+
+  const fragment = document.createDocumentFragment();
+  for (const [key, cfg] of Object.entries(ALL_ASSETS)) {
+    const a = document.createElement('a');
+    a.href = `./api/history_${key}.json`;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    a.className = 'api-link';
+    a.innerHTML = `<span>${cfg.icon}</span><span>${cfg.title}</span>`;
+    fragment.appendChild(a);
+  }
+  list.innerHTML = '';
+  list.appendChild(fragment);
+}
+
+// ============================================================
+//  Start
+// ============================================================
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}
+</script>
+
 </body>
 </html>
