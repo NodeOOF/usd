@@ -1,9 +1,8 @@
-name: Fetch Market Rates & Update API
+name: Fetch Market Rates
 
 on:
-  schedule:
-    - cron: '*/5 * * * *'
-  workflow_dispatch:      # Manual trigger
+  # ⭐ فقط workflow_dispatch (Worker trigger می‌کند)
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -14,10 +13,14 @@ env:
 jobs:
   update-rates:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -27,7 +30,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install requests beautifulsoup4 lxml cloudscraper matplotlib tzdata
+          pip install requests beautifulsoup4 lxml cloudscraper matplotlib tzdata jdatetime
 
       - name: Run fetch script and generate outputs
         run: python fetch_rates.py
@@ -36,11 +39,20 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add market.json README.md api/*.json *.png share/*.html charts/*.png
-          
+
+          # اضافه کردن همه فایل‌های خروجی (با || true برای پوشه‌های ناموجود)
+          git add market.json 2>/dev/null || true
+          git add README.md 2>/dev/null || true
+          git add api/*.json 2>/dev/null || true
+          git add *.png 2>/dev/null || true
+          git add share/*.html 2>/dev/null || true
+          git add charts/*.png 2>/dev/null || true
+          git add index.html 2>/dev/null || true
+
           if git diff --staged --quiet; then
-            echo "No changes to commit."
+            echo "📭 No changes to commit."
           else
             git commit -m "chore(auto): update rates, API history and charts [skip ci]"
             git push
+            echo "✅ Changes committed and pushed"
           fi
