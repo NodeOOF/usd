@@ -1,13 +1,13 @@
 // ============================================================
 //  Cloudflare Worker — Nabz-e Bazaar Bot + GitHub Trigger
-//  نسخه: 15.3 — Robust Edition
+//  نسخه: 15.5 — Notification-Refresh Edition
 //
-//  تغییرات مهم:
-//    - رفع مشکل null در دکمه‌ها
-//    - ویرایش هوشمند (photo vs text)
-//    - fallback chain قوی
-//    - بازگشت به منو همیشه کار می‌کند
-//    - دلار همیشه نشان داده می‌شود
+//  تغییرات نسبت به 15.0:
+//    - نوتیف قبلی قبل از ارسال نوتیف جدید پاک می‌شود
+//    - دیگر cleanupOldNotifications وجود ندارد
+//    - نوتیف هر کاربر در KV ذخیره می‌شود (notify:last:<chatId>)
+//    - fallback chain کامل برای null ها
+//    - ویرایش هوشمند photo vs text
 // ============================================================
 
 // ============================================================
@@ -44,16 +44,18 @@ const FOOTER = "\n\n━━━━━━━━━━━━━━━━━━━\n�
 const DEFAULT_CACHE_SECONDS = 60;
 const FETCH_TIMEOUT_MS = 10000;
 
+// KV keys
 const KV_SUB_PREFIX = "sub:";
 const KV_USER_PREFIX = "user:";
-const KV_NOTIFY_PENDING = "notify:pending";
+const KV_NOTIFY_MSG_PREFIX = "notify:last:";   // ⭐ جدید
 const KV_LAST_NOTIFY_TIME = "notify:last_time";
 
+// TTL
 const KV_SUB_TTL = 60 * 60 * 24 * 7;
 const KV_USER_TTL = 60 * 60 * 24 * 30;
-const KV_PENDING_TTL = 60 * 60;
+const KV_NOTIFY_MSG_TTL = 60 * 60 * 24 * 7;   // ۷ روز
 
-const NOTIFY_DELETE_AFTER_MINUTES = 5;
+// تنظیمات
 const NOTIFY_INTERVAL_MINUTES = 60;
 const NOTIFY_BATCH_SIZE = 20;
 
@@ -199,7 +201,6 @@ function formatDate(u) {
   return p ? `${p[1]}/${p[2]}/${p[3]}` : String(u);
 }
 
-/** امن: رشته‌سازی همه چیز */
 function safeStr(v, fallback = "") {
   if (v === null || v === undefined) return fallback;
   try {
@@ -223,7 +224,7 @@ async function fetchJsonSafe(url, timeoutMs = FETCH_TIMEOUT_MS) {
     const resp = await fetch(urlWithBust, {
       signal: ctrl.signal,
       headers: {
-        "User-Agent": "Nabz-Worker/15.0",
+        "User-Agent": "Nabz-Worker/15.5",
         "Accept": "application/json",
         "Cache-Control": "no-cache",
       },
@@ -272,7 +273,6 @@ async function fetchHistory(env) {
     "History"
   );
 
-  // اعتبارسنجی: latest باید price داشته باشد
   const latest = result.data.latest;
   if (!latest.price && !latest.price_toman) {
     throw new Error("History latest has no price");
@@ -500,7 +500,7 @@ async function isSubscribed(chatId, env) {
 async function handleRoot() {
   return jsonResponse({
     name: "Nabz-e Bazaar Bot API",
-    version: "15.0",
+    version: "15.5",
     source: "NodeOOF/usd",
     endpoints: {
       "GET /rate": "دلار + تغییرات",
@@ -570,7 +570,7 @@ async function handleHealth(env) {
     const users = await getActiveUsers(env).catch(() => []);
     return jsonResponse({
       status: "healthy",
-      version: "15.0",
+      version: "15.5",
       source,
       updated_at: data.updated_at,
       active_users: users.length,
@@ -723,7 +723,6 @@ async function answerCallbackQuery(id, env, text = null) {
 async function sendPhoto(chatId, photoUrl, caption, env, options = {}) {
   if (!chatId) return { ok: false, description: "no chatId" };
 
-  // Try URL first
   const urlResult = await telegramAPI("sendPhoto", {
     chat_id: chatId,
     photo: photoUrl,
@@ -734,11 +733,11 @@ async function sendPhoto(chatId, photoUrl, caption, env, options = {}) {
 
   if (urlResult.ok) return urlResult;
 
-  // Fallback: download and upload
+  // fallback: download and upload
   console.warn(`[sendPhoto] URL failed, trying file upload...`);
   try {
     const imgResp = await fetch(photoUrl, {
-      headers: { "User-Agent": "Nabz-Worker/15.0" },
+      headers: { "User-Agent": "Nabz-Worker/15.5" },
       cf: { cacheTtl: 3600, cacheEverything: true },
     });
     if (!imgResp.ok) throw new Error(`HTTP ${imgResp.status}`);
@@ -1045,59 +1044,39 @@ function buildMenuMessage(subscribed, notifyEnabled) {
 //  بخش ۱۴: تابع کمکی برای ویرایش/ارسال
 // ============================================================
 
-/**
- * ⭐ تابع اصلی — ویرایش/ارسال با تشخیص نوع پیام
- *
- * wasPhoto: آیا پیام فعلی عکس است؟
- * assetKey: کدام دارایی (usd, eur, gold_18k, ...)
- * caption: متن
- */
 async function updateMessage(chatId, env, options, assetKey, caption) {
   const photoUrl = chartUrlFor(assetKey);
   const replyMarkup = options.replyMarkup;
 
-  // اگر editMessageId داریم
   if (options.editMessageId) {
     if (options.wasPhoto) {
-      // پیام فعلی عکس است → editMessageMedia
-      console.log(`[edit] wasPhoto, using editMessageMedia`);
+      console.log(`[edit] wasPhoto, editMessageMedia`);
       const r = await editMessageMedia(chatId, options.editMessageId, photoUrl, caption, env, { replyMarkup });
       if (r.ok) return r;
       console.warn(`[edit] editMessageMedia failed: ${r.description}`);
     } else {
-      // پیام فعلی متن است → editMessage (برای متن‌ها)
-      // ولی چون ما می‌خواهیم عکس بفرستیم، این کار نمی‌کند
-      // پس اول delete + send
       console.log(`[edit] wasText, deleting and resending`);
     }
 
-    // اگر ویرایش fail شد، پیام قبلی را پاک کن
     await deleteMessage(chatId, options.editMessageId, env).catch(() => {});
   }
 
-  // ارسال عکس جدید
   console.log(`[send] sending photo for ${assetKey}`);
   const photoResult = await sendPhoto(chatId, photoUrl, caption, env, { replyMarkup });
   if (photoResult.ok) return photoResult;
 
-  // اگر عکس fail شد، متن بفرست
   console.warn(`[send] photo failed, sending text`);
   return sendMessage(chatId, caption, env, { replyMarkup });
 }
 
-/**
- * تابع برای متن‌های ساده (menu, history, stats, compare, oil)
- */
 async function updateTextMessage(chatId, env, options, text, replyMarkup) {
   if (options.editMessageId) {
     if (!options.wasPhoto) {
-      // پیام متنی است → editMessage
       const r = await editMessage(chatId, options.editMessageId, text, env, { replyMarkup });
       if (r.ok) return r;
       console.warn(`[edit] editMessage failed: ${r.description}`);
     }
 
-    // پیام عکس است → delete + send
     await deleteMessage(chatId, options.editMessageId, env).catch(() => {});
   }
 
@@ -1117,20 +1096,14 @@ async function respondWithRate(chatId, env, options = {}) {
     const replyMarkup = options.replyMarkup || PRICE_KEYBOARD;
     const result = await updateMessage(chatId, env, { ...options, replyMarkup }, "usd", caption);
 
-    if (options.subscribe && result.ok) {
-      if (options.editMessageId && !options.wasPhoto) {
-        // در این حالت پیام جدید فرستادیم، چون edit نشد
-        // پس message_id جدید را ذخیره کن
-      }
-      if (result.result?.message_id) {
-        await subscribeUser(chatId, result.result.message_id, price, env);
-      }
+    if (options.subscribe && result.ok && result.result?.message_id) {
+      await subscribeUser(chatId, result.result.message_id, price, env);
     }
 
     return result;
   } catch (err) {
     console.error(`[rate] ERROR: ${err.message}`);
-    return sendMessage(chatId, `❌ خطا در دریافت قیمت دلار\n\nلطفاً بعداً تلاش کن.${FOOTER}`, env);
+    return sendMessage(chatId, `❌ خطا در دریافت قیمت دلار.${FOOTER}`, env);
   }
 }
 
@@ -1261,7 +1234,6 @@ async function handleBotCommand(message, env, ctx) {
 
   console.log(`[bot] Command: "${text}" from ${chatId}`);
 
-  // حذف پیام کاربر بعد از ۲ ثانیه
   if (messageId) {
     ctx.waitUntil((async () => {
       await sleep(2000);
@@ -1361,7 +1333,6 @@ async function handleCallbackQuery(cb, env, ctx) {
 
   console.log(`[callback] action="${data}" chat=${chatId} isPhoto=${isPhoto}`);
 
-  // پاسخ فوری (بدون انتظار)
   ctx.waitUntil(answerCallbackQuery(cb.id, env));
 
   try {
@@ -1451,35 +1422,77 @@ async function handleWebhook(request, env, ctx) {
 //  بخش ۱۹: Cron
 // ============================================================
 
+/**
+ * ⭐ نوتیف ساعتی — نسخه 15.5
+ * برای هر کاربر:
+ *   ۱. اگر notify:last:<chatId> وجود دارد → message_id قبلی را حذف کن
+ *   ۲. نوتیف جدید بفرست
+ *   ۳. message_id جدید را ذخیره کن
+ *
+ * نتیجه: همیشه یک نوتیف در چت کاربر
+ */
 async function sendHourlyNotification(env) {
-  console.log(`[notify] Starting...`);
+  console.log(`[notify] Starting hourly notification...`);
 
   try {
     const { data } = await fetchHistory(env);
     const price = data.latest?.price || data.latest?.price_toman;
-    if (!price) { console.error(`[notify] No price`); return; }
+    if (!price) {
+      console.error(`[notify] No price available`);
+      return;
+    }
 
     const users = await getActiveUsers(env);
-    console.log(`[notify] ${users.length} users`);
+    console.log(`[notify] ${users.length} active users`);
     if (users.length === 0) return;
 
     const caption = buildPriceCaption(data);
     const photoUrl = chartUrlFor("usd");
-    const pending = (await env.RATE_KV.get(KV_NOTIFY_PENDING, "json")) || [];
 
-    let sent = 0, failed = 0;
+    let sent = 0, deleted = 0, failed = 0, first_time = 0;
 
     for (let i = 0; i < users.length; i++) {
       const chatId = users[i];
+      const lastKey = `${KV_NOTIFY_MSG_PREFIX}${chatId}`;
+
       try {
-        const result = await sendPhoto(chatId, photoUrl, caption, env, { replyMarkup: NOTIFY_KEYBOARD });
+        // ⭐ مرحله ۱: حذف نوتیف قبلی
+        const lastMsgIdStr = await env.RATE_KV.get(lastKey);
+        if (lastMsgIdStr) {
+          const lastMsgId = parseInt(lastMsgIdStr, 10);
+          if (!isNaN(lastMsgId)) {
+            const delResult = await deleteMessage(chatId, lastMsgId, env);
+            if (delResult.ok) {
+              deleted++;
+              console.log(`[notify] Deleted old ${lastMsgId} for ${chatId}`);
+            }
+            // اگر پیام قبلاً پاک شده، مشکلی نیست
+          }
+        } else {
+          first_time++;
+        }
+
+        // ⭐ مرحله ۲: ارسال نوتیف جدید
+        const result = await sendPhoto(chatId, photoUrl, caption, env, {
+          replyMarkup: NOTIFY_KEYBOARD,
+        });
+
         if (result.ok && result.result?.message_id) {
-          pending.push({ chat_id: chatId, message_id: result.result.message_id, sent_at: Date.now() });
+          // ⭐ مرحله ۳: ذخیره message_id جدید
+          await env.RATE_KV.put(
+            lastKey,
+            String(result.result.message_id),
+            { expirationTtl: KV_NOTIFY_MSG_TTL }
+          );
           sent++;
         } else {
           const desc = result.description || "";
-          if (desc.includes("blocked") || desc.includes("not found") || desc.includes("deactivated")) {
+          if (desc.includes("blocked") || desc.includes("not found") || desc.includes("deactivated") || desc.includes("kicked")) {
             await env.RATE_KV.delete(`${KV_USER_PREFIX}${chatId}`);
+            await env.RATE_KV.delete(lastKey);
+            console.log(`[notify] Removed blocked: ${chatId}`);
+          } else {
+            console.warn(`[notify] Send failed for ${chatId}: ${desc}`);
           }
           failed++;
         }
@@ -1488,45 +1501,17 @@ async function sendHourlyNotification(env) {
         failed++;
       }
 
-      if (i > 0 && i % NOTIFY_BATCH_SIZE === 0) await sleep(1000);
-      else await sleep(50);
-    }
-
-    await env.RATE_KV.put(KV_NOTIFY_PENDING, JSON.stringify(pending), { expirationTtl: KV_PENDING_TTL });
-    console.log(`[notify] Sent: ${sent}, Failed: ${failed}`);
-  } catch (err) {
-    console.error(`[notify] fatal: ${err.message}`);
-  }
-}
-
-async function cleanupOldNotifications(env) {
-  try {
-    const pending = (await env.RATE_KV.get(KV_NOTIFY_PENDING, "json")) || [];
-    if (pending.length === 0) return;
-
-    const now = Date.now();
-    const keep = [];
-    let deleted = 0;
-
-    for (const n of pending) {
-      const ageMin = (now - n.sent_at) / 60000;
-      if (ageMin >= NOTIFY_DELETE_AFTER_MINUTES) {
-        try { await deleteMessage(n.chat_id, n.message_id, env); deleted++; } catch {}
+      // rate limit
+      if (i > 0 && i % NOTIFY_BATCH_SIZE === 0) {
+        await sleep(1000);
       } else {
-        keep.push(n);
+        await sleep(50);
       }
-      await sleep(30);
     }
 
-    if (keep.length > 0) {
-      await env.RATE_KV.put(KV_NOTIFY_PENDING, JSON.stringify(keep), { expirationTtl: KV_PENDING_TTL });
-    } else {
-      await env.RATE_KV.delete(KV_NOTIFY_PENDING);
-    }
-
-    if (deleted > 0) console.log(`[cleanup] Deleted: ${deleted}`);
+    console.log(`[notify] Done. Sent: ${sent}, Deleted: ${deleted}, Failed: ${failed}, First-time: ${first_time}`);
   } catch (err) {
-    console.error(`[cleanup] ${err.message}`);
+    console.error(`[notify] Fatal: ${err.message}`);
   }
 }
 
@@ -1550,10 +1535,8 @@ async function updateSubscribers(env) {
       if (sub.last_price === newPrice) { skipped++; continue; }
 
       try {
-        // اول editMessageMedia
         let result = await editMessageMedia(sub.chat_id, sub.message_id, photoUrl, caption, env, { replyMarkup: PRICE_KEYBOARD });
 
-        // اگر پیام متنی است
         if (!result.ok && (result.description?.includes("no caption") || result.description?.includes("not a photo"))) {
           result = await editMessage(sub.chat_id, sub.message_id, caption, env, { replyMarkup: PRICE_KEYBOARD });
         }
@@ -1583,12 +1566,10 @@ async function handleScheduled(controller, env, ctx) {
   console.log(`[cron] ${controller.cron}`);
   if (!env.RATE_KV) return;
 
-  await cleanupOldNotifications(env);
-
   const currentMinute = new Date().getUTCMinutes();
-  console.log(`[cron] minute: ${currentMinute}`);
+  console.log(`[cron] UTC minute: ${currentMinute}`);
 
-  // Trigger در دقیقه :07 و :37
+  // Trigger در :07 و :37
   if (currentMinute === 7 || currentMinute === 37) {
     try {
       await triggerWorkflow(env);
@@ -1597,16 +1578,20 @@ async function handleScheduled(controller, env, ctx) {
     }
   }
 
-  // نوتیف در :07
+  // نوتیف در :07 (ساعتانه)
   if (currentMinute === 7) {
     const lastNotify = parseInt((await env.RATE_KV.get(KV_LAST_NOTIFY_TIME)) || "0", 10);
     const minutesSinceLast = (Date.now() - lastNotify) / 60000;
+
     if (minutesSinceLast >= 55) {
       await sendHourlyNotification(env);
       await env.RATE_KV.put(KV_LAST_NOTIFY_TIME, String(Date.now()));
+    } else {
+      console.log(`[cron] Notify skip, ${Math.round(minutesSinceLast)}m`);
     }
   }
 
+  // ویرایش subscribers
   await updateSubscribers(env);
 }
 
