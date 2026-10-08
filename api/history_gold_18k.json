@@ -3,6 +3,7 @@
   "title": "طلای ۱۸ عیار",
   "unit": "تومان",
   "timezone": "Asia/Tehran",
+<<<<<<< HEAD
   "updated_at": "2026-10-08 09:57:09",
   "total_records": 1167,
   "latest": {
@@ -11,6 +12,16 @@
     "price": 26173880,
     "price_toman": 26173880,
     "price_irr": 261738800
+=======
+  "updated_at": "2026-10-08 12:38:09",
+  "total_records": 1167,
+  "latest": {
+    "timestamp": 1791450489,
+    "date": "2026-10-08",
+    "price": 26377030,
+    "price_toman": 26377030,
+    "price_irr": 263770300
+>>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
   },
   "history": [
     {
@@ -10497,6 +10508,7 @@
       "price_irr": 267163800
     },
     {
+<<<<<<< HEAD
       "timestamp": 1791382764,
       "date": "2026-10-07",
       "price": 26218890,
@@ -10509,6 +10521,20 @@
       "price": 26173880,
       "price_toman": 26173880,
       "price_irr": 261738800
+=======
+      "timestamp": 1791401888,
+      "date": "2026-10-07",
+      "price": 26286990,
+      "price_toman": 26286990,
+      "price_irr": 262869900
+    },
+    {
+      "timestamp": 1791450489,
+      "date": "2026-10-08",
+      "price": 26377030,
+      "price_toman": 26377030,
+      "price_irr": 263770300
+>>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
     }
   ]
 }

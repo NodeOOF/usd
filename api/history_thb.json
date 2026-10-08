@@ -3,6 +3,7 @@
   "title": "بات تایلند",
   "unit": "تومان",
   "timezone": "Asia/Tehran",
+<<<<<<< HEAD
   "updated_at": "2026-10-08 09:57:10",
   "total_records": 1174,
   "latest": {
@@ -11,6 +12,16 @@
     "price": 7860,
     "price_toman": 7860,
     "price_irr": 78600
+=======
+  "updated_at": "2026-10-08 12:38:10",
+  "total_records": 1174,
+  "latest": {
+    "timestamp": 1791450490,
+    "date": "2026-10-08",
+    "price": 7980,
+    "price_toman": 7980,
+    "price_irr": 79800
+>>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
   },
   "history": [
     {
@@ -8213,23 +8224,40 @@
     {
       "timestamp": 1791315681,
       "date": "2026-10-06",
+<<<<<<< HEAD
       "price": 8020,
       "price_toman": 8020,
       "price_irr": 80200
     },
     {
       "timestamp": 1791382765,
+=======
+      "price": 8030,
+      "price_toman": 8030,
+      "price_irr": 80300
+    },
+    {
+      "timestamp": 1791401889,
+>>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
       "date": "2026-10-07",
       "price": 7860,
       "price_toman": 7860,
       "price_irr": 78600
     },
     {
+<<<<<<< HEAD
       "timestamp": 1791440830,
       "date": "2026-10-08",
       "price": 7860,
       "price_toman": 7860,
       "price_irr": 78600
+=======
+      "timestamp": 1791450490,
+      "date": "2026-10-08",
+      "price": 7980,
+      "price_toman": 7980,
+      "price_irr": 79800
+>>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
     }
   ]
 }

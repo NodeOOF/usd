@@ -3,6 +3,7 @@
   "title": "یورو اروپا",
   "unit": "تومان",
   "timezone": "Asia/Tehran",
+<<<<<<< HEAD
   "updated_at": "2026-10-08 09:57:08",
   "total_records": 1174,
   "latest": {
@@ -11,6 +12,16 @@
     "price": 296000,
     "price_toman": 296000,
     "price_irr": 2960000
+=======
+  "updated_at": "2026-10-08 12:38:08",
+  "total_records": 1174,
+  "latest": {
+    "timestamp": 1791450488,
+    "date": "2026-10-08",
+    "price": 300300,
+    "price_toman": 300300,
+    "price_irr": 3003000
+>>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
   },
   "history": [
     {
@@ -8218,6 +8229,7 @@
       "price_irr": 3037000
     },
     {
+<<<<<<< HEAD
       "timestamp": 1791382764,
       "date": "2026-10-07",
       "price": 296300,
@@ -8230,6 +8242,20 @@
       "price": 296000,
       "price_toman": 296000,
       "price_irr": 2960000
+=======
+      "timestamp": 1791401888,
+      "date": "2026-10-07",
+      "price": 296100,
+      "price_toman": 296100,
+      "price_irr": 2961000
+    },
+    {
+      "timestamp": 1791450488,
+      "date": "2026-10-08",
+      "price": 300300,
+      "price_toman": 300300,
+      "price_irr": 3003000
+>>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
     }
   ]
 }

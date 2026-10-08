@@ -3,6 +3,7 @@
   "title": "دلار آمریکا",
   "unit": "تومان",
   "timezone": "Asia/Tehran",
+<<<<<<< HEAD
   "updated_at": "2026-10-08 09:57:08",
   "total_records": 1174,
   "latest": {
@@ -11,6 +12,16 @@
     "price": 264405,
     "price_toman": 264405,
     "price_irr": 2644050
+=======
+  "updated_at": "2026-10-08 12:38:07",
+  "total_records": 1174,
+  "latest": {
+    "timestamp": 1791450487,
+    "date": "2026-10-08",
+    "price": 268408,
+    "price_toman": 268408,
+    "price_irr": 2684080
+>>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
   },
   "history": [
     {
@@ -8218,6 +8229,7 @@
       "price_irr": 2697080
     },
     {
+<<<<<<< HEAD
       "timestamp": 1791382763,
       "date": "2026-10-07",
       "price": 264912,
@@ -8230,6 +8242,20 @@
       "price": 264405,
       "price_toman": 264405,
       "price_irr": 2644050
+=======
+      "timestamp": 1791401887,
+      "date": "2026-10-07",
+      "price": 264397,
+      "price_toman": 264397,
+      "price_irr": 2643970
+    },
+    {
+      "timestamp": 1791450487,
+      "date": "2026-10-08",
+      "price": 268408,
+      "price_toman": 268408,
+      "price_irr": 2684080
+>>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
     }
   ]
 }

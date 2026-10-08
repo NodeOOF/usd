@@ -3,6 +3,7 @@
   "title": "منات ترکمنستان",
   "unit": "تومان",
   "timezone": "Asia/Tehran",
+<<<<<<< HEAD
   "updated_at": "2026-10-08 09:57:11",
   "total_records": 1174,
   "latest": {
@@ -11,6 +12,16 @@
     "price": 75320,
     "price_toman": 75320,
     "price_irr": 753200
+=======
+  "updated_at": "2026-10-08 12:38:11",
+  "total_records": 1174,
+  "latest": {
+    "timestamp": 1791450491,
+    "date": "2026-10-08",
+    "price": 76460,
+    "price_toman": 76460,
+    "price_irr": 764600
+>>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
   },
   "history": [
     {
@@ -8218,6 +8229,7 @@
       "price_irr": 768400
     },
     {
+<<<<<<< HEAD
       "timestamp": 1791382766,
       "date": "2026-10-07",
       "price": 75680,
@@ -8230,6 +8242,20 @@
       "price": 75320,
       "price_toman": 75320,
       "price_irr": 753200
+=======
+      "timestamp": 1791401890,
+      "date": "2026-10-07",
+      "price": 75540,
+      "price_toman": 75540,
+      "price_irr": 755400
+    },
+    {
+      "timestamp": 1791450491,
+      "date": "2026-10-08",
+      "price": 76460,
+      "price_toman": 76460,
+      "price_irr": 764600
+>>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
     }
   ]
 }

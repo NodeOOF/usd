@@ -3,6 +3,7 @@
   "title": "دلار استرالیا",
   "unit": "تومان",
   "timezone": "Asia/Tehran",
+<<<<<<< HEAD
   "updated_at": "2026-10-08 09:57:09",
   "total_records": 1174,
   "latest": {
@@ -11,6 +12,16 @@
     "price": 183800,
     "price_toman": 183800,
     "price_irr": 1838000
+=======
+  "updated_at": "2026-10-08 12:38:09",
+  "total_records": 1174,
+  "latest": {
+    "timestamp": 1791450489,
+    "date": "2026-10-08",
+    "price": 186700,
+    "price_toman": 186700,
+    "price_irr": 1867000
+>>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
   },
   "history": [
     {
@@ -8218,18 +8229,30 @@
       "price_irr": 1884000
     },
     {
+<<<<<<< HEAD
       "timestamp": 1791382764,
+=======
+      "timestamp": 1791401888,
+>>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
       "date": "2026-10-07",
       "price": 184200,
       "price_toman": 184200,
       "price_irr": 1842000
     },
     {
+<<<<<<< HEAD
       "timestamp": 1791440829,
       "date": "2026-10-08",
       "price": 183800,
       "price_toman": 183800,
       "price_irr": 1838000
+=======
+      "timestamp": 1791450489,
+      "date": "2026-10-08",
+      "price": 186700,
+      "price_toman": 186700,
+      "price_irr": 1867000
+>>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
     }
   ]
 }

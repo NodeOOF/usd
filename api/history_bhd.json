@@ -3,6 +3,7 @@
   "title": "دینار بحرین",
   "unit": "تومان",
   "timezone": "Asia/Tehran",
+<<<<<<< HEAD
   "updated_at": "2026-10-08 09:57:11",
   "total_records": 1174,
   "latest": {
@@ -11,6 +12,16 @@
     "price": 701240,
     "price_toman": 701240,
     "price_irr": 7012400
+=======
+  "updated_at": "2026-10-08 12:38:12",
+  "total_records": 1174,
+  "latest": {
+    "timestamp": 1791450492,
+    "date": "2026-10-08",
+    "price": 711740,
+    "price_toman": 711740,
+    "price_irr": 7117400
+>>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
   },
   "history": [
     {
@@ -8218,6 +8229,7 @@
       "price_irr": 7154200
     },
     {
+<<<<<<< HEAD
       "timestamp": 1791382766,
       "date": "2026-10-07",
       "price": 702440,
@@ -8230,6 +8242,20 @@
       "price": 701240,
       "price_toman": 701240,
       "price_irr": 7012400
+=======
+      "timestamp": 1791401890,
+      "date": "2026-10-07",
+      "price": 701180,
+      "price_toman": 701180,
+      "price_irr": 7011800
+    },
+    {
+      "timestamp": 1791450492,
+      "date": "2026-10-08",
+      "price": 711740,
+      "price_toman": 711740,
+      "price_irr": 7117400
+>>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
     }
   ]
 }

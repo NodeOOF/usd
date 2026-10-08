@@ -39,6 +39,7 @@ const MARKET_SOURCES = [
   `${NABZ_CDN}/market.json`,
 ];
 
+
 const CHART_BASE_URLS = [
   "https://cdn.jsdelivr.net/gh/NodeOOF/usd@main",
   "https://raw.githubusercontent.com/NodeOOF/usd/main",
