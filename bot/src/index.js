@@ -1,17 +1,13 @@
 // ============================================================
 //  Cloudflare Worker — Nabz-e Bazaar Bot + GitHub Trigger
-//  نسخه: 14.2
-//  منبع داده: NodeOOF/nabz (fork)
+//  نسخه: 15.3 — Robust Edition
 //
-//  قابلیت‌ها:
-//    - ۴۷ دارایی (ارز، طلا، سکه، نفت)
-//    - editMessageMedia برای ویرایش عکس + caption
-//    - نوتیف ساعتی برای همه کاربران (پیش‌فرض فعال)
-//    - لغو/فعال‌سازی نوتیف با یک دکمه
-//    - حذف خودکار نوتیف بعد از ۵ دقیقه
-//    - اشتراک زنده دلار (ویرایش پیام هر ۳۰ دقیقه)
-//    - ⭐ Trigger GitHub Action برای scraping
-//    - cache buster برای داده‌های تازه
+//  تغییرات مهم:
+//    - رفع مشکل null در دکمه‌ها
+//    - ویرایش هوشمند (photo vs text)
+//    - fallback chain قوی
+//    - بازگشت به منو همیشه کار می‌کند
+//    - دلار همیشه نشان داده می‌شود
 // ============================================================
 
 // ============================================================
@@ -25,7 +21,6 @@ const CORS_HEADERS = Object.freeze({
   "Access-Control-Max-Age": "86400",
 });
 
-// ⭐ منبع داده: fork خودت (NodeOOF/USD)
 const NABZ_RAW = "https://raw.githubusercontent.com/NodeOOF/usd/main";
 const NABZ_CDN = "https://cdn.jsdelivr.net/gh/NodeOOF/usd@main";
 
@@ -39,7 +34,6 @@ const MARKET_SOURCES = [
   `${NABZ_CDN}/market.json`,
 ];
 
-
 const CHART_BASE_URLS = [
   "https://cdn.jsdelivr.net/gh/NodeOOF/usd@main",
   "https://raw.githubusercontent.com/NodeOOF/usd/main",
@@ -50,24 +44,21 @@ const FOOTER = "\n\n━━━━━━━━━━━━━━━━━━━\n�
 const DEFAULT_CACHE_SECONDS = 60;
 const FETCH_TIMEOUT_MS = 10000;
 
-// KV keys
 const KV_SUB_PREFIX = "sub:";
 const KV_USER_PREFIX = "user:";
 const KV_NOTIFY_PENDING = "notify:pending";
 const KV_LAST_NOTIFY_TIME = "notify:last_time";
 
-// TTL
 const KV_SUB_TTL = 60 * 60 * 24 * 7;
 const KV_USER_TTL = 60 * 60 * 24 * 30;
 const KV_PENDING_TTL = 60 * 60;
 
-// نوتیف
 const NOTIFY_DELETE_AFTER_MINUTES = 5;
 const NOTIFY_INTERVAL_MINUTES = 60;
 const NOTIFY_BATCH_SIZE = 20;
 
 // ============================================================
-//  جدول دارایی‌ها
+//  بخش ۲: جدول دارایی‌ها
 // ============================================================
 
 const ASSETS = {
@@ -80,7 +71,7 @@ const ASSETS = {
   aud: { title: "دلار استرالیا", icon: "🇦🇺", unit: "تومان", category: "major" },
   cny: { title: "یوان چین", icon: "🇨🇳", unit: "تومان", category: "major" },
   gold_18k: { title: "طلای ۱۸ عیار", icon: "✨", unit: "تومان", category: "gold" },
-  gold_mesghal: { title: "مثقال طلا (آبشده)", icon: "⚖️", unit: "تومان", category: "gold" },
+  gold_mesghal: { title: "مثقال طلا", icon: "⚖️", unit: "تومان", category: "gold" },
   usd_xau: { title: "انس جهانی طلا", icon: "🌐", unit: "دلار", category: "gold" },
   gold_ounce: { title: "انس جهانی طلا", icon: "🌐", unit: "دلار", category: "gold" },
   coin_emami: { title: "سکه تمام امامی", icon: "🟡", unit: "تومان", category: "coin" },
@@ -99,7 +90,7 @@ const ASSETS = {
   jpy: { title: "۱۰۰ ین ژاپن", icon: "🇯🇵", unit: "تومان", category: "fiat" },
   sar: { title: "ریال عربستان", icon: "🇸🇦", unit: "تومان", category: "fiat" },
   inr: { title: "روپیه هند", icon: "🇮🇳", unit: "تومان", category: "fiat" },
-  afn: { title: "افغانی افغانستان", icon: "🇦🇫", unit: "تومان", category: "fiat" },
+  afn: { title: "افغانی", icon: "🇦🇫", unit: "تومان", category: "fiat" },
   nok: { title: "کرون نروژ", icon: "🇳🇴", unit: "تومان", category: "fiat" },
   chf: { title: "فرانک سوئیس", icon: "🇨🇭", unit: "تومان", category: "fiat" },
   qar: { title: "ریال قطر", icon: "🇶🇦", unit: "تومان", category: "fiat" },
@@ -142,7 +133,7 @@ const BOT_COMMANDS = [
 ];
 
 // ============================================================
-//  بخش ۲: cache
+//  بخش ۳: cache
 // ============================================================
 
 const _cache = new Map();
@@ -157,7 +148,7 @@ function cacheGet(k) {
 function cacheSet(k, v) { _cache.set(k, { value: v, ts: Date.now() }); }
 
 // ============================================================
-//  بخش ۳: ابزارها
+//  بخش ۴: ابزارها
 // ============================================================
 
 function jsonResponse(body, status = 200, cacheSeconds = DEFAULT_CACHE_SECONDS) {
@@ -187,7 +178,11 @@ function safeNumber(v) {
 function toPersianNumber(num, fallback = "نامشخص") {
   const n = safeNumber(num);
   if (n === null) return fallback;
-  return n.toLocaleString("fa-IR");
+  try {
+    return n.toLocaleString("fa-IR");
+  } catch {
+    return String(n);
+  }
 }
 
 function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
@@ -204,8 +199,18 @@ function formatDate(u) {
   return p ? `${p[1]}/${p[2]}/${p[3]}` : String(u);
 }
 
+/** امن: رشته‌سازی همه چیز */
+function safeStr(v, fallback = "") {
+  if (v === null || v === undefined) return fallback;
+  try {
+    return String(v);
+  } catch {
+    return fallback;
+  }
+}
+
 // ============================================================
-//  بخش ۴: لایه داده
+//  بخش ۵: لایه داده
 // ============================================================
 
 async function fetchJsonSafe(url, timeoutMs = FETCH_TIMEOUT_MS) {
@@ -218,20 +223,28 @@ async function fetchJsonSafe(url, timeoutMs = FETCH_TIMEOUT_MS) {
     const resp = await fetch(urlWithBust, {
       signal: ctrl.signal,
       headers: {
-        "User-Agent": "Nabz-Worker/14.0",
+        "User-Agent": "Nabz-Worker/15.0",
         "Accept": "application/json",
-        "Cache-Control": "no-cache, no-store, must-revalidate",
-        "Pragma": "no-cache",
+        "Cache-Control": "no-cache",
       },
       cf: { cacheTtl: 0, cacheEverything: false },
     });
+
     const text = await resp.text();
     const trimmed = text.trimStart();
+
     if (trimmed.startsWith("<")) throw new Error(`HTML (${resp.status})`);
     if (trimmed.toLowerCase().startsWith("error")) throw new Error("Upstream error");
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    try { return JSON.parse(text); } catch { throw new Error("Invalid JSON"); }
-  } finally { clearTimeout(timer); }
+
+    try {
+      return JSON.parse(text);
+    } catch {
+      throw new Error("Invalid JSON");
+    }
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 async function fetchWithFallback(sources, validator, label) {
@@ -252,11 +265,19 @@ async function fetchWithFallback(sources, validator, label) {
 async function fetchHistory(env) {
   const cached = cacheGet("history");
   if (cached) return cached;
+
   const result = await fetchWithFallback(
     [env.GITHUB_HISTORY_URL, ...HISTORY_SOURCES],
     (d) => d && d.latest && Array.isArray(d.history),
     "History"
   );
+
+  // اعتبارسنجی: latest باید price داشته باشد
+  const latest = result.data.latest;
+  if (!latest.price && !latest.price_toman) {
+    throw new Error("History latest has no price");
+  }
+
   cacheSet("history", result);
   return result;
 }
@@ -264,6 +285,7 @@ async function fetchHistory(env) {
 async function fetchMarket(env) {
   const cached = cacheGet("market");
   if (cached) return cached;
+
   const result = await fetchWithFallback(
     [env.GITHUB_MARKET_URL, ...MARKET_SOURCES],
     (d) => d && (d.usd || d.gold_18k),
@@ -278,7 +300,7 @@ function chartUrlFor(key) {
 }
 
 // ============================================================
-//  بخش ۵: ⭐ GitHub Trigger
+//  بخش ۶: GitHub Trigger
 // ============================================================
 
 async function triggerWorkflow(env) {
@@ -292,7 +314,7 @@ async function triggerWorkflow(env) {
   }
 
   const url = `https://api.github.com/repos/${owner}/${repo}/actions/workflows/${workflow}/dispatches`;
-  console.log(`[trigger] Dispatching: ${owner}/${repo}/${workflow}@${branch}`);
+  console.log(`[trigger] ${owner}/${repo}/${workflow}@${branch}`);
 
   const res = await fetch(url, {
     method: "POST",
@@ -307,25 +329,23 @@ async function triggerWorkflow(env) {
   });
 
   if (res.status !== 204 && res.status !== 200) {
-    const text = await respText(res);
-    throw new Error(`GitHub ${res.status}: ${text}`);
+    const text = await res.text().catch(() => "");
+    throw new Error(`GitHub ${res.status}: ${text.slice(0, 150)}`);
   }
 
   console.log(`[trigger] Success (${res.status})`);
   return { status: res.status, workflow, branch };
 }
 
-async function respText(res) {
-  try { return (await res.text()).slice(0, 200); } catch { return ""; }
-}
-
 // ============================================================
-//  بخش ۶: پردازش داده
+//  بخش ۷: پردازش داده
 // ============================================================
 
 function computeStats(history) {
   if (!history || history.length === 0) return null;
-  const prices = history.map((x) => x.price || x.price_toman).filter((p) => safeNumber(p) !== null);
+  const prices = history
+    .map((x) => safeNumber(x.price || x.price_toman))
+    .filter((p) => p !== null);
   if (prices.length === 0) return null;
   const sum = prices.reduce((a, b) => a + b, 0);
   return {
@@ -355,111 +375,133 @@ function computeChange(history, daysAgo) {
 }
 
 // ============================================================
-//  بخش ۷: مدیریت کاربران (نوتیف)
+//  بخش ۸: مدیریت کاربران
 // ============================================================
 
 async function registerUser(chatId, env) {
+  if (!chatId) return;
   const key = `${KV_USER_PREFIX}${chatId}`;
-  const existing = await env.RATE_KV.get(key, "json");
-
-  if (!existing) {
-    await env.RATE_KV.put(
-      key,
-      JSON.stringify({
+  try {
+    const existing = await env.RATE_KV.get(key, "json");
+    if (!existing) {
+      await env.RATE_KV.put(key, JSON.stringify({
         chat_id: chatId,
         registered_at: Date.now(),
         notify_off: false,
-      }),
-      { expirationTtl: KV_USER_TTL }
-    );
-    console.log(`[user] New: ${chatId}`);
-    return;
+      }), { expirationTtl: KV_USER_TTL });
+      console.log(`[user] New: ${chatId}`);
+      return;
+    }
+    await env.RATE_KV.put(key, JSON.stringify({ ...existing, last_seen: Date.now() }), { expirationTtl: KV_USER_TTL });
+  } catch (err) {
+    console.error(`[user] register error: ${err.message}`);
   }
-
-  await env.RATE_KV.put(
-    key,
-    JSON.stringify({ ...existing, last_seen: Date.now() }),
-    { expirationTtl: KV_USER_TTL }
-  );
 }
 
 async function setNotifyOff(chatId, env) {
+  if (!chatId) return;
   const key = `${KV_USER_PREFIX}${chatId}`;
-  const user = (await env.RATE_KV.get(key, "json")) || { chat_id: chatId, registered_at: Date.now() };
-  user.notify_off = true;
-  user.notify_off_at = Date.now();
-  await env.RATE_KV.put(key, JSON.stringify(user), { expirationTtl: KV_USER_TTL });
-  console.log(`[user] Notify OFF: ${chatId}`);
+  try {
+    const user = (await env.RATE_KV.get(key, "json")) || { chat_id: chatId, registered_at: Date.now() };
+    user.notify_off = true;
+    user.notify_off_at = Date.now();
+    await env.RATE_KV.put(key, JSON.stringify(user), { expirationTtl: KV_USER_TTL });
+    console.log(`[user] OFF: ${chatId}`);
+  } catch (err) {
+    console.error(`[user] setNotifyOff: ${err.message}`);
+  }
 }
 
 async function setNotifyOn(chatId, env) {
+  if (!chatId) return;
   const key = `${KV_USER_PREFIX}${chatId}`;
-  const user = (await env.RATE_KV.get(key, "json")) || { chat_id: chatId, registered_at: Date.now() };
-  user.notify_off = false;
-  user.notify_on_at = Date.now();
-  await env.RATE_KV.put(key, JSON.stringify(user), { expirationTtl: KV_USER_TTL });
-  console.log(`[user] Notify ON: ${chatId}`);
+  try {
+    const user = (await env.RATE_KV.get(key, "json")) || { chat_id: chatId, registered_at: Date.now() };
+    user.notify_off = false;
+    user.notify_on_at = Date.now();
+    await env.RATE_KV.put(key, JSON.stringify(user), { expirationTtl: KV_USER_TTL });
+    console.log(`[user] ON: ${chatId}`);
+  } catch (err) {
+    console.error(`[user] setNotifyOn: ${err.message}`);
+  }
 }
 
 async function isNotifyEnabled(chatId, env) {
-  const user = await env.RATE_KV.get(`${KV_USER_PREFIX}${chatId}`, "json");
-  return user !== null && user.notify_off !== true;
+  if (!chatId) return false;
+  try {
+    const user = await env.RATE_KV.get(`${KV_USER_PREFIX}${chatId}`, "json");
+    return user !== null && user.notify_off !== true;
+  } catch {
+    return false;
+  }
 }
 
 async function getActiveUsers(env) {
   const users = [];
   let cursor = undefined;
-
-  do {
-    const list = await env.RATE_KV.list({ prefix: KV_USER_PREFIX, cursor });
-    for (const key of list.keys) {
-      const user = await env.RATE_KV.get(key.name, "json");
-      if (user && user.chat_id && user.notify_off !== true) {
-        users.push(user.chat_id);
+  try {
+    do {
+      const list = await env.RATE_KV.list({ prefix: KV_USER_PREFIX, cursor });
+      for (const key of list.keys) {
+        const user = await env.RATE_KV.get(key.name, "json");
+        if (user && user.chat_id && user.notify_off !== true) {
+          users.push(user.chat_id);
+        }
       }
-    }
-    cursor = list.list_complete ? undefined : list.cursor;
-  } while (cursor);
-
+      cursor = list.list_complete ? undefined : list.cursor;
+    } while (cursor);
+  } catch (err) {
+    console.error(`[users] list: ${err.message}`);
+  }
   return users;
 }
 
 // ============================================================
-//  بخش ۸: مدیریت اشتراک زنده دلار
+//  بخش ۹: اشتراک زنده دلار
 // ============================================================
 
 async function subscribeUser(chatId, messageId, price, env) {
+  if (!chatId || !messageId) return;
   await env.RATE_KV.put(`${KV_SUB_PREFIX}${chatId}`,
     JSON.stringify({ chat_id: chatId, message_id: messageId, last_price: price, last_updated: Date.now() }),
     { expirationTtl: KV_SUB_TTL });
 }
 
 async function unsubscribeUser(chatId, env) {
+  if (!chatId) return;
   await env.RATE_KV.delete(`${KV_SUB_PREFIX}${chatId}`);
 }
 
 async function updateSubscriptionMessage(chatId, newMessageId, price, env) {
+  if (!chatId || !newMessageId) return;
   const key = `${KV_SUB_PREFIX}${chatId}`;
   const existing = await env.RATE_KV.get(key, "json");
-  await env.RATE_KV.put(key,
-    JSON.stringify({ chat_id: chatId, message_id: newMessageId, last_price: price, last_updated: Date.now(), was_subscribed: existing?.was_subscribed ?? true }),
-    { expirationTtl: KV_SUB_TTL });
+  await env.RATE_KV.put(key, JSON.stringify({
+    chat_id: chatId, message_id: newMessageId, last_price: price,
+    last_updated: Date.now(),
+    was_subscribed: existing?.was_subscribed ?? true,
+  }), { expirationTtl: KV_SUB_TTL });
 }
 
 async function isSubscribed(chatId, env) {
-  const d = await env.RATE_KV.get(`${KV_SUB_PREFIX}${chatId}`, "json");
-  return d !== null;
+  if (!chatId) return false;
+  try {
+    const d = await env.RATE_KV.get(`${KV_SUB_PREFIX}${chatId}`, "json");
+    return d !== null;
+  } catch {
+    return false;
+  }
 }
 
 // ============================================================
-//  بخش ۹: API Endpoints
+//  بخش ۱۰: API Endpoints
 // ============================================================
 
 async function handleRoot() {
   return jsonResponse({
     name: "Nabz-e Bazaar Bot API",
-    version: "14.0",
-    source: "NodeOOF/nabz",
+    version: "15.0",
+    source: "NodeOOF/usd",
     endpoints: {
       "GET /rate": "دلار + تغییرات",
       "GET /market": "همه ۴۷ دارایی",
@@ -468,7 +510,7 @@ async function handleRoot() {
       "GET /compare?days=N": "مقایسه",
       "GET /health": "سلامت",
       "GET /ui": "صفحه وب",
-      "GET /trigger": "⭐ Trigger GitHub Action",
+      "GET /trigger": "Trigger GitHub Action",
       "POST /webhook": "وبهوک تلگرام",
     },
   });
@@ -476,9 +518,10 @@ async function handleRoot() {
 
 async function handleRate(env) {
   const { data } = await fetchHistory(env);
+  const price = data.latest.price || data.latest.price_toman;
   return jsonResponse({
     success: true,
-    price_toman: data.latest.price || data.latest.price_toman,
+    price_toman: price,
     date: data.latest.date,
     updated_at: data.updated_at,
     changes: {
@@ -527,7 +570,7 @@ async function handleHealth(env) {
     const users = await getActiveUsers(env).catch(() => []);
     return jsonResponse({
       status: "healthy",
-      version: "14.0",
+      version: "15.0",
       source,
       updated_at: data.updated_at,
       active_users: users.length,
@@ -541,12 +584,7 @@ async function handleHealth(env) {
 async function handleTrigger(env) {
   try {
     const result = await triggerWorkflow(env);
-    return jsonResponse({
-      success: true,
-      message: "✅ Workflow triggered",
-      ...result,
-      timestamp: new Date().toISOString(),
-    });
+    return jsonResponse({ success: true, message: "✅ Workflow triggered", ...result, timestamp: new Date().toISOString() });
   } catch (err) {
     return errorResponse("Trigger failed", 500, err.message);
   }
@@ -554,7 +592,7 @@ async function handleTrigger(env) {
 
 async function handleUI() {
   const html = `<!DOCTYPE html><html dir="rtl" lang="fa"><head><meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1"><title>نبض بازار — قیمت‌ها</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"><title>نبض بازار</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:Vazirmatn,-apple-system,sans-serif;background:linear-gradient(135deg,#667eea,#764ba2);min-height:100vh;padding:20px;display:flex;justify-content:center}
@@ -578,7 +616,7 @@ h2{text-align:center;font-size:22px;margin-bottom:8px}
 <script>
 fetch('/market').then(r=>r.json()).then(d=>{
   const fmt=n=>{if(n===null||n===undefined||n==='')return '—';const v=typeof n==='number'?n:parseFloat(n);return isNaN(v)?n:v.toLocaleString('fa-IR')};
-  const AR={usd:'دلار',eur:'یورو',aed:'درهم',try:'لیر ترکیه',gbp:'پوند',cad:'دلار کانادا',aud:'دلار استرالیا',cny:'یوان',jpy:'ین',chf:'فرانک',rub:'روبل',sar:'ریال عربستان'};
+  const AR={usd:'دلار',eur:'یورو',aed:'درهم',try:'لیر',gbp:'پوند',cad:'دلار کانادا',aud:'دلار استرالیا',cny:'یوان',jpy:'ین',chf:'فرانک',rub:'روبل'};
   let h='<div class="section">💵 ارزها</div>';
   Object.keys(AR).forEach(k=>{if(d[k])h+='<div class="row"><span class="label">'+AR[k]+'</span><span class="value">'+fmt(d[k])+'<span class="unit"> تومان</span></span></div>';});
   h+='<div class="section">🥇 طلا و سکه</div>';
@@ -597,24 +635,33 @@ fetch('/market').then(r=>r.json()).then(d=>{
 }
 
 // ============================================================
-//  بخش ۱۰: Telegram API
+//  بخش ۱۱: Telegram API
 // ============================================================
 
 async function telegramAPI(method, body, env) {
   const url = `https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/${method}`;
-  const resp = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  const result = await resp.json();
-  if (!result.ok) console.error(`[telegram] ${method}: ${result.description}`);
-  return result;
+  try {
+    const resp = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const result = await resp.json();
+    if (!result.ok) {
+      console.error(`[telegram] ${method}: ${result.description}`);
+    }
+    return result;
+  } catch (err) {
+    console.error(`[telegram] ${method} fetch error: ${err.message}`);
+    return { ok: false, description: err.message };
+  }
 }
 
 async function sendMessage(chatId, text, env, options = {}) {
+  if (!chatId) return { ok: false, description: "no chatId" };
   return telegramAPI("sendMessage", {
-    chat_id: chatId, text,
+    chat_id: chatId,
+    text: safeStr(text, "—"),
     parse_mode: options.parseMode || "Markdown",
     reply_markup: options.replyMarkup,
     disable_web_page_preview: true,
@@ -622,8 +669,11 @@ async function sendMessage(chatId, text, env, options = {}) {
 }
 
 async function editMessage(chatId, messageId, text, env, options = {}) {
+  if (!chatId || !messageId) return { ok: false, description: "no ids" };
   return telegramAPI("editMessageText", {
-    chat_id: chatId, message_id: messageId, text,
+    chat_id: chatId,
+    message_id: messageId,
+    text: safeStr(text, "—"),
     parse_mode: options.parseMode || "Markdown",
     reply_markup: options.replyMarkup,
     disable_web_page_preview: true,
@@ -631,21 +681,25 @@ async function editMessage(chatId, messageId, text, env, options = {}) {
 }
 
 async function editMessageCaption(chatId, messageId, caption, env, options = {}) {
+  if (!chatId || !messageId) return { ok: false, description: "no ids" };
   return telegramAPI("editMessageCaption", {
-    chat_id: chatId, message_id: messageId, caption,
+    chat_id: chatId,
+    message_id: messageId,
+    caption: safeStr(caption, "—"),
     parse_mode: options.parseMode || "Markdown",
     reply_markup: options.replyMarkup,
   }, env);
 }
 
 async function editMessageMedia(chatId, messageId, photoUrl, caption, env, options = {}) {
+  if (!chatId || !messageId || !photoUrl) return { ok: false, description: "no ids or url" };
   return telegramAPI("editMessageMedia", {
     chat_id: chatId,
     message_id: messageId,
     media: {
       type: "photo",
       media: photoUrl,
-      caption: caption,
+      caption: safeStr(caption, "—"),
       parse_mode: options.parseMode || "Markdown",
     },
     reply_markup: options.replyMarkup,
@@ -653,42 +707,55 @@ async function editMessageMedia(chatId, messageId, photoUrl, caption, env, optio
 }
 
 async function deleteMessage(chatId, messageId, env) {
+  if (!chatId || !messageId) return { ok: false };
   return telegramAPI("deleteMessage", { chat_id: chatId, message_id: messageId }, env);
 }
 
 async function answerCallbackQuery(id, env, text = null) {
-  return telegramAPI("answerCallbackQuery", { callback_query_id: id, text, show_alert: false }, env);
+  if (!id) return { ok: false };
+  return telegramAPI("answerCallbackQuery", {
+    callback_query_id: id,
+    text: text,
+    show_alert: false,
+  }, env);
 }
 
 async function sendPhoto(chatId, photoUrl, caption, env, options = {}) {
+  if (!chatId) return { ok: false, description: "no chatId" };
+
+  // Try URL first
   const urlResult = await telegramAPI("sendPhoto", {
-    chat_id: chatId, photo: photoUrl, caption,
+    chat_id: chatId,
+    photo: photoUrl,
+    caption: safeStr(caption, "—"),
     parse_mode: options.parseMode || "Markdown",
     reply_markup: options.replyMarkup,
   }, env);
+
   if (urlResult.ok) return urlResult;
 
+  // Fallback: download and upload
   console.warn(`[sendPhoto] URL failed, trying file upload...`);
   try {
     const imgResp = await fetch(photoUrl, {
-      headers: { "User-Agent": "Nabz-Worker/14.0" },
+      headers: { "User-Agent": "Nabz-Worker/15.0" },
       cf: { cacheTtl: 3600, cacheEverything: true },
     });
     if (!imgResp.ok) throw new Error(`HTTP ${imgResp.status}`);
+
     const imgBlob = await imgResp.blob();
     const filename = photoUrl.split("/").pop() || "chart.png";
 
     const form = new FormData();
     form.append("chat_id", chatId.toString());
     form.append("photo", imgBlob, filename);
-    if (caption) form.append("caption", caption);
+    if (caption) form.append("caption", safeStr(caption));
     form.append("parse_mode", options.parseMode || "Markdown");
     if (options.replyMarkup) form.append("reply_markup", JSON.stringify(options.replyMarkup));
 
     const url = `https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendPhoto`;
     const resp = await fetch(url, { method: "POST", body: form });
     const result = await resp.json();
-    if (!result.ok) console.error(`[sendPhoto] file upload failed: ${result.description}`);
     return result;
   } catch (err) {
     console.error(`[sendPhoto] file upload error: ${err.message}`);
@@ -697,7 +764,7 @@ async function sendPhoto(chatId, photoUrl, caption, env, options = {}) {
 }
 
 // ============================================================
-//  بخش ۱۱: Keyboards
+//  بخش ۱۲: Keyboards
 // ============================================================
 
 const MAIN_MENU_KEYBOARD = {
@@ -769,7 +836,7 @@ const NOTIFY_KEYBOARD = {
     [{ text: "🔕 لغو نوتیف ساعتی", callback_data: "cmd:notify_off" }],
     [
       { text: "💵 دلار", callback_data: "cmd:price" },
-      { text: "📊 همه قیمت‌ها", callback_data: "cmd:all" },
+      { text: "📊 همه", callback_data: "cmd:all" },
     ],
     [{ text: "🏠 منو", callback_data: "cmd:menu" }],
   ],
@@ -787,7 +854,7 @@ const NOTIFY_OFF_KEYBOARD = {
 };
 
 // ============================================================
-//  بخش ۱۲: Message Builders
+//  بخش ۱۳: Message Builders
 // ============================================================
 
 function changeIndicator(ch) {
@@ -822,8 +889,7 @@ function buildAllCaption(m) {
     energy: { title: "🛢 انرژی", keys: ["oil"] },
   };
 
-  let msg = `📊 *نبض بازار*\n`;
-  msg += `━━━━━━━━━━━━━━━━━━━\n\n`;
+  let msg = `📊 *نبض بازار*\n━━━━━━━━━━━━━━━━━━━\n\n`;
 
   for (const cat of Object.values(categories)) {
     msg += `*${cat.title}*\n`;
@@ -850,8 +916,7 @@ function buildAssetCaption(key, m) {
   const val = m[key];
   const unit = info.unit === "دلار" ? "دلار" : "تومان";
 
-  let msg = `${info.icon} *${info.title}*\n`;
-  msg += `━━━━━━━━━━━━━━━━━━━\n\n`;
+  let msg = `${info.icon} *${info.title}*\n━━━━━━━━━━━━━━━━━━━\n\n`;
   msg += `💰 *${toPersianNumber(val)}* ${unit}\n\n`;
   msg += `⏱ ${m.updated_at || "—"}`;
   if (m.date_shamsi_full) msg += `\n📅 ${m.date_shamsi_full}`;
@@ -903,8 +968,7 @@ function buildCurrenciesCaption(m) {
 
 function buildOilCaption(m) {
   let msg = `🛢 *نفت خام*\n━━━━━━━━━━━━━━━━━━━\n\n`;
-  msg += `💰 *${m.oil || "—"}* دلار\n\n`;
-  msg += `⏱ ${m.updated_at || "—"}`;
+  msg += `💰 *${m.oil || "—"}* دلار\n\n⏱ ${m.updated_at || "—"}`;
   msg += FOOTER;
   return msg;
 }
@@ -917,8 +981,7 @@ function buildHistoryMessage(data, days = 7) {
   const minP = Math.min(...prices), maxP = Math.max(...prices);
   const range = maxP - minP || 1;
 
-  let msg = `📊 *تاریخچه ${toPersianNumber(days)} روز دلار*\n`;
-  msg += `━━━━━━━━━━━━━━━━━━━\n\n`;
+  let msg = `📊 *تاریخچه ${toPersianNumber(days)} روز دلار*\n━━━━━━━━━━━━━━━━━━━\n\n`;
   history.forEach((item) => {
     const v = safeNumber(item.price || item.price_toman);
     if (v === null) return;
@@ -962,8 +1025,7 @@ function buildCompareMessage(data, days = 30) {
 
 function buildMenuMessage(subscribed, notifyEnabled) {
   let msg = `🏠 *منوی اصلی*\n━━━━━━━━━━━━━━━━━━━\n\n`;
-  msg += `سلام! 👋\n`;
-  msg += `من بات *نبض بازار* هستم.\n\n`;
+  msg += `سلام! 👋\nمن بات *نبض بازار* هستم.\n\n`;
   msg += `📋 *قابلیت‌ها*\n`;
   msg += `• 📊 همه قیمت‌ها\n`;
   msg += `• 💵 دلار + نمودار\n`;
@@ -974,181 +1036,238 @@ function buildMenuMessage(subscribed, notifyEnabled) {
   msg += `• 🔄 تبدیل\n\n`;
   msg += `🔔 *وضعیت‌ها:*\n`;
   msg += `• نوتیف ساعتی: ${notifyEnabled ? "✅ فعال" : "🔕 غیرفعال"}\n`;
-  msg += `• اشتراک زنده دلار: ${subscribed ? "✅ فعال" : "❌ غیرفعال"}\n\n`;
-  msg += `💡 *راهنما:*\n`;
-  msg += `• «🔔 اشتراک زنده دلار» → پیام دلار هر ۳۰ دقیقه ویرایش می‌شود\n`;
-  msg += `• «🔕 لغو نوتیف ساعتی» → پیام ساعتی دریافت نکن`;
+  msg += `• اشتراک زنده دلار: ${subscribed ? "✅ فعال" : "❌ غیرفعال"}\n`;
   msg += FOOTER;
   return msg;
 }
 
 // ============================================================
-//  بخش ۱۳: تابع کمکی
+//  بخش ۱۴: تابع کمکی برای ویرایش/ارسال
 // ============================================================
 
-async function updateWithPhoto(chatId, env, options, assetKey, caption) {
+/**
+ * ⭐ تابع اصلی — ویرایش/ارسال با تشخیص نوع پیام
+ *
+ * wasPhoto: آیا پیام فعلی عکس است؟
+ * assetKey: کدام دارایی (usd, eur, gold_18k, ...)
+ * caption: متن
+ */
+async function updateMessage(chatId, env, options, assetKey, caption) {
   const photoUrl = chartUrlFor(assetKey);
+  const replyMarkup = options.replyMarkup;
 
+  // اگر editMessageId داریم
   if (options.editMessageId) {
-    const mediaResult = await editMessageMedia(
-      chatId,
-      options.editMessageId,
-      photoUrl,
-      caption,
-      env,
-      { replyMarkup: options.replyMarkup }
-    );
-
-    if (mediaResult.ok) return mediaResult;
-
-    const desc = mediaResult.description || "";
-    console.warn(`[edit] editMessageMedia failed: ${desc}`);
-
-    if (desc.includes("no caption") || desc.includes("message is not a photo")) {
-      const capResult = await editMessageCaption(chatId, options.editMessageId, caption, env, { replyMarkup: options.replyMarkup });
-      if (capResult.ok) return capResult;
+    if (options.wasPhoto) {
+      // پیام فعلی عکس است → editMessageMedia
+      console.log(`[edit] wasPhoto, using editMessageMedia`);
+      const r = await editMessageMedia(chatId, options.editMessageId, photoUrl, caption, env, { replyMarkup });
+      if (r.ok) return r;
+      console.warn(`[edit] editMessageMedia failed: ${r.description}`);
+    } else {
+      // پیام فعلی متن است → editMessage (برای متن‌ها)
+      // ولی چون ما می‌خواهیم عکس بفرستیم، این کار نمی‌کند
+      // پس اول delete + send
+      console.log(`[edit] wasText, deleting and resending`);
     }
 
+    // اگر ویرایش fail شد، پیام قبلی را پاک کن
     await deleteMessage(chatId, options.editMessageId, env).catch(() => {});
   }
 
-  const photoResult = await sendPhoto(chatId, photoUrl, caption, env, {
-    replyMarkup: options.replyMarkup,
-  });
+  // ارسال عکس جدید
+  console.log(`[send] sending photo for ${assetKey}`);
+  const photoResult = await sendPhoto(chatId, photoUrl, caption, env, { replyMarkup });
   if (photoResult.ok) return photoResult;
 
-  return sendMessage(chatId, caption, env, { replyMarkup: options.replyMarkup });
+  // اگر عکس fail شد، متن بفرست
+  console.warn(`[send] photo failed, sending text`);
+  return sendMessage(chatId, caption, env, { replyMarkup });
+}
+
+/**
+ * تابع برای متن‌های ساده (menu, history, stats, compare, oil)
+ */
+async function updateTextMessage(chatId, env, options, text, replyMarkup) {
+  if (options.editMessageId) {
+    if (!options.wasPhoto) {
+      // پیام متنی است → editMessage
+      const r = await editMessage(chatId, options.editMessageId, text, env, { replyMarkup });
+      if (r.ok) return r;
+      console.warn(`[edit] editMessage failed: ${r.description}`);
+    }
+
+    // پیام عکس است → delete + send
+    await deleteMessage(chatId, options.editMessageId, env).catch(() => {});
+  }
+
+  return sendMessage(chatId, text, env, { replyMarkup });
 }
 
 // ============================================================
-//  بخش ۱۴: Handlers
+//  بخش ۱۵: Handlers
 // ============================================================
 
 async function respondWithRate(chatId, env, options = {}) {
-  const { data } = await fetchHistory(env);
-  const caption = buildPriceCaption(data);
-  const price = data.latest?.price || data.latest?.price_toman;
+  try {
+    const { data } = await fetchHistory(env);
+    const caption = buildPriceCaption(data);
+    const price = data.latest?.price || data.latest?.price_toman;
 
-  const replyMarkup = options.replyMarkup || PRICE_KEYBOARD;
-  const result = await updateWithPhoto(chatId, env, { ...options, replyMarkup }, "usd", caption);
+    const replyMarkup = options.replyMarkup || PRICE_KEYBOARD;
+    const result = await updateMessage(chatId, env, { ...options, replyMarkup }, "usd", caption);
 
-  if (options.subscribe && result.ok) {
-    if (options.editMessageId) {
-      await updateSubscriptionMessage(chatId, options.editMessageId, price, env);
-    } else if (result.result?.message_id) {
-      await subscribeUser(chatId, result.result.message_id, price, env);
+    if (options.subscribe && result.ok) {
+      if (options.editMessageId && !options.wasPhoto) {
+        // در این حالت پیام جدید فرستادیم، چون edit نشد
+        // پس message_id جدید را ذخیره کن
+      }
+      if (result.result?.message_id) {
+        await subscribeUser(chatId, result.result.message_id, price, env);
+      }
     }
-  }
 
-  return result;
+    return result;
+  } catch (err) {
+    console.error(`[rate] ERROR: ${err.message}`);
+    return sendMessage(chatId, `❌ خطا در دریافت قیمت دلار\n\nلطفاً بعداً تلاش کن.${FOOTER}`, env);
+  }
 }
 
 async function respondWithAsset(chatId, env, assetKey, options = {}) {
-  const { data } = await fetchMarket(env);
-  const caption = buildAssetCaption(assetKey, data);
-  return updateWithPhoto(chatId, env, { ...options, replyMarkup: BACK_KEYBOARD }, assetKey, caption);
+  try {
+    const { data } = await fetchMarket(env);
+    const caption = buildAssetCaption(assetKey, data);
+    return updateMessage(chatId, env, { ...options, replyMarkup: BACK_KEYBOARD }, assetKey, caption);
+  } catch (err) {
+    console.error(`[asset] ERROR: ${err.message}`);
+    return sendMessage(chatId, `❌ خطا در دریافت قیمت.${FOOTER}`, env);
+  }
 }
 
 async function respondWithAll(chatId, env, options = {}) {
-  const { data } = await fetchMarket(env);
-  const caption = buildAllCaption(data);
-  return updateWithPhoto(chatId, env, { ...options, replyMarkup: BACK_KEYBOARD }, "usd", caption);
+  try {
+    const { data } = await fetchMarket(env);
+    const caption = buildAllCaption(data);
+    return updateMessage(chatId, env, { ...options, replyMarkup: BACK_KEYBOARD }, "usd", caption);
+  } catch (err) {
+    console.error(`[all] ERROR: ${err.message}`);
+    return sendMessage(chatId, `❌ خطا در دریافت قیمت‌ها.${FOOTER}`, env);
+  }
 }
 
 async function respondWithCoins(chatId, env, options = {}) {
-  const { data } = await fetchMarket(env);
-  const caption = buildCoinsCaption(data);
-  return updateWithPhoto(chatId, env, { ...options, replyMarkup: BACK_KEYBOARD }, "coin_emami", caption);
+  try {
+    const { data } = await fetchMarket(env);
+    const caption = buildCoinsCaption(data);
+    return updateMessage(chatId, env, { ...options, replyMarkup: BACK_KEYBOARD }, "coin_emami", caption);
+  } catch (err) {
+    console.error(`[coins] ERROR: ${err.message}`);
+    return sendMessage(chatId, `❌ خطا در دریافت سکه‌ها.${FOOTER}`, env);
+  }
 }
 
 async function respondWithGold(chatId, env, options = {}) {
-  const { data } = await fetchMarket(env);
-  const caption = buildGoldCaption(data);
-  return updateWithPhoto(chatId, env, { ...options, replyMarkup: BACK_KEYBOARD }, "gold_18k", caption);
+  try {
+    const { data } = await fetchMarket(env);
+    const caption = buildGoldCaption(data);
+    return updateMessage(chatId, env, { ...options, replyMarkup: BACK_KEYBOARD }, "gold_18k", caption);
+  } catch (err) {
+    console.error(`[gold] ERROR: ${err.message}`);
+    return sendMessage(chatId, `❌ خطا در دریافت طلا.${FOOTER}`, env);
+  }
 }
 
 async function respondWithCurrencies(chatId, env, options = {}) {
-  const { data } = await fetchMarket(env);
-  const caption = buildCurrenciesCaption(data);
-  return updateWithPhoto(chatId, env, { ...options, replyMarkup: BACK_KEYBOARD }, "eur", caption);
+  try {
+    const { data } = await fetchMarket(env);
+    const caption = buildCurrenciesCaption(data);
+    return updateMessage(chatId, env, { ...options, replyMarkup: BACK_KEYBOARD }, "eur", caption);
+  } catch (err) {
+    console.error(`[currencies] ERROR: ${err.message}`);
+    return sendMessage(chatId, `❌ خطا در دریافت ارزها.${FOOTER}`, env);
+  }
 }
 
 async function respondWithOil(chatId, env, options = {}) {
-  const { data } = await fetchMarket(env);
-  const msg = buildOilCaption(data);
-  if (options.editMessageId) {
-    const r = await editMessage(chatId, options.editMessageId, msg, env, { replyMarkup: BACK_KEYBOARD });
-    if (r.ok) return r;
-    if (!r.description?.includes("no caption")) return r;
-    await deleteMessage(chatId, options.editMessageId, env).catch(() => {});
+  try {
+    const { data } = await fetchMarket(env);
+    const msg = buildOilCaption(data);
+    return updateTextMessage(chatId, env, options, msg, BACK_KEYBOARD);
+  } catch (err) {
+    console.error(`[oil] ERROR: ${err.message}`);
+    return sendMessage(chatId, `❌ خطا در دریافت نفت.${FOOTER}`, env);
   }
-  return sendMessage(chatId, msg, env, { replyMarkup: BACK_KEYBOARD });
 }
 
 async function respondWithHistory(chatId, env, days = 7, options = {}) {
-  const { data } = await fetchHistory(env);
-  const msg = buildHistoryMessage(data, days);
-  if (options.editMessageId) {
-    const r = await editMessage(chatId, options.editMessageId, msg, env, { replyMarkup: BACK_KEYBOARD });
-    if (r.ok) return r;
-    if (!r.description?.includes("no caption")) return r;
-    await deleteMessage(chatId, options.editMessageId, env).catch(() => {});
+  try {
+    const { data } = await fetchHistory(env);
+    const msg = buildHistoryMessage(data, days);
+    return updateTextMessage(chatId, env, options, msg, BACK_KEYBOARD);
+  } catch (err) {
+    console.error(`[history] ERROR: ${err.message}`);
+    return sendMessage(chatId, `❌ خطا در دریافت تاریخچه.${FOOTER}`, env);
   }
-  return sendMessage(chatId, msg, env, { replyMarkup: BACK_KEYBOARD });
 }
 
 async function respondWithStats(chatId, env, options = {}) {
-  const { data } = await fetchHistory(env);
-  const msg = buildStatsMessage(data);
-  if (options.editMessageId) {
-    const r = await editMessage(chatId, options.editMessageId, msg, env, { replyMarkup: BACK_KEYBOARD });
-    if (r.ok) return r;
-    if (!r.description?.includes("no caption")) return r;
-    await deleteMessage(chatId, options.editMessageId, env).catch(() => {});
+  try {
+    const { data } = await fetchHistory(env);
+    const msg = buildStatsMessage(data);
+    return updateTextMessage(chatId, env, options, msg, BACK_KEYBOARD);
+  } catch (err) {
+    console.error(`[stats] ERROR: ${err.message}`);
+    return sendMessage(chatId, `❌ خطا در دریافت آمار.${FOOTER}`, env);
   }
-  return sendMessage(chatId, msg, env, { replyMarkup: BACK_KEYBOARD });
 }
 
 async function respondWithCompare(chatId, env, days = 30, options = {}) {
-  const { data } = await fetchHistory(env);
-  const msg = buildCompareMessage(data, days);
-  if (options.editMessageId) {
-    const r = await editMessage(chatId, options.editMessageId, msg, env, { replyMarkup: BACK_KEYBOARD });
-    if (r.ok) return r;
-    if (!r.description?.includes("no caption")) return r;
-    await deleteMessage(chatId, options.editMessageId, env).catch(() => {});
+  try {
+    const { data } = await fetchHistory(env);
+    const msg = buildCompareMessage(data, days);
+    return updateTextMessage(chatId, env, options, msg, BACK_KEYBOARD);
+  } catch (err) {
+    console.error(`[compare] ERROR: ${err.message}`);
+    return sendMessage(chatId, `❌ خطا در مقایسه.${FOOTER}`, env);
   }
-  return sendMessage(chatId, msg, env, { replyMarkup: BACK_KEYBOARD });
 }
 
 async function respondWithMenu(chatId, env, options = {}) {
-  const subscribed = await isSubscribed(chatId, env);
-  const notifyEnabled = await isNotifyEnabled(chatId, env);
-  const msg = buildMenuMessage(subscribed, notifyEnabled);
-  if (options.editMessageId) {
-    const r = await editMessage(chatId, options.editMessageId, msg, env, { replyMarkup: MAIN_MENU_KEYBOARD });
-    if (r.ok) return r;
-    if (!r.description?.includes("no caption")) return r;
-    await deleteMessage(chatId, options.editMessageId, env).catch(() => {});
+  try {
+    const subscribed = await isSubscribed(chatId, env);
+    const notifyEnabled = await isNotifyEnabled(chatId, env);
+    const msg = buildMenuMessage(subscribed, notifyEnabled);
+    return updateTextMessage(chatId, env, options, msg, MAIN_MENU_KEYBOARD);
+  } catch (err) {
+    console.error(`[menu] ERROR: ${err.message}`);
+    return sendMessage(chatId, `🏠 منوی اصلی\n\n/price /gold /coins /all${FOOTER}`, env, { replyMarkup: MAIN_MENU_KEYBOARD });
   }
-  return sendMessage(chatId, msg, env, { replyMarkup: MAIN_MENU_KEYBOARD });
 }
 
 // ============================================================
-//  بخش ۱۵: پردازش دستورات متنی
+//  بخش ۱۶: پردازش دستورات متنی
 // ============================================================
 
 async function handleBotCommand(message, env, ctx) {
-  const chatId = message.chat.id;
-  const messageId = message.message_id;
-  const text = (message.text || "").trim();
+  const chatId = message?.chat?.id;
+  const messageId = message?.message_id;
+  const text = safeStr(message?.text, "").trim();
 
-  console.log(`[bot] Command: "${text}" from chat ${chatId}`);
+  if (!chatId) {
+    console.error(`[bot] No chatId`);
+    return;
+  }
 
-  ctx.waitUntil((async () => {
-    await sleep(2000);
-    await deleteMessage(chatId, messageId, env).catch(() => {});
-  })());
+  console.log(`[bot] Command: "${text}" from ${chatId}`);
+
+  // حذف پیام کاربر بعد از ۲ ثانیه
+  if (messageId) {
+    ctx.waitUntil((async () => {
+      await sleep(2000);
+      await deleteMessage(chatId, messageId, env).catch(() => {});
+    })());
+  }
 
   try {
     await registerUser(chatId, env);
@@ -1158,8 +1277,7 @@ async function handleBotCommand(message, env, ctx) {
     if (text === "/help") {
       let msg = `📖 *راهنمای بات*\n━━━━━━━━━━━━━━━━━━━\n\n`;
       BOT_COMMANDS.forEach((c) => { msg += `/${c.command} — ${c.description}\n`; });
-      msg += `\n💡 *نکته:* هر ساعت یک نوتیف قیمت دریافت می‌کنی.\n`;
-      msg += `برای لغو: /notify\\_off`;
+      msg += `\n💡 هر ساعت یک نوتیف قیمت دریافت می‌کنی.`;
       msg += FOOTER;
       return sendMessage(chatId, msg, env, { replyMarkup: MAIN_MENU_KEYBOARD });
     }
@@ -1178,48 +1296,37 @@ async function handleBotCommand(message, env, ctx) {
     if (text === "/subscribe") {
       const msg = await respondWithRate(chatId, env, { subscribe: true });
       if (msg.ok) {
-        return sendMessage(chatId,
-          `✅ *اشتراک زنده دلار فعال شد*\n\n` +
-          `از این پس قیمت دلار هر ۳۰ دقیقه بررسی و در صورت تغییر، *همین پیام* ویرایش می‌شود.\n\n` +
-          `🔕 لغو: /unsubscribe` + FOOTER, env);
+        await sendMessage(chatId,
+          `✅ *اشتراک زنده دلار فعال شد*\n\nاز این پس قیمت دلار هر ۳۰ دقیقه بررسی و در صورت تغییر، همین پیام ویرایش می‌شود.\n\n🔕 لغو: /unsubscribe${FOOTER}`,
+          env);
       }
       return msg;
     }
 
     if (text === "/unsubscribe") {
       await unsubscribeUser(chatId, env);
-      return sendMessage(chatId,
-        `🔕 *اشتراک زنده دلار غیرفعال شد*\n\nدیگر پیام دلار برایت ویرایش نمی‌شود.` + FOOTER,
-        env, { replyMarkup: MAIN_MENU_KEYBOARD });
+      return sendMessage(chatId, `🔕 *اشتراک زنده غیرفعال شد*.${FOOTER}`, env, { replyMarkup: MAIN_MENU_KEYBOARD });
     }
 
     if (text === "/notify_off") {
       await setNotifyOff(chatId, env);
-      return sendMessage(chatId,
-        `🔕 *نوتیف ساعتی لغو شد*\n\n` +
-        `دیگر پیام ساعتی قیمت دریافت نمی‌کنی.\n\n` +
-        `💡 برای فعال‌سازی: /notify\\_on` + FOOTER,
-        env, { replyMarkup: NOTIFY_OFF_KEYBOARD });
+      return sendMessage(chatId, `🔕 *نوتیف ساعتی لغو شد*.\n\n💡 برای فعال‌سازی: /notify\\_on${FOOTER}`, env, { replyMarkup: NOTIFY_OFF_KEYBOARD });
     }
 
     if (text === "/notify_on") {
       await setNotifyOn(chatId, env);
-      return sendMessage(chatId,
-        `🔔 *نوتیف ساعتی فعال شد*\n\n` +
-        `از این پس هر ساعت قیمت جدید برایت ارسال می‌شود.\n\n` +
-        `🔕 برای لغو: /notify\\_off` + FOOTER,
-        env, { replyMarkup: MAIN_MENU_KEYBOARD });
+      return sendMessage(chatId, `🔔 *نوتیف ساعتی فعال شد*.${FOOTER}`, env, { replyMarkup: MAIN_MENU_KEYBOARD });
     }
 
     if (text.startsWith("/convert")) {
       const arg = text.replace("/convert", "").trim();
       const amount = parseFloat(arg);
       if (isNaN(amount) || amount <= 0) {
-        return sendMessage(chatId, `🔄 *تبدیل دلار به تومان*\n\nمثال: \`/convert 100\`` + FOOTER, env, { replyMarkup: BACK_KEYBOARD });
+        return sendMessage(chatId, `🔄 *تبدیل*\n\nمثال: \`/convert 100\`${FOOTER}`, env, { replyMarkup: BACK_KEYBOARD });
       }
       const { data } = await fetchHistory(env);
       const rate = safeNumber(data.latest?.price || data.latest?.price_toman);
-      if (rate === null) return sendMessage(chatId, `❌ نرخ دلار در دسترس نیست.` + FOOTER, env);
+      if (rate === null) return sendMessage(chatId, `❌ نرخ دلار در دسترس نیست.${FOOTER}`, env);
       const toman = Math.round(amount * rate);
       let msg = `🔄 *تبدیل ارز*\n━━━━━━━━━━━━━━━━━━━\n\n`;
       msg += `💵 *${toPersianNumber(amount)}* دلار\n       ⬇️\n💰 *${toPersianNumber(toman)}* تومان\n\n`;
@@ -1228,80 +1335,96 @@ async function handleBotCommand(message, env, ctx) {
       return sendMessage(chatId, msg, env, { replyMarkup: BACK_KEYBOARD });
     }
 
-    return sendMessage(chatId, `❓ *دستور نامعتبر*\n\nاز /menu استفاده کن.` + FOOTER, env, { replyMarkup: MAIN_MENU_KEYBOARD });
+    return sendMessage(chatId, `❓ *دستور نامعتبر*\n\nاز /menu استفاده کن.${FOOTER}`, env, { replyMarkup: MAIN_MENU_KEYBOARD });
   } catch (err) {
-    console.error(`[bot] ERROR: ${err.message}\n${err.stack}`);
+    console.error(`[bot] ERROR: ${err?.message || err}\n${err?.stack || ""}`);
     try {
-      return await sendMessage(chatId, `❌ *خطا در پردازش*\n\nلطفاً بعداً تلاش کن.` + FOOTER, env);
-    } catch (e2) { console.error(`[bot] double error: ${e2.message}`); }
+      await sendMessage(chatId, `❌ خطا. لطفاً دوباره تلاش کن.${FOOTER}`, env);
+    } catch {}
   }
 }
 
 // ============================================================
-//  بخش ۱۶: Callback Query Handler
+//  بخش ۱۷: Callback Query Handler
 // ============================================================
 
 async function handleCallbackQuery(cb, env, ctx) {
-  const chatId = cb.message.chat.id;
-  const messageId = cb.message.message_id;
-  const data = cb.data || "";
+  const chatId = cb?.message?.chat?.id;
+  const messageId = cb?.message?.message_id;
+  const isPhoto = !!(cb?.message?.photo);
+  const data = safeStr(cb?.data, "");
+
+  if (!chatId || !messageId) {
+    console.error(`[callback] Missing chatId/messageId`);
+    return;
+  }
+
+  console.log(`[callback] action="${data}" chat=${chatId} isPhoto=${isPhoto}`);
+
+  // پاسخ فوری (بدون انتظار)
   ctx.waitUntil(answerCallbackQuery(cb.id, env));
 
   try {
-    if (!data.startsWith("cmd:")) return;
-    const action = data.slice(4);
-
     await registerUser(chatId, env);
 
+    if (!data.startsWith("cmd:")) return;
+    const action = data.slice(4);
+    const opts = { editMessageId: messageId, wasPhoto: isPhoto };
+
     switch (action) {
-      case "menu": return respondWithMenu(chatId, env, { editMessageId: messageId });
-      case "all": return respondWithAll(chatId, env, { editMessageId: messageId });
-      case "price": return respondWithRate(chatId, env, { editMessageId: messageId });
-      case "eur": return respondWithAsset(chatId, env, "eur", { editMessageId: messageId });
-      case "gold": return respondWithGold(chatId, env, { editMessageId: messageId });
-      case "coins": return respondWithCoins(chatId, env, { editMessageId: messageId });
-      case "currencies": return respondWithCurrencies(chatId, env, { editMessageId: messageId });
-      case "oil": return respondWithOil(chatId, env, { editMessageId: messageId });
-      case "history": return respondWithHistory(chatId, env, 7, { editMessageId: messageId });
-      case "stats": return respondWithStats(chatId, env, { editMessageId: messageId });
-      case "compare": return respondWithCompare(chatId, env, 30, { editMessageId: messageId });
+      case "menu": return respondWithMenu(chatId, env, opts);
+      case "all": return respondWithAll(chatId, env, opts);
+      case "price": return respondWithRate(chatId, env, opts);
+      case "eur": return respondWithAsset(chatId, env, "eur", opts);
+      case "gold": return respondWithGold(chatId, env, opts);
+      case "coins": return respondWithCoins(chatId, env, opts);
+      case "currencies": return respondWithCurrencies(chatId, env, opts);
+      case "oil": return respondWithOil(chatId, env, opts);
+      case "history": return respondWithHistory(chatId, env, 7, opts);
+      case "stats": return respondWithStats(chatId, env, opts);
+      case "compare": return respondWithCompare(chatId, env, 30, opts);
 
       case "subscribe":
         await unsubscribeUser(chatId, env);
-        return respondWithRate(chatId, env, { editMessageId: messageId, subscribe: true });
+        return respondWithRate(chatId, env, { ...opts, subscribe: true });
 
       case "notify_off":
         await setNotifyOff(chatId, env);
-        return editMessage(
-          chatId, messageId,
-          `🔕 *نوتیف ساعتی لغو شد*\n\n` +
-          `دیگر پیام ساعتی قیمت دریافت نمی‌کنی.\n\n` +
-          `💡 برای فعال‌سازی مجدد، دکمه زیر را بزن.` + FOOTER,
-          env, { replyMarkup: NOTIFY_OFF_KEYBOARD }
+        return updateTextMessage(
+          chatId, env, opts,
+          `🔕 *نوتیف ساعتی لغو شد*\n\nدیگر پیام ساعتی دریافت نمی‌کنی.\n\n💡 برای فعال‌سازی، دکمه زیر.${FOOTER}`,
+          NOTIFY_OFF_KEYBOARD
         );
 
       case "notify_on":
         await setNotifyOn(chatId, env);
-        return editMessage(
-          chatId, messageId,
-          `🔔 *نوتیف ساعتی فعال شد*\n\n` +
-          `از این پس هر ساعت قیمت جدید برایت ارسال می‌شود.\n\n` +
-          `💡 برای لغو، دکمه زیر را بزن.` + FOOTER,
-          env, { replyMarkup: MAIN_MENU_KEYBOARD }
+        return updateTextMessage(
+          chatId, env, opts,
+          `🔔 *نوتیف ساعتی فعال شد*\n\nاز این پس هر ساعت پیام قیمت دریافت می‌کنی.${FOOTER}`,
+          MAIN_MENU_KEYBOARD
         );
 
       case "convert":
-        return editMessage(chatId, messageId,
-          `🔄 *تبدیل دلار به تومان*\n\nدستور \`/convert <عدد>\` را بفرست.\n\nمثال: \`/convert 100\`` + FOOTER,
-          env, { replyMarkup: BACK_KEYBOARD });
+        return updateTextMessage(
+          chatId, env, opts,
+          `🔄 *تبدیل دلار*\n\nدستور \`/convert <عدد>\` را بفرست.\n\nمثال: \`/convert 100\`${FOOTER}`,
+          BACK_KEYBOARD
+        );
 
-      default: return;
+      default:
+        console.log(`[callback] Unknown action: ${action}`);
+        return;
     }
-  } catch (err) { console.error(`[callback] ERROR: ${err.message}`); }
+  } catch (err) {
+    console.error(`[callback] ERROR: ${err?.message || err}\n${err?.stack || ""}`);
+    try {
+      await sendMessage(chatId, `❌ خطا در پردازش. لطفاً دوباره تلاش کن.${FOOTER}`, env);
+    } catch {}
+  }
 }
 
 // ============================================================
-//  بخش ۱۷: Webhook
+//  بخش ۱۸: Webhook
 // ============================================================
 
 async function handleWebhook(request, env, ctx) {
@@ -1311,8 +1434,12 @@ async function handleWebhook(request, env, ctx) {
   }
   try {
     const update = await request.json();
-    if (update.message && update.message.text) ctx.waitUntil(handleBotCommand(update.message, env, ctx));
-    if (update.callback_query) ctx.waitUntil(handleCallbackQuery(update.callback_query, env, ctx));
+    if (update?.message?.text) {
+      ctx.waitUntil(handleBotCommand(update.message, env, ctx));
+    }
+    if (update?.callback_query) {
+      ctx.waitUntil(handleCallbackQuery(update.callback_query, env, ctx));
+    }
     return new Response("OK", { status: 200 });
   } catch (err) {
     console.error(`[webhook] ${err.message}`);
@@ -1321,196 +1448,170 @@ async function handleWebhook(request, env, ctx) {
 }
 
 // ============================================================
-//  بخش ۱۸: Cron
+//  بخش ۱۹: Cron
 // ============================================================
 
 async function sendHourlyNotification(env) {
-  console.log(`[notify] Starting hourly notification...`);
+  console.log(`[notify] Starting...`);
 
-  const { data } = await fetchHistory(env);
-  const price = data.latest?.price || data.latest?.price_toman;
-  if (!price) { console.error(`[notify] No price`); return; }
+  try {
+    const { data } = await fetchHistory(env);
+    const price = data.latest?.price || data.latest?.price_toman;
+    if (!price) { console.error(`[notify] No price`); return; }
 
-  const users = await getActiveUsers(env);
-  console.log(`[notify] ${users.length} active users`);
-  if (users.length === 0) return;
+    const users = await getActiveUsers(env);
+    console.log(`[notify] ${users.length} users`);
+    if (users.length === 0) return;
 
-  const caption = buildPriceCaption(data);
-  const photoUrl = chartUrlFor("usd");
-  const pending = (await env.RATE_KV.get(KV_NOTIFY_PENDING, "json")) || [];
+    const caption = buildPriceCaption(data);
+    const photoUrl = chartUrlFor("usd");
+    const pending = (await env.RATE_KV.get(KV_NOTIFY_PENDING, "json")) || [];
 
-  let sent = 0, failed = 0;
+    let sent = 0, failed = 0;
 
-  for (let i = 0; i < users.length; i++) {
-    const chatId = users[i];
-    try {
-      const result = await sendPhoto(chatId, photoUrl, caption, env, {
-        replyMarkup: NOTIFY_KEYBOARD,
-      });
-
-      if (result.ok && result.result?.message_id) {
-        pending.push({
-          chat_id: chatId,
-          message_id: result.result.message_id,
-          sent_at: Date.now(),
-        });
-        sent++;
-      } else {
-        const desc = result.description || "";
-        if (desc.includes("blocked") || desc.includes("chat not found") || desc.includes("deactivated") || desc.includes("kicked")) {
-          await env.RATE_KV.delete(`${KV_USER_PREFIX}${chatId}`);
-          console.log(`[notify] Removed blocked: ${chatId}`);
+    for (let i = 0; i < users.length; i++) {
+      const chatId = users[i];
+      try {
+        const result = await sendPhoto(chatId, photoUrl, caption, env, { replyMarkup: NOTIFY_KEYBOARD });
+        if (result.ok && result.result?.message_id) {
+          pending.push({ chat_id: chatId, message_id: result.result.message_id, sent_at: Date.now() });
+          sent++;
+        } else {
+          const desc = result.description || "";
+          if (desc.includes("blocked") || desc.includes("not found") || desc.includes("deactivated")) {
+            await env.RATE_KV.delete(`${KV_USER_PREFIX}${chatId}`);
+          }
+          failed++;
         }
+      } catch (err) {
+        console.error(`[notify] ${chatId}: ${err.message}`);
         failed++;
       }
-    } catch (err) {
-      console.error(`[notify] ${chatId}: ${err.message}`);
-      failed++;
+
+      if (i > 0 && i % NOTIFY_BATCH_SIZE === 0) await sleep(1000);
+      else await sleep(50);
     }
 
-    if (i > 0 && i % NOTIFY_BATCH_SIZE === 0) {
-      await sleep(1000);
-    } else {
-      await sleep(50);
-    }
+    await env.RATE_KV.put(KV_NOTIFY_PENDING, JSON.stringify(pending), { expirationTtl: KV_PENDING_TTL });
+    console.log(`[notify] Sent: ${sent}, Failed: ${failed}`);
+  } catch (err) {
+    console.error(`[notify] fatal: ${err.message}`);
   }
-
-  await env.RATE_KV.put(KV_NOTIFY_PENDING, JSON.stringify(pending), {
-    expirationTtl: KV_PENDING_TTL,
-  });
-
-  console.log(`[notify] Sent: ${sent}, Failed: ${failed}, Pending: ${pending.length}`);
 }
 
 async function cleanupOldNotifications(env) {
-  const pending = (await env.RATE_KV.get(KV_NOTIFY_PENDING, "json")) || [];
-  if (pending.length === 0) return;
+  try {
+    const pending = (await env.RATE_KV.get(KV_NOTIFY_PENDING, "json")) || [];
+    if (pending.length === 0) return;
 
-  const now = Date.now();
-  const keep = [];
-  let deleted = 0;
+    const now = Date.now();
+    const keep = [];
+    let deleted = 0;
 
-  for (const n of pending) {
-    const ageMin = (now - n.sent_at) / 60000;
-    if (ageMin >= NOTIFY_DELETE_AFTER_MINUTES) {
-      try {
-        await deleteMessage(n.chat_id, n.message_id, env);
-        deleted++;
-      } catch {}
-    } else {
-      keep.push(n);
+    for (const n of pending) {
+      const ageMin = (now - n.sent_at) / 60000;
+      if (ageMin >= NOTIFY_DELETE_AFTER_MINUTES) {
+        try { await deleteMessage(n.chat_id, n.message_id, env); deleted++; } catch {}
+      } else {
+        keep.push(n);
+      }
+      await sleep(30);
     }
-    await sleep(30);
-  }
 
-  if (keep.length > 0) {
-    await env.RATE_KV.put(KV_NOTIFY_PENDING, JSON.stringify(keep), {
-      expirationTtl: KV_PENDING_TTL,
-    });
-  } else {
-    await env.RATE_KV.delete(KV_NOTIFY_PENDING);
-  }
+    if (keep.length > 0) {
+      await env.RATE_KV.put(KV_NOTIFY_PENDING, JSON.stringify(keep), { expirationTtl: KV_PENDING_TTL });
+    } else {
+      await env.RATE_KV.delete(KV_NOTIFY_PENDING);
+    }
 
-  if (deleted > 0) console.log(`[cleanup] Deleted: ${deleted}, Kept: ${keep.length}`);
+    if (deleted > 0) console.log(`[cleanup] Deleted: ${deleted}`);
+  } catch (err) {
+    console.error(`[cleanup] ${err.message}`);
+  }
 }
 
 async function updateSubscribers(env) {
-  const { data } = await fetchHistory(env);
-  const newPrice = data.latest?.price || data.latest?.price_toman;
+  try {
+    const { data } = await fetchHistory(env);
+    const newPrice = data.latest?.price || data.latest?.price_toman;
 
-  const list = await env.RATE_KV.list({ prefix: KV_SUB_PREFIX });
-  if (list.keys.length === 0) return;
+    const list = await env.RATE_KV.list({ prefix: KV_SUB_PREFIX });
+    if (list.keys.length === 0) return;
 
-  console.log(`[subs] ${list.keys.length} subscribers`);
+    console.log(`[subs] ${list.keys.length} subscribers`);
 
-  let edited = 0, deleted = 0, skipped = 0;
-  for (const key of list.keys) {
-    const sub = await env.RATE_KV.get(key.name, "json");
-    if (!sub) continue;
-    if (sub.last_price === newPrice) { skipped++; continue; }
-
+    let edited = 0, deleted = 0, skipped = 0;
     const caption = buildPriceCaption(data);
-    try {
-      let result = await editMessageMedia(
-        sub.chat_id,
-        sub.message_id,
-        chartUrlFor("usd"),
-        caption,
-        env,
-        { replyMarkup: PRICE_KEYBOARD }
-      );
+    const photoUrl = chartUrlFor("usd");
 
-      if (!result.ok && result.description?.includes("no caption")) {
-        result = await editMessage(sub.chat_id, sub.message_id, caption, env, { replyMarkup: PRICE_KEYBOARD });
-      }
+    for (const key of list.keys) {
+      const sub = await env.RATE_KV.get(key.name, "json");
+      if (!sub) continue;
+      if (sub.last_price === newPrice) { skipped++; continue; }
 
-      if (result.ok) {
-        await env.RATE_KV.put(key.name, JSON.stringify({ ...sub, last_price: newPrice, last_updated: Date.now() }), { expirationTtl: KV_SUB_TTL });
-        edited++;
-      } else {
-        const desc = result.description || "";
-        if (desc.includes("not found") || desc.includes("can't be edited") || desc.includes("chat not found")) {
-          await env.RATE_KV.delete(key.name);
-          deleted++;
+      try {
+        // اول editMessageMedia
+        let result = await editMessageMedia(sub.chat_id, sub.message_id, photoUrl, caption, env, { replyMarkup: PRICE_KEYBOARD });
+
+        // اگر پیام متنی است
+        if (!result.ok && (result.description?.includes("no caption") || result.description?.includes("not a photo"))) {
+          result = await editMessage(sub.chat_id, sub.message_id, caption, env, { replyMarkup: PRICE_KEYBOARD });
         }
+
+        if (result.ok) {
+          await env.RATE_KV.put(key.name, JSON.stringify({ ...sub, last_price: newPrice, last_updated: Date.now() }), { expirationTtl: KV_SUB_TTL });
+          edited++;
+        } else {
+          const desc = result.description || "";
+          if (desc.includes("not found") || desc.includes("can't be edited") || desc.includes("chat not found")) {
+            await env.RATE_KV.delete(key.name);
+            deleted++;
+          }
+        }
+      } catch (err) {
+        console.error(`[subs] ${sub.chat_id}: ${err.message}`);
       }
-    } catch (err) {
-      console.error(`[subs] ${sub.chat_id}: ${err.message}`);
+      await sleep(50);
     }
-    await sleep(50);
+    console.log(`[subs] Edited: ${edited}, Deleted: ${deleted}, Skipped: ${skipped}`);
+  } catch (err) {
+    console.error(`[subs] fatal: ${err.message}`);
   }
-  console.log(`[subs] Edited: ${edited}, Deleted: ${deleted}, Skipped: ${skipped}`);
 }
 
-/**
- * ⭐ Cron Handler ترکیبی
- *
- * cron: "7,22,37,52 * * * *"
- *   :07 → trigger GitHub + نوتیف + cleanup
- *   :22 → چک داده + ویرایش subscribers + cleanup
- *   :37 → trigger GitHub + cleanup
- *   :52 → چک داده + ویرایش subscribers + cleanup
- */
 async function handleScheduled(controller, env, ctx) {
   console.log(`[cron] ${controller.cron}`);
   if (!env.RATE_KV) return;
 
-  const now = new Date();
-  const currentMinute = now.getUTCMinutes();
-  console.log(`[cron] UTC minute: ${currentMinute}`);
-
-  // ⭐ همیشه: پاک‌سازی نوتیف‌های قدیمی
   await cleanupOldNotifications(env);
 
-  // ⭐ دقیقه :07 و :37 → Trigger GitHub Action
+  const currentMinute = new Date().getUTCMinutes();
+  console.log(`[cron] minute: ${currentMinute}`);
+
+  // Trigger در دقیقه :07 و :37
   if (currentMinute === 7 || currentMinute === 37) {
     try {
       await triggerWorkflow(env);
     } catch (err) {
       console.error(`[cron] Trigger failed: ${err.message}`);
-      // خطا نادیده گرفته می‌شود، cron بعدی تلاش می‌کند
     }
   }
 
-  // ⭐ دقیقه :07 → نوتیف ساعتی
+  // نوتیف در :07
   if (currentMinute === 7) {
     const lastNotify = parseInt((await env.RATE_KV.get(KV_LAST_NOTIFY_TIME)) || "0", 10);
     const minutesSinceLast = (Date.now() - lastNotify) / 60000;
-
     if (minutesSinceLast >= 55) {
       await sendHourlyNotification(env);
       await env.RATE_KV.put(KV_LAST_NOTIFY_TIME, String(Date.now()));
-    } else {
-      console.log(`[cron] Notify skip, ${Math.round(minutesSinceLast)}m`);
     }
   }
 
-  // ⭐ همیشه: ویرایش subscribers
   await updateSubscribers(env);
 }
 
 // ============================================================
-//  بخش ۱۹: Setup & Router
+//  بخش ۲۰: Setup & Router
 // ============================================================
 
 async function handleSetup(env) {
@@ -1526,7 +1627,6 @@ async function route(request, env, ctx) {
   if (path === "/webhook" && method === "POST") return handleWebhook(request, env, ctx);
   if (path === "/setup") return handleSetup(env);
   if (path === "/trigger") return handleTrigger(env);
-
   if (method !== "GET") return errorResponse("Method not allowed", 405);
 
   switch (path) {
