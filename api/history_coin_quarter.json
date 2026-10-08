@@ -3,10 +3,10 @@
   "title": "ربع سکه",
   "unit": "تومان",
   "timezone": "Asia/Tehran",
-  "updated_at": "2026-10-08 19:37:29",
+  "updated_at": "2026-10-08 20:07:31",
   "total_records": 1165,
   "latest": {
-    "timestamp": 1791475649,
+    "timestamp": 1791477451,
     "date": "2026-10-08",
     "price": 76500000,
     "price_toman": 76500000,
@@ -10490,7 +10490,7 @@
       "bubble_percent": 18.86
     },
     {
-      "timestamp": 1791475649,
+      "timestamp": 1791477451,
       "date": "2026-10-08",
       "price": 76500000,
       "price_toman": 76500000,
