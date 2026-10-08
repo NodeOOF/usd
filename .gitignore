@@ -1,2 +1,4 @@
 bot/.wrangler/cache/wrangler-account.json
 bot/wrangler.jsonc
+.github/copilot-instructions.md
+.gitignore

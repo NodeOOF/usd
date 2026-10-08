@@ -13,19 +13,19 @@
 <meta property="og:image" content="usd_chart.png">
 <meta name="twitter:card" content="summary_large_image">
 
-<!-- Favicon inline (بدون درخواست اضافی) -->
+<!-- Favicon inline -->
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
 
-<!-- Preconnect (سریع‌تر) -->
+<!-- Preconnect -->
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-
-<!-- Font با display=swap (بدون مسدود شدن) -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<!-- Font -->
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;800&display=swap" rel="stylesheet">
 
 <style>
-/* ===== Reset & Base ===== */
+/* ===== Reset ===== */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
 body{
@@ -117,8 +117,6 @@ header{
 }
 .btn:hover{background:#334155;color:#fff}
 .btn:active{transform:scale(.97)}
-.btn-primary{background:#2563eb;border-color:#2563eb;color:#fff}
-.btn-primary:hover{background:#1d4ed8}
 .btn svg{width:14px;height:14px}
 
 /* ===== Timeframe ===== */
@@ -324,23 +322,6 @@ header{
 }
 .section-desc{font-size:11px;color:#94a3b8;margin-bottom:12px;line-height:1.6}
 
-/* ===== API List ===== */
-.api-list{display:flex;flex-wrap:wrap;gap:6px}
-.api-link{
-  display:inline-flex;align-items:center;gap:5px;
-  padding:6px 10px;
-  font-size:11px;font-weight:600;
-  background:#1e293b;
-  color:#cbd5e1;
-  border:1px solid #334155;
-  border-radius:8px;
-  text-decoration:none;
-  transition:all .15s;
-  touch-action:manipulation;
-}
-.api-link:hover{background:#334155;color:#fff}
-.api-link:active{transform:scale(.97)}
-
 /* ===== Toast ===== */
 .toast{
   position:fixed;
@@ -381,17 +362,7 @@ footer a:hover{text-decoration:underline}
   .spotlight{padding:12px}
 }
 
-/* ===== Loading skeleton ===== */
-.skeleton{
-  background:linear-gradient(90deg,#1e293b 25%,#334155 50%,#1e293b 75%);
-  background-size:200% 100%;
-  animation:skeleton 1.5s infinite;
-  border-radius:6px;
-  color:transparent !important;
-}
-@keyframes skeleton{0%{background-position:200% 0}100%{background-position:-200% 0}}
-
-/* ===== Reduce motion ===== */
+/* ===== Reduce Motion ===== */
 @media(prefers-reduced-motion:reduce){
   *{animation-duration:.01ms !important;transition-duration:.01ms !important}
   html{scroll-behavior:auto}
@@ -493,13 +464,6 @@ footer a:hover{text-decoration:underline}
     </div>
   </section>
 
-  <!-- API Docs -->
-  <section class="card">
-    <h3 class="section-title">🚀 API رایگان</h3>
-    <p class="section-desc">داده‌ها در قالب JSON آماده فراخوانی بدون کلید دسترسی:</p>
-    <div id="apiList" class="api-list"></div>
-  </section>
-
 </main>
 
 <!-- Footer -->
@@ -512,12 +476,12 @@ footer a:hover{text-decoration:underline}
 <!-- Toast -->
 <div id="toast" class="toast">لینک کپی شد! 📋</div>
 
-<!-- Chart.js با defer (بدون مسدود کردن) -->
+<!-- Chart.js با defer -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
 
 <script>
 // ============================================================
-//  تنظیمات
+//  تنظیمات دارایی‌ها
 // ============================================================
 const ALL_ASSETS = {
   usd:{title:"دلار آمریکا",symbol:"USD",icon:"🇺🇸",category:"major",color:"#3b82f6",unit:"تومان"},
@@ -568,6 +532,9 @@ const ALL_ASSETS = {
   ars:{title:"پزو آرژانتین",symbol:"ARS",icon:"🇦🇷",category:"fiat",color:"#64748b",unit:"تومان"},
 };
 
+// ============================================================
+//  State
+// ============================================================
 let marketData = {};
 let activeAssetKey = "usd";
 let activeHistory = [];
@@ -577,7 +544,7 @@ let chartInstance = null;
 let chartJsLoaded = false;
 
 // ============================================================
-//  ابزارها
+//  Utils
 // ============================================================
 const FA_DIGITS = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
 const toPersianDigits = (n) => String(n).replace(/[0-9]/g, d => FA_DIGITS[+d]);
@@ -598,14 +565,10 @@ async function initApp() {
   const hash = window.location.hash.slice(1).trim();
   if (hash && ALL_ASSETS[hash]) activeAssetKey = hash;
 
-  // بارگذاری همزمان
   await fetchMarketSummary();
   renderMarketGrid();
-  renderApiDocs();
   loadActiveAssetHistory();
   initCalculator();
-
-  // بارگذاری Chart.js به صورت lazy
   loadChartJs();
 }
 
@@ -616,7 +579,6 @@ function loadChartJs() {
     renderChart();
     return;
   }
-  // اگر Chart.js هنوز لود نشده، صبر کن
   const checkChart = setInterval(() => {
     if (typeof Chart !== 'undefined') {
       chartJsLoaded = true;
@@ -683,7 +645,7 @@ function renderMarketGrid() {
   grid.appendChild(fragment);
 }
 
-// استفاده از event delegation (سریع‌تر از onclick روی هر کارت)
+// Event Delegation
 document.addEventListener('click', (e) => {
   const card = e.target.closest('.asset-card');
   if (card && card.dataset.key) {
@@ -851,7 +813,7 @@ function changeTimeframe(days) {
 }
 
 // ============================================================
-//  Share
+//  Share Link
 // ============================================================
 function copyShareLink() {
   const base = `${location.origin}${location.pathname.replace('index.html', '').replace(/\/$/, '')}`;
@@ -898,27 +860,6 @@ function updateCalculator() {
 
   const amount = inputVal / currentPrice;
   resultEl.textContent = `${toPersianDigits(amount.toLocaleString('en-US', {maximumFractionDigits:3}))} ${cfg.symbol}`;
-}
-
-// ============================================================
-//  API Docs
-// ============================================================
-function renderApiDocs() {
-  const list = document.getElementById('apiList');
-  if (!list) return;
-
-  const fragment = document.createDocumentFragment();
-  for (const [key, cfg] of Object.entries(ALL_ASSETS)) {
-    const a = document.createElement('a');
-    a.href = `./api/history_${key}.json`;
-    a.target = '_blank';
-    a.rel = 'noopener';
-    a.className = 'api-link';
-    a.innerHTML = `<span>${cfg.icon}</span><span>${cfg.title}</span>`;
-    fragment.appendChild(a);
-  }
-  list.innerHTML = '';
-  list.appendChild(fragment);
 }
 
 // ============================================================
