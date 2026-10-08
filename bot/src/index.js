@@ -296,7 +296,9 @@ async function fetchMarket(env) {
 }
 
 function chartUrlFor(key) {
-  return `${CHART_BASE_URLS[0]}/charts/${key}.png`;
+  // cache buster: هر ۱۰ دقیقه عوض می‌شود
+  const bust = Math.floor(Date.now() / 600000);
+  return `${CHART_BASE_URLS[0]}/charts/${key}.png?v=${bust}`;
 }
 
 // ============================================================
