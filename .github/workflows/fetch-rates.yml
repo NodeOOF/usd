@@ -1,69 +1,46 @@
-name: Fetch Market Rates
+name: Fetch Market Rates & Update API
 
 on:
-  # ⭐ فقط workflow_dispatch (چون Worker trigger می‌کند)
-  workflow_dispatch:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:      # Manual trigger
 
-# اجازه commit و push
 permissions:
   contents: write
 
-# متغیرهای محیطی
 env:
   TZ: Asia/Tehran
-  STALE_MINUTES: "120"
-  CHART_DAYS: "180"
 
 jobs:
-  update:
+  update-rates:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
 
     steps:
-      # ۱. چک‌اوت ریپو
       - name: Check out repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-          token: ${{ secrets.GITHUB_TOKEN }}
 
-      # ۲. نصب Python (بدون cache: pip)
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      # ۳. نصب پکیج‌ها
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install requests beautifulsoup4 lxml cloudscraper matplotlib tzdata jdatetime
+          pip install requests beautifulsoup4 lxml cloudscraper matplotlib tzdata
 
-      # ۴. اجرای اسکریپت اصلی
-      - name: Run fetch script
+      - name: Run fetch script and generate outputs
         run: python fetch_rates.py
 
-      # ۵. Commit و push
       - name: Commit and push changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          # اضافه کردن همه فایل‌های خروجی
-          git add market.json 2>/dev/null || true
-          git add api/ 2>/dev/null || true
-          git add charts/ 2>/dev/null || true
-          git add share/ 2>/dev/null || true
-          git add index.html 2>/dev/null || true
-          git add README.md 2>/dev/null || true
-          git add *.png 2>/dev/null || true
-          git add usd_chart.png 2>/dev/null || true
-
-          # بررسی تغییرات
+          git add market.json README.md api/*.json *.png share/*.html charts/*.png
+          
           if git diff --staged --quiet; then
-            echo "📭 No changes to commit."
+            echo "No changes to commit."
           else
-            git commit -m "chore(auto): update rates [skip ci]"
+            git commit -m "chore(auto): update rates, API history and charts [skip ci]"
             git push
-            echo "✅ Changes committed and pushed"
           fi
