@@ -3,41 +3,16 @@
   "title": "رئال برزیل",
   "unit": "تومان",
   "timezone": "Asia/Tehran",
-<<<<<<< HEAD
-  "updated_at": "2026-10-08 09:57:11",
-  "total_records": 1174,
+  "updated_at": "2026-10-08 13:01:00",
+  "total_records": 1172,
   "latest": {
-    "timestamp": 1791440831,
+    "timestamp": 1791451860,
     "date": "2026-10-08",
-    "price": 52660,
-    "price_toman": 52660,
-    "price_irr": 526600
-=======
-  "updated_at": "2026-10-08 12:38:12",
-  "total_records": 1174,
-  "latest": {
-    "timestamp": 1791450492,
-    "date": "2026-10-08",
-    "price": 53460,
-    "price_toman": 53460,
-    "price_irr": 534600
->>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
+    "price": 53400,
+    "price_toman": 53400,
+    "price_irr": 534000
   },
   "history": [
-    {
-      "timestamp": 1688070600,
-      "date": "2023-06-30",
-      "price": 10470,
-      "price_toman": 10470,
-      "price_irr": 104700
-    },
-    {
-      "timestamp": 1688157000,
-      "date": "2023-07-01",
-      "price": 10490,
-      "price_toman": 10490,
-      "price_irr": 104900
-    },
     {
       "timestamp": 1688243400,
       "date": "2023-07-02",
@@ -8222,40 +8197,25 @@
       "price_irr": 539800
     },
     {
-      "timestamp": 1791315681,
+      "timestamp": 1791232200,
       "date": "2026-10-06",
-      "price": 54200,
-      "price_toman": 54200,
-      "price_irr": 542000
+      "price": 54240,
+      "price_toman": 54240,
+      "price_irr": 542400
     },
     {
-<<<<<<< HEAD
-      "timestamp": 1791382766,
+      "timestamp": 1791318600,
       "date": "2026-10-07",
-      "price": 53060,
-      "price_toman": 53060,
-      "price_irr": 530600
+      "price": 52760,
+      "price_toman": 52760,
+      "price_irr": 527600
     },
     {
-      "timestamp": 1791440831,
+      "timestamp": 1791451860,
       "date": "2026-10-08",
-      "price": 52660,
-      "price_toman": 52660,
-      "price_irr": 526600
-=======
-      "timestamp": 1791401890,
-      "date": "2026-10-07",
-      "price": 52820,
-      "price_toman": 52820,
-      "price_irr": 528200
-    },
-    {
-      "timestamp": 1791450492,
-      "date": "2026-10-08",
-      "price": 53460,
-      "price_toman": 53460,
-      "price_irr": 534600
->>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
+      "price": 53400,
+      "price_toman": 53400,
+      "price_irr": 534000
     }
   ]
 }

@@ -3,41 +3,16 @@
   "title": "روپیه هند",
   "unit": "تومان",
   "timezone": "Asia/Tehran",
-<<<<<<< HEAD
-  "updated_at": "2026-10-08 09:57:10",
-  "total_records": 1174,
+  "updated_at": "2026-10-08 13:00:59",
+  "total_records": 1172,
   "latest": {
-    "timestamp": 1791440830,
-    "date": "2026-10-08",
-    "price": 2730,
-    "price_toman": 2730,
-    "price_irr": 27300
-=======
-  "updated_at": "2026-10-08 12:38:10",
-  "total_records": 1174,
-  "latest": {
-    "timestamp": 1791450490,
+    "timestamp": 1791451859,
     "date": "2026-10-08",
     "price": 2770,
     "price_toman": 2770,
     "price_irr": 27700
->>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
   },
   "history": [
-    {
-      "timestamp": 1688070600,
-      "date": "2023-06-30",
-      "price": 610,
-      "price_toman": 610,
-      "price_irr": 6100
-    },
-    {
-      "timestamp": 1688157000,
-      "date": "2023-07-01",
-      "price": 612,
-      "price_toman": 612,
-      "price_irr": 6120
-    },
     {
       "timestamp": 1688243400,
       "date": "2023-07-02",
@@ -8222,37 +8197,25 @@
       "price_irr": 28000
     },
     {
-      "timestamp": 1791315681,
+      "timestamp": 1791232200,
       "date": "2026-10-06",
       "price": 2800,
       "price_toman": 2800,
       "price_irr": 28000
     },
     {
-<<<<<<< HEAD
-      "timestamp": 1791382765,
-=======
-      "timestamp": 1791401889,
->>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
+      "timestamp": 1791318600,
       "date": "2026-10-07",
       "price": 2730,
       "price_toman": 2730,
       "price_irr": 27300
     },
     {
-<<<<<<< HEAD
-      "timestamp": 1791440830,
-      "date": "2026-10-08",
-      "price": 2730,
-      "price_toman": 2730,
-      "price_irr": 27300
-=======
-      "timestamp": 1791450490,
+      "timestamp": 1791451859,
       "date": "2026-10-08",
       "price": 2770,
       "price_toman": 2770,
       "price_irr": 27700
->>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
     }
   ]
 }

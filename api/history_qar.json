@@ -3,41 +3,16 @@
   "title": "ریال قطر",
   "unit": "تومان",
   "timezone": "Asia/Tehran",
-<<<<<<< HEAD
-  "updated_at": "2026-10-08 09:57:10",
-  "total_records": 1174,
+  "updated_at": "2026-10-08 13:00:59",
+  "total_records": 1172,
   "latest": {
-    "timestamp": 1791440830,
+    "timestamp": 1791451859,
     "date": "2026-10-08",
-    "price": 72600,
-    "price_toman": 72600,
-    "price_irr": 726000
-=======
-  "updated_at": "2026-10-08 12:38:10",
-  "total_records": 1174,
-  "latest": {
-    "timestamp": 1791450490,
-    "date": "2026-10-08",
-    "price": 73700,
-    "price_toman": 73700,
-    "price_irr": 737000
->>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
+    "price": 73600,
+    "price_toman": 73600,
+    "price_irr": 736000
   },
   "history": [
-    {
-      "timestamp": 1688157000,
-      "date": "2023-07-01",
-      "price": 13800,
-      "price_toman": 13800,
-      "price_irr": 138000
-    },
-    {
-      "timestamp": 1688243400,
-      "date": "2023-07-02",
-      "price": 13870,
-      "price_toman": 13870,
-      "price_irr": 138700
-    },
     {
       "timestamp": 1688329800,
       "date": "2023-07-03",
@@ -8222,40 +8197,25 @@
       "price_irr": 739600
     },
     {
-      "timestamp": 1791315681,
+      "timestamp": 1791232200,
       "date": "2026-10-06",
       "price": 74040,
       "price_toman": 74040,
       "price_irr": 740400
     },
     {
-<<<<<<< HEAD
-      "timestamp": 1791382765,
-      "date": "2026-10-07",
-      "price": 72680,
-      "price_toman": 72680,
-      "price_irr": 726800
-    },
-    {
-      "timestamp": 1791440830,
-      "date": "2026-10-08",
-      "price": 72600,
-      "price_toman": 72600,
-      "price_irr": 726000
-=======
-      "timestamp": 1791401889,
+      "timestamp": 1791318600,
       "date": "2026-10-07",
       "price": 72600,
       "price_toman": 72600,
       "price_irr": 726000
     },
     {
-      "timestamp": 1791450490,
+      "timestamp": 1791451859,
       "date": "2026-10-08",
-      "price": 73700,
-      "price_toman": 73700,
-      "price_irr": 737000
->>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
+      "price": 73600,
+      "price_toman": 73600,
+      "price_irr": 736000
     }
   ]
 }

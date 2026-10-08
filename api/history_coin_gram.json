@@ -3,41 +3,16 @@
   "title": "سکه گرمی",
   "unit": "تومان",
   "timezone": "Asia/Tehran",
-<<<<<<< HEAD
-  "updated_at": "2026-10-08 09:57:09",
-  "total_records": 1203,
+  "updated_at": "2026-10-08 13:00:57",
+  "total_records": 1201,
   "latest": {
-    "timestamp": 1791440829,
-=======
-  "updated_at": "2026-10-08 12:38:08",
-  "total_records": 1203,
-  "latest": {
-    "timestamp": 1791450488,
->>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
+    "timestamp": 1791451857,
     "date": "2026-10-08",
     "price": 37000000,
     "price_toman": 37000000,
     "price_irr": 370000000
   },
   "history": [
-    {
-      "timestamp": 1684614300,
-      "date": "2023-05-20",
-      "price": 6520000,
-      "price_toman": 6520000,
-      "price_irr": 65200000,
-      "bubble": 0,
-      "bubble_percent": 0
-    },
-    {
-      "timestamp": 1684700700,
-      "date": "2023-05-21",
-      "price": 6820000,
-      "price_toman": 6820000,
-      "price_irr": 68200000,
-      "bubble": 0,
-      "bubble_percent": 0
-    },
     {
       "timestamp": 1684787100,
       "date": "2023-05-22",
@@ -10821,29 +10796,25 @@
       "bubble_percent": 16.75
     },
     {
-      "timestamp": 1791315680,
+      "timestamp": 1791318301,
       "date": "2026-10-06",
       "price": 38000000,
       "price_toman": 38000000,
-      "price_irr": 380000000
+      "price_irr": 380000000,
+      "bubble": 5234000,
+      "bubble_percent": 15.97
     },
     {
-<<<<<<< HEAD
-      "timestamp": 1791382764,
-=======
-      "timestamp": 1791401888,
->>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
+      "timestamp": 1791404701,
       "date": "2026-10-07",
       "price": 37000000,
       "price_toman": 37000000,
-      "price_irr": 370000000
+      "price_irr": 370000000,
+      "bubble": 5376000,
+      "bubble_percent": 17
     },
     {
-<<<<<<< HEAD
-      "timestamp": 1791440829,
-=======
-      "timestamp": 1791450488,
->>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
+      "timestamp": 1791451857,
       "date": "2026-10-08",
       "price": 37000000,
       "price_toman": 37000000,

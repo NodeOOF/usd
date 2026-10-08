@@ -3,41 +3,16 @@
   "title": "افغانی افغانستان",
   "unit": "تومان",
   "timezone": "Asia/Tehran",
-<<<<<<< HEAD
-  "updated_at": "2026-10-08 09:57:10",
-  "total_records": 1174,
+  "updated_at": "2026-10-08 13:00:59",
+  "total_records": 1172,
   "latest": {
-    "timestamp": 1791440830,
+    "timestamp": 1791451859,
     "date": "2026-10-08",
-    "price": 4070,
-    "price_toman": 4070,
-    "price_irr": 40700
-=======
-  "updated_at": "2026-10-08 12:38:10",
-  "total_records": 1174,
-  "latest": {
-    "timestamp": 1791450490,
-    "date": "2026-10-08",
-    "price": 4135,
-    "price_toman": 4135,
-    "price_irr": 41350
->>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
+    "price": 4130,
+    "price_toman": 4130,
+    "price_irr": 41300
   },
   "history": [
-    {
-      "timestamp": 1688070600,
-      "date": "2023-06-30",
-      "price": 573,
-      "price_toman": 573,
-      "price_irr": 5730
-    },
-    {
-      "timestamp": 1688157000,
-      "date": "2023-07-01",
-      "price": 574,
-      "price_toman": 574,
-      "price_irr": 5740
-    },
     {
       "timestamp": 1688243400,
       "date": "2023-07-02",
@@ -8222,40 +8197,25 @@
       "price_irr": 41550
     },
     {
-      "timestamp": 1791315681,
+      "timestamp": 1791232200,
       "date": "2026-10-06",
       "price": 4215,
       "price_toman": 4215,
       "price_irr": 42150
     },
     {
-<<<<<<< HEAD
-      "timestamp": 1791382765,
-      "date": "2026-10-07",
-      "price": 4140,
-      "price_toman": 4140,
-      "price_irr": 41400
-    },
-    {
-      "timestamp": 1791440830,
-      "date": "2026-10-08",
-      "price": 4070,
-      "price_toman": 4070,
-      "price_irr": 40700
-=======
-      "timestamp": 1791401889,
+      "timestamp": 1791318600,
       "date": "2026-10-07",
       "price": 4070,
       "price_toman": 4070,
       "price_irr": 40700
     },
     {
-      "timestamp": 1791450490,
+      "timestamp": 1791451859,
       "date": "2026-10-08",
-      "price": 4135,
-      "price_toman": 4135,
-      "price_irr": 41350
->>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
+      "price": 4130,
+      "price_toman": 4130,
+      "price_irr": 41300
     }
   ]
 }

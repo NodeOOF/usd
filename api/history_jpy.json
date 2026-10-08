@@ -3,41 +3,16 @@
   "title": "۱۰۰ ین ژاپن",
   "unit": "تومان",
   "timezone": "Asia/Tehran",
-<<<<<<< HEAD
-  "updated_at": "2026-10-08 09:57:10",
-  "total_records": 1174,
+  "updated_at": "2026-10-08 13:00:59",
+  "total_records": 1172,
   "latest": {
-    "timestamp": 1791440830,
+    "timestamp": 1791451859,
     "date": "2026-10-08",
-    "price": 167100,
-    "price_toman": 167100,
-    "price_irr": 1671000
-=======
-  "updated_at": "2026-10-08 12:38:10",
-  "total_records": 1174,
-  "latest": {
-    "timestamp": 1791450490,
-    "date": "2026-10-08",
-    "price": 169600,
-    "price_toman": 169600,
-    "price_irr": 1696000
->>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
+    "price": 169500,
+    "price_toman": 169500,
+    "price_irr": 1695000
   },
   "history": [
-    {
-      "timestamp": 1688070600,
-      "date": "2023-06-30",
-      "price": 34750,
-      "price_toman": 34750,
-      "price_irr": 347500
-    },
-    {
-      "timestamp": 1688157000,
-      "date": "2023-07-01",
-      "price": 34820,
-      "price_toman": 34820,
-      "price_irr": 348200
-    },
     {
       "timestamp": 1688243400,
       "date": "2023-07-02",
@@ -8222,40 +8197,25 @@
       "price_irr": 1708000
     },
     {
-      "timestamp": 1791315681,
+      "timestamp": 1791232200,
       "date": "2026-10-06",
       "price": 170500,
       "price_toman": 170500,
       "price_irr": 1705000
     },
     {
-<<<<<<< HEAD
-      "timestamp": 1791382765,
-      "date": "2026-10-07",
-      "price": 167500,
-      "price_toman": 167500,
-      "price_irr": 1675000
-    },
-    {
-      "timestamp": 1791440830,
-      "date": "2026-10-08",
-      "price": 167100,
-      "price_toman": 167100,
-      "price_irr": 1671000
-=======
-      "timestamp": 1791401889,
+      "timestamp": 1791318600,
       "date": "2026-10-07",
       "price": 167300,
       "price_toman": 167300,
       "price_irr": 1673000
     },
     {
-      "timestamp": 1791450490,
+      "timestamp": 1791451859,
       "date": "2026-10-08",
-      "price": 169600,
-      "price_toman": 169600,
-      "price_irr": 1696000
->>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
+      "price": 169500,
+      "price_toman": 169500,
+      "price_irr": 1695000
     }
   ]
 }

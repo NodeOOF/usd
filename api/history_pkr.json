@@ -3,41 +3,16 @@
   "title": "روپیه پاکستان",
   "unit": "تومان",
   "timezone": "Asia/Tehran",
-<<<<<<< HEAD
-  "updated_at": "2026-10-08 09:57:12",
-  "total_records": 1174,
+  "updated_at": "2026-10-08 13:01:00",
+  "total_records": 1172,
   "latest": {
-    "timestamp": 1791440832,
+    "timestamp": 1791451860,
     "date": "2026-10-08",
-    "price": 955,
-    "price_toman": 955,
-    "price_irr": 9550
-=======
-  "updated_at": "2026-10-08 12:38:12",
-  "total_records": 1174,
-  "latest": {
-    "timestamp": 1791450492,
-    "date": "2026-10-08",
-    "price": 970,
-    "price_toman": 970,
-    "price_irr": 9700
->>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
+    "price": 968,
+    "price_toman": 968,
+    "price_irr": 9680
   },
   "history": [
-    {
-      "timestamp": 1688070600,
-      "date": "2023-06-30",
-      "price": 175,
-      "price_toman": 175,
-      "price_irr": 1750
-    },
-    {
-      "timestamp": 1688157000,
-      "date": "2023-07-01",
-      "price": 175,
-      "price_toman": 175,
-      "price_irr": 1750
-    },
     {
       "timestamp": 1688243400,
       "date": "2023-07-02",
@@ -8222,40 +8197,25 @@
       "price_irr": 9750
     },
     {
-      "timestamp": 1791315681,
+      "timestamp": 1791232200,
       "date": "2026-10-06",
       "price": 974,
       "price_toman": 974,
       "price_irr": 9740
     },
     {
-<<<<<<< HEAD
-      "timestamp": 1791382766,
-      "date": "2026-10-07",
-      "price": 956,
-      "price_toman": 956,
-      "price_irr": 9560
-    },
-    {
-      "timestamp": 1791440832,
-      "date": "2026-10-08",
-      "price": 955,
-      "price_toman": 955,
-      "price_irr": 9550
-=======
-      "timestamp": 1791401890,
+      "timestamp": 1791318600,
       "date": "2026-10-07",
       "price": 955,
       "price_toman": 955,
       "price_irr": 9550
     },
     {
-      "timestamp": 1791450492,
+      "timestamp": 1791451860,
       "date": "2026-10-08",
-      "price": 970,
-      "price_toman": 970,
-      "price_irr": 9700
->>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
+      "price": 968,
+      "price_toman": 968,
+      "price_irr": 9680
     }
   ]
 }

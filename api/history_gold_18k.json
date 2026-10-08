@@ -3,45 +3,16 @@
   "title": "طلای ۱۸ عیار",
   "unit": "تومان",
   "timezone": "Asia/Tehran",
-<<<<<<< HEAD
-  "updated_at": "2026-10-08 09:57:09",
-  "total_records": 1167,
+  "updated_at": "2026-10-08 13:00:58",
+  "total_records": 1165,
   "latest": {
-    "timestamp": 1791440829,
+    "timestamp": 1791451858,
     "date": "2026-10-08",
-    "price": 26173880,
-    "price_toman": 26173880,
-    "price_irr": 261738800
-=======
-  "updated_at": "2026-10-08 12:38:09",
-  "total_records": 1167,
-  "latest": {
-    "timestamp": 1791450489,
-    "date": "2026-10-08",
-    "price": 26377030,
-    "price_toman": 26377030,
-    "price_irr": 263770300
->>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
+    "price": 26386260,
+    "price_toman": 26386260,
+    "price_irr": 263862600
   },
   "history": [
-    {
-      "timestamp": 1688243159,
-      "date": "2023-07-01",
-      "price": 2400390,
-      "price_toman": 2400390,
-      "price_irr": 24003900,
-      "bubble": 101249,
-      "bubble_percent": 4.218022904611334
-    },
-    {
-      "timestamp": 1688329559,
-      "date": "2023-07-02",
-      "price": 2398770,
-      "price_toman": 2398770,
-      "price_irr": 23987700,
-      "bubble": 93730,
-      "bubble_percent": 3.907419219016413
-    },
     {
       "timestamp": 1688415959,
       "date": "2023-07-03",
@@ -10501,40 +10472,29 @@
       "bubble_percent": -0.31
     },
     {
-      "timestamp": 1791315679,
+      "timestamp": 1791318301,
       "date": "2026-10-06",
       "price": 26716380,
       "price_toman": 26716380,
-      "price_irr": 267163800
+      "price_irr": 267163800,
+      "bubble": -326620,
+      "bubble_percent": -1.21
     },
     {
-<<<<<<< HEAD
-      "timestamp": 1791382764,
-      "date": "2026-10-07",
-      "price": 26218890,
-      "price_toman": 26218890,
-      "price_irr": 262188900
-    },
-    {
-      "timestamp": 1791440829,
-      "date": "2026-10-08",
-      "price": 26173880,
-      "price_toman": 26173880,
-      "price_irr": 261738800
-=======
-      "timestamp": 1791401888,
+      "timestamp": 1791404701,
       "date": "2026-10-07",
       "price": 26286990,
       "price_toman": 26286990,
-      "price_irr": 262869900
+      "price_irr": 262869900,
+      "bubble": 186990,
+      "bubble_percent": 0.72
     },
     {
-      "timestamp": 1791450489,
+      "timestamp": 1791451858,
       "date": "2026-10-08",
-      "price": 26377030,
-      "price_toman": 26377030,
-      "price_irr": 263770300
->>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
+      "price": 26386260,
+      "price_toman": 26386260,
+      "price_irr": 263862600
     }
   ]
 }

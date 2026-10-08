@@ -3,41 +3,16 @@
   "title": "یوان چین",
   "unit": "تومان",
   "timezone": "Asia/Tehran",
-<<<<<<< HEAD
-  "updated_at": "2026-10-08 09:57:09",
-  "total_records": 1174,
+  "updated_at": "2026-10-08 13:00:58",
+  "total_records": 1172,
   "latest": {
-    "timestamp": 1791440829,
+    "timestamp": 1791451858,
     "date": "2026-10-08",
-    "price": 39540,
-    "price_toman": 39540,
-    "price_irr": 395400
-=======
-  "updated_at": "2026-10-08 12:38:09",
-  "total_records": 1174,
-  "latest": {
-    "timestamp": 1791450489,
-    "date": "2026-10-08",
-    "price": 40140,
-    "price_toman": 40140,
-    "price_irr": 401400
->>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
+    "price": 40100,
+    "price_toman": 40100,
+    "price_irr": 401000
   },
   "history": [
-    {
-      "timestamp": 1688070600,
-      "date": "2023-06-30",
-      "price": 6910,
-      "price_toman": 6910,
-      "price_irr": 69100
-    },
-    {
-      "timestamp": 1688157000,
-      "date": "2023-07-01",
-      "price": 6930,
-      "price_toman": 6930,
-      "price_irr": 69300
-    },
     {
       "timestamp": 1688243400,
       "date": "2023-07-02",
@@ -8222,40 +8197,25 @@
       "price_irr": 403400
     },
     {
-      "timestamp": 1791315680,
+      "timestamp": 1791232200,
       "date": "2026-10-06",
       "price": 40320,
       "price_toman": 40320,
       "price_irr": 403200
     },
     {
-<<<<<<< HEAD
-      "timestamp": 1791382764,
-      "date": "2026-10-07",
-      "price": 39600,
-      "price_toman": 39600,
-      "price_irr": 396000
-    },
-    {
-      "timestamp": 1791440829,
-      "date": "2026-10-08",
-      "price": 39540,
-      "price_toman": 39540,
-      "price_irr": 395400
-=======
-      "timestamp": 1791401888,
+      "timestamp": 1791318600,
       "date": "2026-10-07",
       "price": 39540,
       "price_toman": 39540,
       "price_irr": 395400
     },
     {
-      "timestamp": 1791450489,
+      "timestamp": 1791451858,
       "date": "2026-10-08",
-      "price": 40140,
-      "price_toman": 40140,
-      "price_irr": 401400
->>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
+      "price": 40100,
+      "price_toman": 40100,
+      "price_irr": 401000
     }
   ]
 }

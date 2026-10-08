@@ -3,41 +3,16 @@
   "title": "لاری گرجستان",
   "unit": "تومان",
   "timezone": "Asia/Tehran",
-<<<<<<< HEAD
-  "updated_at": "2026-10-08 09:57:10",
-  "total_records": 1174,
+  "updated_at": "2026-10-08 13:00:58",
+  "total_records": 1172,
   "latest": {
-    "timestamp": 1791440830,
+    "timestamp": 1791451858,
     "date": "2026-10-08",
-    "price": 101900,
-    "price_toman": 101900,
-    "price_irr": 1019000
-=======
-  "updated_at": "2026-10-08 12:38:10",
-  "total_records": 1174,
-  "latest": {
-    "timestamp": 1791450490,
-    "date": "2026-10-08",
-    "price": 103400,
-    "price_toman": 103400,
-    "price_irr": 1034000
->>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
+    "price": 103300,
+    "price_toman": 103300,
+    "price_irr": 1033000
   },
   "history": [
-    {
-      "timestamp": 1688070600,
-      "date": "2023-06-30",
-      "price": 19210,
-      "price_toman": 19210,
-      "price_irr": 192100
-    },
-    {
-      "timestamp": 1688157000,
-      "date": "2023-07-01",
-      "price": 19250,
-      "price_toman": 19250,
-      "price_irr": 192500
-    },
     {
       "timestamp": 1688243400,
       "date": "2023-07-02",
@@ -8222,40 +8197,25 @@
       "price_irr": 1040000
     },
     {
-      "timestamp": 1791315681,
+      "timestamp": 1791232200,
       "date": "2026-10-06",
       "price": 103900,
       "price_toman": 103900,
       "price_irr": 1039000
     },
     {
-<<<<<<< HEAD
-      "timestamp": 1791382765,
-      "date": "2026-10-07",
-      "price": 102200,
-      "price_toman": 102200,
-      "price_irr": 1022000
-    },
-    {
-      "timestamp": 1791440830,
-      "date": "2026-10-08",
-      "price": 101900,
-      "price_toman": 101900,
-      "price_irr": 1019000
-=======
-      "timestamp": 1791401889,
+      "timestamp": 1791318600,
       "date": "2026-10-07",
       "price": 102000,
       "price_toman": 102000,
       "price_irr": 1020000
     },
     {
-      "timestamp": 1791450490,
+      "timestamp": 1791451858,
       "date": "2026-10-08",
-      "price": 103400,
-      "price_toman": 103400,
-      "price_irr": 1034000
->>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
+      "price": 103300,
+      "price_toman": 103300,
+      "price_irr": 1033000
     }
   ]
 }

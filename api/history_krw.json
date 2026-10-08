@@ -3,41 +3,16 @@
   "title": "۱۰۰ وون کره",
   "unit": "تومان",
   "timezone": "Asia/Tehran",
-<<<<<<< HEAD
-  "updated_at": "2026-10-08 09:57:11",
-  "total_records": 1174,
+  "updated_at": "2026-10-08 13:00:59",
+  "total_records": 1172,
   "latest": {
-    "timestamp": 1791440831,
+    "timestamp": 1791451859,
     "date": "2026-10-08",
-    "price": 19770,
-    "price_toman": 19770,
-    "price_irr": 197700
-=======
-  "updated_at": "2026-10-08 12:38:11",
-  "total_records": 1174,
-  "latest": {
-    "timestamp": 1791450491,
-    "date": "2026-10-08",
-    "price": 20000,
-    "price_toman": 20000,
-    "price_irr": 200000
->>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
+    "price": 19950,
+    "price_toman": 19950,
+    "price_irr": 199500
   },
   "history": [
-    {
-      "timestamp": 1688157000,
-      "date": "2023-07-01",
-      "price": 3815,
-      "price_toman": 3815,
-      "price_irr": 38150
-    },
-    {
-      "timestamp": 1688243400,
-      "date": "2023-07-02",
-      "price": 3835,
-      "price_toman": 3835,
-      "price_irr": 38350
-    },
     {
       "timestamp": 1688329800,
       "date": "2023-07-03",
@@ -8222,40 +8197,25 @@
       "price_irr": 201200
     },
     {
-      "timestamp": 1791315681,
+      "timestamp": 1791232200,
       "date": "2026-10-06",
       "price": 20160,
       "price_toman": 20160,
       "price_irr": 201600
     },
     {
-<<<<<<< HEAD
-      "timestamp": 1791382765,
+      "timestamp": 1791318600,
       "date": "2026-10-07",
-      "price": 19780,
-      "price_toman": 19780,
-      "price_irr": 197800
+      "price": 19730,
+      "price_toman": 19730,
+      "price_irr": 197300
     },
     {
-      "timestamp": 1791440831,
+      "timestamp": 1791451859,
       "date": "2026-10-08",
-      "price": 19770,
-      "price_toman": 19770,
-      "price_irr": 197700
-=======
-      "timestamp": 1791401889,
-      "date": "2026-10-07",
-      "price": 19750,
-      "price_toman": 19750,
-      "price_irr": 197500
-    },
-    {
-      "timestamp": 1791450491,
-      "date": "2026-10-08",
-      "price": 20000,
-      "price_toman": 20000,
-      "price_irr": 200000
->>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
+      "price": 19950,
+      "price_toman": 19950,
+      "price_irr": 199500
     }
   ]
 }

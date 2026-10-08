@@ -3,41 +3,16 @@
   "title": "نیم سکه",
   "unit": "تومان",
   "timezone": "Asia/Tehran",
-<<<<<<< HEAD
-  "updated_at": "2026-10-08 09:57:08",
-  "total_records": 1167,
+  "updated_at": "2026-10-08 13:00:57",
+  "total_records": 1165,
   "latest": {
-    "timestamp": 1791440828,
-=======
-  "updated_at": "2026-10-08 12:38:09",
-  "total_records": 1167,
-  "latest": {
-    "timestamp": 1791450489,
->>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
+    "timestamp": 1791451857,
     "date": "2026-10-08",
     "price": 143000000,
     "price_toman": 143000000,
     "price_irr": 1430000000
   },
   "history": [
-    {
-      "timestamp": 1688243159,
-      "date": "2023-07-01",
-      "price": 15770000,
-      "price_toman": 15770000,
-      "price_irr": 157700000,
-      "bubble": 3878952,
-      "bubble_percent": 24.59703233988586
-    },
-    {
-      "timestamp": 1688329559,
-      "date": "2023-07-02",
-      "price": 15970000,
-      "price_toman": 15970000,
-      "price_irr": 159700000,
-      "bubble": 4048442,
-      "bubble_percent": 25.350294301815907
-    },
     {
       "timestamp": 1688415959,
       "date": "2023-07-03",
@@ -10497,29 +10472,25 @@
       "bubble_percent": 8.86
     },
     {
-      "timestamp": 1791315679,
+      "timestamp": 1791318301,
       "date": "2026-10-06",
       "price": 144000000,
       "price_toman": 144000000,
-      "price_irr": 1440000000
+      "price_irr": 1440000000,
+      "bubble": 11752000,
+      "bubble_percent": 8.89
     },
     {
-<<<<<<< HEAD
-      "timestamp": 1791382764,
-=======
-      "timestamp": 1791401888,
->>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
+      "timestamp": 1791404701,
       "date": "2026-10-07",
       "price": 143000000,
       "price_toman": 143000000,
-      "price_irr": 1430000000
+      "price_irr": 1430000000,
+      "bubble": 15351000,
+      "bubble_percent": 12.03
     },
     {
-<<<<<<< HEAD
-      "timestamp": 1791440828,
-=======
-      "timestamp": 1791450489,
->>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
+      "timestamp": 1791451857,
       "date": "2026-10-08",
       "price": 143000000,
       "price_toman": 143000000,

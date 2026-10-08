@@ -3,45 +3,16 @@
   "title": "سکه تمام امامی",
   "unit": "تومان",
   "timezone": "Asia/Tehran",
-<<<<<<< HEAD
-  "updated_at": "2026-10-08 09:57:09",
-  "total_records": 1167,
+  "updated_at": "2026-10-08 13:00:58",
+  "total_records": 1165,
   "latest": {
-    "timestamp": 1791440829,
-    "date": "2026-10-08",
-    "price": 268000000,
-    "price_toman": 268000000,
-    "price_irr": 2680000000
-=======
-  "updated_at": "2026-10-08 12:38:09",
-  "total_records": 1167,
-  "latest": {
-    "timestamp": 1791450489,
+    "timestamp": 1791451858,
     "date": "2026-10-08",
     "price": 269500000,
     "price_toman": 269500000,
     "price_irr": 2695000000
->>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
   },
   "history": [
-    {
-      "timestamp": 1688243159,
-      "date": "2023-07-01",
-      "price": 28930000,
-      "price_toman": 28930000,
-      "price_irr": 289300000,
-      "bubble": 5144101,
-      "bubble_percent": 17.781199446940892
-    },
-    {
-      "timestamp": 1688329559,
-      "date": "2023-07-02",
-      "price": 29250000,
-      "price_toman": 29250000,
-      "price_irr": 292500000,
-      "bubble": 5403073,
-      "bubble_percent": 18.472044444444442
-    },
     {
       "timestamp": 1688415959,
       "date": "2023-07-03",
@@ -10501,37 +10472,29 @@
       "bubble_percent": 4.01
     },
     {
-      "timestamp": 1791315681,
+      "timestamp": 1791318301,
       "date": "2026-10-06",
       "price": 273500000,
       "price_toman": 273500000,
-      "price_irr": 2735000000
+      "price_irr": 2735000000,
+      "bubble": 9261000,
+      "bubble_percent": 3.5
     },
     {
-<<<<<<< HEAD
-      "timestamp": 1791382764,
-=======
-      "timestamp": 1791401888,
->>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
+      "timestamp": 1791404701,
       "date": "2026-10-07",
       "price": 268500000,
       "price_toman": 268500000,
-      "price_irr": 2685000000
+      "price_irr": 2685000000,
+      "bubble": 13461000,
+      "bubble_percent": 5.28
     },
     {
-<<<<<<< HEAD
-      "timestamp": 1791440829,
-      "date": "2026-10-08",
-      "price": 268000000,
-      "price_toman": 268000000,
-      "price_irr": 2680000000
-=======
-      "timestamp": 1791450489,
+      "timestamp": 1791451858,
       "date": "2026-10-08",
       "price": 269500000,
       "price_toman": 269500000,
       "price_irr": 2695000000
->>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
     }
   ]
 }

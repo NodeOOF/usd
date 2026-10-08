@@ -3,45 +3,16 @@
   "title": "مثقال طلا (آبشده)",
   "unit": "تومان",
   "timezone": "Asia/Tehran",
-<<<<<<< HEAD
-  "updated_at": "2026-10-08 09:57:08",
-  "total_records": 1171,
+  "updated_at": "2026-10-08 13:00:57",
+  "total_records": 1169,
   "latest": {
-    "timestamp": 1791440828,
+    "timestamp": 1791451857,
     "date": "2026-10-08",
-    "price": 113380000,
-    "price_toman": 113380000,
-    "price_irr": 1133800000
-=======
-  "updated_at": "2026-10-08 12:38:08",
-  "total_records": 1171,
-  "latest": {
-    "timestamp": 1791450488,
-    "date": "2026-10-08",
-    "price": 114260000,
-    "price_toman": 114260000,
-    "price_irr": 1142600000
->>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
+    "price": 114300000,
+    "price_toman": 114300000,
+    "price_irr": 1143000000
   },
   "history": [
-    {
-      "timestamp": 1687811181,
-      "date": "2023-06-26",
-      "price": 10220000,
-      "price_toman": 10220000,
-      "price_irr": 102200000,
-      "bubble": 196756,
-      "bubble_percent": 1.9252054794520548
-    },
-    {
-      "timestamp": 1687897560,
-      "date": "2023-06-27",
-      "price": 10180000,
-      "price_toman": 10180000,
-      "price_irr": 101800000,
-      "bubble": 177856,
-      "bubble_percent": 1.7471119842829077
-    },
     {
       "timestamp": 1687983958,
       "date": "2023-06-28",
@@ -10537,40 +10508,29 @@
       "bubble_percent": -0.31
     },
     {
-      "timestamp": 1791315679,
+      "timestamp": 1791318301,
       "date": "2026-10-06",
       "price": 115730000,
       "price_toman": 115730000,
-      "price_irr": 1157300000
+      "price_irr": 1157300000,
+      "bubble": -1415000,
+      "bubble_percent": -1.21
     },
     {
-<<<<<<< HEAD
-      "timestamp": 1791382764,
-      "date": "2026-10-07",
-      "price": 113580000,
-      "price_toman": 113580000,
-      "price_irr": 1135800000
-    },
-    {
-      "timestamp": 1791440828,
-      "date": "2026-10-08",
-      "price": 113380000,
-      "price_toman": 113380000,
-      "price_irr": 1133800000
-=======
-      "timestamp": 1791401887,
+      "timestamp": 1791404701,
       "date": "2026-10-07",
       "price": 113870000,
       "price_toman": 113870000,
-      "price_irr": 1138700000
+      "price_irr": 1138700000,
+      "bubble": 808000,
+      "bubble_percent": 0.71
     },
     {
-      "timestamp": 1791450488,
+      "timestamp": 1791451857,
       "date": "2026-10-08",
-      "price": 114260000,
-      "price_toman": 114260000,
-      "price_irr": 1142600000
->>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
+      "price": 114300000,
+      "price_toman": 114300000,
+      "price_irr": 1143000000
     }
   ]
 }

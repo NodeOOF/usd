@@ -3,41 +3,16 @@
   "title": "دلار کانادا",
   "unit": "تومان",
   "timezone": "Asia/Tehran",
-<<<<<<< HEAD
-  "updated_at": "2026-10-08 09:57:09",
-  "total_records": 1174,
+  "updated_at": "2026-10-08 13:00:57",
+  "total_records": 1172,
   "latest": {
-    "timestamp": 1791440829,
+    "timestamp": 1791451857,
     "date": "2026-10-08",
-    "price": 185300,
-    "price_toman": 185300,
-    "price_irr": 1853000
-=======
-  "updated_at": "2026-10-08 12:38:09",
-  "total_records": 1174,
-  "latest": {
-    "timestamp": 1791450489,
-    "date": "2026-10-08",
-    "price": 188300,
-    "price_toman": 188300,
-    "price_irr": 1883000
->>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
+    "price": 188000,
+    "price_toman": 188000,
+    "price_irr": 1880000
   },
   "history": [
-    {
-      "timestamp": 1688070600,
-      "date": "2023-06-30",
-      "price": 37860,
-      "price_toman": 37860,
-      "price_irr": 378600
-    },
-    {
-      "timestamp": 1688157000,
-      "date": "2023-07-01",
-      "price": 37940,
-      "price_toman": 37940,
-      "price_irr": 379400
-    },
     {
       "timestamp": 1688243400,
       "date": "2023-07-02",
@@ -8222,40 +8197,25 @@
       "price_irr": 1892000
     },
     {
-      "timestamp": 1791315680,
+      "timestamp": 1791232200,
       "date": "2026-10-06",
       "price": 189800,
       "price_toman": 189800,
       "price_irr": 1898000
     },
     {
-<<<<<<< HEAD
-      "timestamp": 1791382764,
+      "timestamp": 1791318600,
       "date": "2026-10-07",
-      "price": 185800,
-      "price_toman": 185800,
-      "price_irr": 1858000
+      "price": 185400,
+      "price_toman": 185400,
+      "price_irr": 1854000
     },
     {
-      "timestamp": 1791440829,
+      "timestamp": 1791451857,
       "date": "2026-10-08",
-      "price": 185300,
-      "price_toman": 185300,
-      "price_irr": 1853000
-=======
-      "timestamp": 1791401888,
-      "date": "2026-10-07",
-      "price": 185500,
-      "price_toman": 185500,
-      "price_irr": 1855000
-    },
-    {
-      "timestamp": 1791450489,
-      "date": "2026-10-08",
-      "price": 188300,
-      "price_toman": 188300,
-      "price_irr": 1883000
->>>>>>> 7f1085bfb51078f4cb77d44c9ea4e08e0678a002
+      "price": 188000,
+      "price_toman": 188000,
+      "price_irr": 1880000
     }
   ]
 }
