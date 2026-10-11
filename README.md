@@ -10,7 +10,7 @@
 <br/>
 
 > [!NOTE]
-> 📅 **تاریخ:** ۲۰ مهر ۱۴۰۵ (2026-10-12) &nbsp;|&nbsp; ⏱ **ساعت آخرین بروزرسانی:** **۰۰:۳۷** (به وقت تهران)
+> 📅 **تاریخ:** ۲۰ مهر ۱۴۰۵ (2026-10-12) &nbsp;|&nbsp; ⏱ **ساعت آخرین بروزرسانی:** **۰۱:۰۷** (به وقت تهران)
 
 <br/>
 
@@ -37,7 +37,7 @@
 <tr>
 <td align="center">🇺🇸</td>
 <td><b>دلار آمریکا</b></td>
-<td align="left"><b>۲۶۵،۷۰۵ تومان</b></td>
+<td align="left"><b>۲۶۵،۶۸۳ تومان</b></td>
 </tr>
 <tr>
 <td align="center">🇪🇺</td>
@@ -57,17 +57,17 @@
 <tr>
 <td align="center">🇬🇧</td>
 <td><b>پوند انگلیس</b></td>
-<td align="left"><b>۳۴۸،۱۰۰ تومان</b></td>
+<td align="left"><b>۳۴۸،۰۰۰ تومان</b></td>
 </tr>
 <tr>
 <td align="center">🇨🇦</td>
 <td><b>دلار کانادا</b></td>
-<td align="left"><b>۱۸۶،۲۰۰ تومان</b></td>
+<td align="left"><b>۱۸۶،۱۰۰ تومان</b></td>
 </tr>
 <tr>
 <td align="center">🇦🇺</td>
 <td><b>دلار استرالیا</b></td>
-<td align="left"><b>۱۸۵،۴۰۰ تومان</b></td>
+<td align="left"><b>۱۸۵،۳۰۰ تومان</b></td>
 </tr>
 <tr>
 <td align="center">🇨🇳</td>
