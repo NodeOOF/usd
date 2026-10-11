@@ -10,7 +10,7 @@
 <br/>
 
 > [!NOTE]
-> 📅 **تاریخ:** ۱۹ مهر ۱۴۰۵ (2026-10-11) &nbsp;|&nbsp; ⏱ **ساعت آخرین بروزرسانی:** **۱۳:۰۷** (به وقت تهران)
+> 📅 **تاریخ:** ۱۹ مهر ۱۴۰۵ (2026-10-11) &nbsp;|&nbsp; ⏱ **ساعت آخرین بروزرسانی:** **۱۳:۳۷** (به وقت تهران)
 
 <br/>
 
@@ -37,7 +37,7 @@
 <tr>
 <td align="center">🇺🇸</td>
 <td><b>دلار آمریکا</b></td>
-<td align="left"><b>۲۶۷،۶۸۸ تومان</b></td>
+<td align="left"><b>۲۶۷،۶۵۲ تومان</b></td>
 </tr>
 <tr>
 <td align="center">🇪🇺</td>
@@ -47,7 +47,7 @@
 <tr>
 <td align="center">🇦🇪</td>
 <td><b>درهم امارات</b></td>
-<td align="left"><b>۷۲،۸۸۰ تومان</b></td>
+<td align="left"><b>۷۲،۸۷۰ تومان</b></td>
 </tr>
 <tr>
 <td align="center">🇹🇷</td>
@@ -62,12 +62,12 @@
 <tr>
 <td align="center">🇨🇦</td>
 <td><b>دلار کانادا</b></td>
-<td align="left"><b>۱۸۷،۸۰۰ تومان</b></td>
+<td align="left"><b>۱۸۷،۷۰۰ تومان</b></td>
 </tr>
 <tr>
 <td align="center">🇦🇺</td>
 <td><b>دلار استرالیا</b></td>
-<td align="left"><b>۱۸۷،۰۰۰ تومان</b></td>
+<td align="left"><b>۱۸۶،۹۰۰ تومان</b></td>
 </tr>
 <tr>
 <td align="center">🇨🇳</td>
@@ -82,12 +82,12 @@
 <tr>
 <td align="center">🟡</td>
 <td><b>سکه تمام امامی (طرح جدید)</b></td>
-<td align="left"><b>۲۶۹،۰۰۰،۰۰۰ تومان</b></td>
+<td align="left"><b>۲۶۹،۵۰۰،۰۰۰ تومان</b></td>
 </tr>
 <tr>
 <td align="center">🟡</td>
 <td><b>سکه بهار آزادی (طرح قدیم)</b></td>
-<td align="left"><b>۲۵۹،۰۰۰،۰۰۰ تومان</b></td>
+<td align="left"><b>۲۶۰،۰۰۰،۰۰۰ تومان</b></td>
 </tr>
 <tr>
 <td align="center">🟡</td>
@@ -107,17 +107,17 @@
 <tr>
 <td align="center">✨</td>
 <td><b>طلای ۱۸ عیار (هر گرم)</b></td>
-<td align="left"><b>۲۶،۳۳۷،۷۸۰ تومان</b></td>
+<td align="left"><b>۲۶،۳۵۶،۲۵۰ تومان</b></td>
 </tr>
 <tr>
 <td align="center">⚖️</td>
 <td><b>مثقال طلا (آبشده)</b></td>
-<td align="left"><b>۱۱۴،۰۹۰،۰۰۰ تومان</b></td>
+<td align="left"><b>۱۱۴،۱۷۰،۰۰۰ تومان</b></td>
 </tr>
 <tr>
 <td align="center">🌐</td>
 <td><b>انس جهانی طلا</b></td>
-<td align="left"><b>۴،۱۹۴.۳۴ دلار</b></td>
+<td align="left"><b>۴،۱۹۴.۲۹ دلار</b></td>
 </tr>
 
 <!-- کامودیتی -->
