@@ -3,14 +3,14 @@
   "title": "کرون نروژ",
   "unit": "تومان",
   "timezone": "Asia/Tehran",
-  "updated_at": "2026-10-12 19:37:26",
+  "updated_at": "2026-10-12 20:07:27",
   "total_records": 1176,
   "latest": {
-    "timestamp": 1791821246,
+    "timestamp": 1791823047,
     "date": "2026-10-12",
-    "price": 27520,
-    "price_toman": 27520,
-    "price_irr": 275200
+    "price": 27500,
+    "price_toman": 27500,
+    "price_irr": 275000
   },
   "history": [
     {
@@ -8239,11 +8239,11 @@
       "price_irr": 278000
     },
     {
-      "timestamp": 1791821246,
+      "timestamp": 1791823047,
       "date": "2026-10-12",
-      "price": 27520,
-      "price_toman": 27520,
-      "price_irr": 275200
+      "price": 27500,
+      "price_toman": 27500,
+      "price_irr": 275000
     }
   ]
 }
