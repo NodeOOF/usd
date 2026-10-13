@@ -3,10 +3,10 @@
   "title": "روپیه پاکستان",
   "unit": "تومان",
   "timezone": "Asia/Tehran",
-  "updated_at": "2026-10-13 22:07:27",
+  "updated_at": "2026-10-13 22:37:28",
   "total_records": 1177,
   "latest": {
-    "timestamp": 1791916647,
+    "timestamp": 1791918448,
     "date": "2026-10-13",
     "price": 941,
     "price_toman": 941,
@@ -8246,7 +8246,7 @@
       "price_irr": 9490
     },
     {
-      "timestamp": 1791916647,
+      "timestamp": 1791918448,
       "date": "2026-10-13",
       "price": 941,
       "price_toman": 941,
