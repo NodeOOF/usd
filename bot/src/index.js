@@ -29,8 +29,8 @@ const CORS_HEADERS = Object.freeze({
   "Access-Control-Max-Age": "86400",
 });
 
-const NABZ_RAW = "https://raw.githubusercontent.com/NodeOOF/usd/main";
-const NABZ_CDN = "https://cdn.jsdelivr.net/gh/NodeOOF/usd@main";
+const NABZ_RAW = "https://raw.githubusercontent.com/itsyebekhe/nabz/main";
+const NABZ_CDN = "https://cdn.jsdelivr.net/gh/itsyebekhe/nabz@main";
 
 const HISTORY_SOURCES = [
   `${NABZ_RAW}/api/history_usd.json`,
@@ -43,12 +43,12 @@ const MARKET_SOURCES = [
 ];
 
 const CHART_BASE_URLS = [
-  "https://raw.githubusercontent.com/NodeOOF/usd/main",
-  "https://cdn.jsdelivr.net/gh/NodeOOF/usd@main",
+  "https://raw.githubusercontent.com/itsyebekhe/nabz/main",
+  "https://cdn.jsdelivr.net/gh/itsyebekhe/nabz@main",
 ];
 
 // آدرس GitHub Pages برای UI
-const GITHUB_PAGES_URL = "https://NodeOOF.github.io/usd/";
+const GITHUB_PAGES_URL = "https://itsyebekhe.github.io/nabz/";
 
 const FOOTER = "\n\n━━━━━━━━━━━━━━━━━━━\n🌐 github.com/NodeOOF\n🤖 @dolarazad\\_bot";
 
@@ -319,35 +319,35 @@ function chartUrlFor(key) {
 //  GitHub Trigger
 // ============================================================
 
-async function triggerWorkflow(env) {
-  const owner = env.GITHUB_OWNER;
-  const repo = env.GITHUB_REPO;
-  const workflow = env.GITHUB_WORKFLOW;
-  const branch = env.GITHUB_BRANCH || "main";
+// async function triggerWorkflow(env) {
+//   const owner = env.GITHUB_OWNER;
+//   const repo = env.GITHUB_REPO;
+//   const workflow = env.GITHUB_WORKFLOW;
+//   const branch = env.GITHUB_BRANCH || "main";
 
-  if (!owner || !repo || !workflow) throw new Error("GITHUB config missing");
+//   if (!owner || !repo || !workflow) throw new Error("GITHUB config missing");
 
-  const url = `https://api.github.com/repos/${owner}/${repo}/actions/workflows/${workflow}/dispatches`;
-  console.log(`[trigger] ${owner}/${repo}/${workflow}@${branch}`);
+//   const url = `https://api.github.com/repos/${owner}/${repo}/actions/workflows/${workflow}/dispatches`;
+//   console.log(`[trigger] ${owner}/${repo}/${workflow}@${branch}`);
 
-  const res = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${env.GITHUB_TOKEN}`,
-      "Accept": "application/vnd.github+json",
-      "User-Agent": "nabz-trigger-worker",
-      "Content-Type": "application/json",
-      "X-GitHub-Api-Version": "2022-11-28",
-    },
-    body: JSON.stringify({ ref: branch }),
-  });
+//   const res = await fetch(url, {
+//     method: "POST",
+//     headers: {
+//       "Authorization": `Bearer ${env.GITHUB_TOKEN}`,
+//       "Accept": "application/vnd.github+json",
+//       "User-Agent": "nabz-trigger-worker",
+//       "Content-Type": "application/json",
+//       "X-GitHub-Api-Version": "2022-11-28",
+//     },
+//     body: JSON.stringify({ ref: branch }),
+//   });
 
-  if (res.status !== 204 && res.status !== 200) {
-    const text = await res.text().catch(() => "");
-    throw new Error(`GitHub ${res.status}: ${text.slice(0, 150)}`);
-  }
-  return { status: res.status, workflow, branch };
-}
+//   if (res.status !== 204 && res.status !== 200) {
+//     const text = await res.text().catch(() => "");
+//     throw new Error(`GitHub ${res.status}: ${text.slice(0, 150)}`);
+//   }
+//   return { status: res.status, workflow, branch };
+// }
 
 // ============================================================
 //  پردازش داده
