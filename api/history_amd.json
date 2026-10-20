@@ -3,14 +3,14 @@
   "title": "۱۰۰ درام ارمنستان",
   "unit": "تومان",
   "timezone": "Asia/Tehran",
-  "updated_at": "2026-10-08 14:08:07",
-  "total_records": 1172,
+  "updated_at": "2026-10-15 01:37:45",
+  "total_records": 1179,
   "latest": {
-    "timestamp": 1791455887,
-    "date": "2026-10-08",
-    "price": 74760,
-    "price_toman": 74760,
-    "price_irr": 747600
+    "timestamp": 1792015665,
+    "date": "2026-10-15",
+    "price": 73520,
+    "price_toman": 73520,
+    "price_irr": 735200
   },
   "history": [
     {
@@ -8211,11 +8211,60 @@
       "price_irr": 729800
     },
     {
-      "timestamp": 1791455887,
+      "timestamp": 1791490044,
       "date": "2026-10-08",
-      "price": 74760,
-      "price_toman": 74760,
-      "price_irr": 747600
+      "price": 73880,
+      "price_toman": 73880,
+      "price_irr": 738800
+    },
+    {
+      "timestamp": 1791576443,
+      "date": "2026-10-09",
+      "price": 74300,
+      "price_toman": 74300,
+      "price_irr": 743000
+    },
+    {
+      "timestamp": 1791662840,
+      "date": "2026-10-10",
+      "price": 73520,
+      "price_toman": 73520,
+      "price_irr": 735200
+    },
+    {
+      "timestamp": 1791749248,
+      "date": "2026-10-11",
+      "price": 73420,
+      "price_toman": 73420,
+      "price_irr": 734200
+    },
+    {
+      "timestamp": 1791835644,
+      "date": "2026-10-12",
+      "price": 72520,
+      "price_toman": 72520,
+      "price_irr": 725200
+    },
+    {
+      "timestamp": 1791922051,
+      "date": "2026-10-13",
+      "price": 72020,
+      "price_toman": 72020,
+      "price_irr": 720200
+    },
+    {
+      "timestamp": 1792008470,
+      "date": "2026-10-14",
+      "price": 73520,
+      "price_toman": 73520,
+      "price_irr": 735200
+    },
+    {
+      "timestamp": 1792015665,
+      "date": "2026-10-15",
+      "price": 73520,
+      "price_toman": 73520,
+      "price_irr": 735200
     }
   ]
 }

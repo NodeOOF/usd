@@ -3,14 +3,14 @@
   "title": "۱۰۰ وون کره",
   "unit": "تومان",
   "timezone": "Asia/Tehran",
-  "updated_at": "2026-10-08 14:08:07",
-  "total_records": 1172,
+  "updated_at": "2026-10-15 01:37:46",
+  "total_records": 1179,
   "latest": {
-    "timestamp": 1791455887,
-    "date": "2026-10-08",
-    "price": 20010,
-    "price_toman": 20010,
-    "price_irr": 200100
+    "timestamp": 1792015666,
+    "date": "2026-10-15",
+    "price": 19810,
+    "price_toman": 19810,
+    "price_irr": 198100
   },
   "history": [
     {
@@ -8211,11 +8211,60 @@
       "price_irr": 197300
     },
     {
-      "timestamp": 1791455887,
+      "timestamp": 1791490045,
       "date": "2026-10-08",
-      "price": 20010,
-      "price_toman": 20010,
-      "price_irr": 200100
+      "price": 19910,
+      "price_toman": 19910,
+      "price_irr": 199100
+    },
+    {
+      "timestamp": 1791576444,
+      "date": "2026-10-09",
+      "price": 20050,
+      "price_toman": 20050,
+      "price_irr": 200500
+    },
+    {
+      "timestamp": 1791662841,
+      "date": "2026-10-10",
+      "price": 19840,
+      "price_toman": 19840,
+      "price_irr": 198400
+    },
+    {
+      "timestamp": 1791749249,
+      "date": "2026-10-11",
+      "price": 19810,
+      "price_toman": 19810,
+      "price_irr": 198100
+    },
+    {
+      "timestamp": 1791835645,
+      "date": "2026-10-12",
+      "price": 19690,
+      "price_toman": 19690,
+      "price_irr": 196900
+    },
+    {
+      "timestamp": 1791922052,
+      "date": "2026-10-13",
+      "price": 19430,
+      "price_toman": 19430,
+      "price_irr": 194300
+    },
+    {
+      "timestamp": 1792008471,
+      "date": "2026-10-14",
+      "price": 19800,
+      "price_toman": 19800,
+      "price_irr": 198000
+    },
+    {
+      "timestamp": 1792015666,
+      "date": "2026-10-15",
+      "price": 19810,
+      "price_toman": 19810,
+      "price_irr": 198100
     }
   ]
 }

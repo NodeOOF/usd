@@ -3,14 +3,14 @@
   "title": "۱۰۰ ین ژاپن",
   "unit": "تومان",
   "timezone": "Asia/Tehran",
-  "updated_at": "2026-10-08 14:08:07",
-  "total_records": 1172,
+  "updated_at": "2026-10-15 01:37:45",
+  "total_records": 1179,
   "latest": {
-    "timestamp": 1791455887,
-    "date": "2026-10-08",
-    "price": 170000,
-    "price_toman": 170000,
-    "price_irr": 1700000
+    "timestamp": 1792015665,
+    "date": "2026-10-15",
+    "price": 167800,
+    "price_toman": 167800,
+    "price_irr": 1678000
   },
   "history": [
     {
@@ -8211,11 +8211,60 @@
       "price_irr": 1673000
     },
     {
-      "timestamp": 1791455887,
+      "timestamp": 1791490044,
       "date": "2026-10-08",
-      "price": 170000,
-      "price_toman": 170000,
-      "price_irr": 1700000
+      "price": 169400,
+      "price_toman": 169400,
+      "price_irr": 1694000
+    },
+    {
+      "timestamp": 1791576443,
+      "date": "2026-10-09",
+      "price": 169900,
+      "price_toman": 169900,
+      "price_irr": 1699000
+    },
+    {
+      "timestamp": 1791662841,
+      "date": "2026-10-10",
+      "price": 168100,
+      "price_toman": 168100,
+      "price_irr": 1681000
+    },
+    {
+      "timestamp": 1791749248,
+      "date": "2026-10-11",
+      "price": 167900,
+      "price_toman": 167900,
+      "price_irr": 1679000
+    },
+    {
+      "timestamp": 1791835644,
+      "date": "2026-10-12",
+      "price": 165600,
+      "price_toman": 165600,
+      "price_irr": 1656000
+    },
+    {
+      "timestamp": 1791922052,
+      "date": "2026-10-13",
+      "price": 164500,
+      "price_toman": 164500,
+      "price_irr": 1645000
+    },
+    {
+      "timestamp": 1792008471,
+      "date": "2026-10-14",
+      "price": 167800,
+      "price_toman": 167800,
+      "price_irr": 1678000
+    },
+    {
+      "timestamp": 1792015665,
+      "date": "2026-10-15",
+      "price": 167800,
+      "price_toman": 167800,
+      "price_irr": 1678000
     }
   ]
 }

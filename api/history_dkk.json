@@ -3,14 +3,14 @@
   "title": "کرون دانمارک",
   "unit": "تومان",
   "timezone": "Asia/Tehran",
-  "updated_at": "2026-10-08 14:08:08",
-  "total_records": 1172,
+  "updated_at": "2026-10-15 01:37:46",
+  "total_records": 1179,
   "latest": {
-    "timestamp": 1791455888,
-    "date": "2026-10-08",
-    "price": 40240,
-    "price_toman": 40240,
-    "price_irr": 402400
+    "timestamp": 1792015666,
+    "date": "2026-10-15",
+    "price": 39640,
+    "price_toman": 39640,
+    "price_irr": 396400
   },
   "history": [
     {
@@ -8211,11 +8211,60 @@
       "price_irr": 396000
     },
     {
-      "timestamp": 1791455888,
+      "timestamp": 1791490045,
       "date": "2026-10-08",
-      "price": 40240,
-      "price_toman": 40240,
-      "price_irr": 402400
+      "price": 40120,
+      "price_toman": 40120,
+      "price_irr": 401200
+    },
+    {
+      "timestamp": 1791576444,
+      "date": "2026-10-09",
+      "price": 40280,
+      "price_toman": 40280,
+      "price_irr": 402800
+    },
+    {
+      "timestamp": 1791662841,
+      "date": "2026-10-10",
+      "price": 39880,
+      "price_toman": 39880,
+      "price_irr": 398800
+    },
+    {
+      "timestamp": 1791749249,
+      "date": "2026-10-11",
+      "price": 39820,
+      "price_toman": 39820,
+      "price_irr": 398200
+    },
+    {
+      "timestamp": 1791835645,
+      "date": "2026-10-12",
+      "price": 39200,
+      "price_toman": 39200,
+      "price_irr": 392000
+    },
+    {
+      "timestamp": 1791922053,
+      "date": "2026-10-13",
+      "price": 39020,
+      "price_toman": 39020,
+      "price_irr": 390200
+    },
+    {
+      "timestamp": 1792008472,
+      "date": "2026-10-14",
+      "price": 39660,
+      "price_toman": 39660,
+      "price_irr": 396600
+    },
+    {
+      "timestamp": 1792015666,
+      "date": "2026-10-15",
+      "price": 39640,
+      "price_toman": 39640,
+      "price_irr": 396400
     }
   ]
 }

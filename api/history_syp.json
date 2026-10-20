@@ -3,14 +3,14 @@
   "title": "۱۰۰ لیر سوریه",
   "unit": "تومان",
   "timezone": "Asia/Tehran",
-  "updated_at": "2026-10-08 14:08:08",
-  "total_records": 1172,
+  "updated_at": "2026-10-15 01:37:47",
+  "total_records": 1179,
   "latest": {
-    "timestamp": 1791455888,
-    "date": "2026-10-08",
-    "price": 220885,
-    "price_toman": 220885,
-    "price_irr": 2208850
+    "timestamp": 1792015667,
+    "date": "2026-10-15",
+    "price": 218065,
+    "price_toman": 218065,
+    "price_irr": 2180650
   },
   "history": [
     {
@@ -8211,11 +8211,60 @@
       "price_irr": 2171150
     },
     {
-      "timestamp": 1791455888,
+      "timestamp": 1791490045,
       "date": "2026-10-08",
-      "price": 220885,
-      "price_toman": 220885,
-      "price_irr": 2208850
+      "price": 219460,
+      "price_toman": 219460,
+      "price_irr": 2194600
+    },
+    {
+      "timestamp": 1791576444,
+      "date": "2026-10-09",
+      "price": 220655,
+      "price_toman": 220655,
+      "price_irr": 2206550
+    },
+    {
+      "timestamp": 1791662841,
+      "date": "2026-10-10",
+      "price": 218360,
+      "price_toman": 218360,
+      "price_irr": 2183600
+    },
+    {
+      "timestamp": 1791749249,
+      "date": "2026-10-11",
+      "price": 218030,
+      "price_toman": 218030,
+      "price_irr": 2180300
+    },
+    {
+      "timestamp": 1791835645,
+      "date": "2026-10-12",
+      "price": 215605,
+      "price_toman": 215605,
+      "price_irr": 2156050
+    },
+    {
+      "timestamp": 1791922053,
+      "date": "2026-10-13",
+      "price": 213765,
+      "price_toman": 213765,
+      "price_irr": 2137650
+    },
+    {
+      "timestamp": 1792008472,
+      "date": "2026-10-14",
+      "price": 218065,
+      "price_toman": 218065,
+      "price_irr": 2180650
+    },
+    {
+      "timestamp": 1792015667,
+      "date": "2026-10-15",
+      "price": 218065,
+      "price_toman": 218065,
+      "price_irr": 2180650
     }
   ]
 }

@@ -3,14 +3,14 @@
   "title": "لاری گرجستان",
   "unit": "تومان",
   "timezone": "Asia/Tehran",
-  "updated_at": "2026-10-08 14:08:06",
-  "total_records": 1172,
+  "updated_at": "2026-10-15 01:37:45",
+  "total_records": 1179,
   "latest": {
-    "timestamp": 1791455886,
-    "date": "2026-10-08",
-    "price": 103700,
-    "price_toman": 103700,
-    "price_irr": 1037000
+    "timestamp": 1792015665,
+    "date": "2026-10-15",
+    "price": 102300,
+    "price_toman": 102300,
+    "price_irr": 1023000
   },
   "history": [
     {
@@ -8211,11 +8211,60 @@
       "price_irr": 1020000
     },
     {
-      "timestamp": 1791455886,
+      "timestamp": 1791490044,
       "date": "2026-10-08",
-      "price": 103700,
-      "price_toman": 103700,
-      "price_irr": 1037000
+      "price": 102900,
+      "price_toman": 102900,
+      "price_irr": 1029000
+    },
+    {
+      "timestamp": 1791576443,
+      "date": "2026-10-09",
+      "price": 103500,
+      "price_toman": 103500,
+      "price_irr": 1035000
+    },
+    {
+      "timestamp": 1791662840,
+      "date": "2026-10-10",
+      "price": 102700,
+      "price_toman": 102700,
+      "price_irr": 1027000
+    },
+    {
+      "timestamp": 1791749248,
+      "date": "2026-10-11",
+      "price": 102500,
+      "price_toman": 102500,
+      "price_irr": 1025000
+    },
+    {
+      "timestamp": 1791835644,
+      "date": "2026-10-12",
+      "price": 101400,
+      "price_toman": 101400,
+      "price_irr": 1014000
+    },
+    {
+      "timestamp": 1791922051,
+      "date": "2026-10-13",
+      "price": 100400,
+      "price_toman": 100400,
+      "price_irr": 1004000
+    },
+    {
+      "timestamp": 1792008470,
+      "date": "2026-10-14",
+      "price": 102200,
+      "price_toman": 102200,
+      "price_irr": 1022000
+    },
+    {
+      "timestamp": 1792015665,
+      "date": "2026-10-15",
+      "price": 102300,
+      "price_toman": 102300,
+      "price_irr": 1023000
     }
   ]
 }

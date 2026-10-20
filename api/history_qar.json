@@ -3,14 +3,14 @@
   "title": "ریال قطر",
   "unit": "تومان",
   "timezone": "Asia/Tehran",
-  "updated_at": "2026-10-08 14:08:07",
-  "total_records": 1172,
+  "updated_at": "2026-10-15 01:37:45",
+  "total_records": 1179,
   "latest": {
-    "timestamp": 1791455887,
-    "date": "2026-10-08",
-    "price": 73860,
-    "price_toman": 73860,
-    "price_irr": 738600
+    "timestamp": 1792015665,
+    "date": "2026-10-15",
+    "price": 72980,
+    "price_toman": 72980,
+    "price_irr": 729800
   },
   "history": [
     {
@@ -8211,11 +8211,60 @@
       "price_irr": 726000
     },
     {
-      "timestamp": 1791455887,
+      "timestamp": 1791490044,
       "date": "2026-10-08",
-      "price": 73860,
-      "price_toman": 73860,
-      "price_irr": 738600
+      "price": 73380,
+      "price_toman": 73380,
+      "price_irr": 733800
+    },
+    {
+      "timestamp": 1791576443,
+      "date": "2026-10-09",
+      "price": 73680,
+      "price_toman": 73680,
+      "price_irr": 736800
+    },
+    {
+      "timestamp": 1791662841,
+      "date": "2026-10-10",
+      "price": 72980,
+      "price_toman": 72980,
+      "price_irr": 729800
+    },
+    {
+      "timestamp": 1791749249,
+      "date": "2026-10-11",
+      "price": 72860,
+      "price_toman": 72860,
+      "price_irr": 728600
+    },
+    {
+      "timestamp": 1791835645,
+      "date": "2026-10-12",
+      "price": 71960,
+      "price_toman": 71960,
+      "price_irr": 719600
+    },
+    {
+      "timestamp": 1791922052,
+      "date": "2026-10-13",
+      "price": 71560,
+      "price_toman": 71560,
+      "price_irr": 715600
+    },
+    {
+      "timestamp": 1792008471,
+      "date": "2026-10-14",
+      "price": 73000,
+      "price_toman": 73000,
+      "price_irr": 730000
+    },
+    {
+      "timestamp": 1792015665,
+      "date": "2026-10-15",
+      "price": 72980,
+      "price_toman": 72980,
+      "price_irr": 729800
     }
   ]
 }

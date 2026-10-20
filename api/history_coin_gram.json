@@ -3,11 +3,11 @@
   "title": "سکه گرمی",
   "unit": "تومان",
   "timezone": "Asia/Tehran",
-  "updated_at": "2026-10-08 14:08:06",
-  "total_records": 1201,
+  "updated_at": "2026-10-15 01:37:44",
+  "total_records": 1208,
   "latest": {
-    "timestamp": 1791455886,
-    "date": "2026-10-08",
+    "timestamp": 1792015664,
+    "date": "2026-10-15",
     "price": 37000000,
     "price_toman": 37000000,
     "price_irr": 370000000
@@ -10814,8 +10814,57 @@
       "bubble_percent": 17
     },
     {
-      "timestamp": 1791455886,
+      "timestamp": 1791490042,
       "date": "2026-10-08",
+      "price": 37000000,
+      "price_toman": 37000000,
+      "price_irr": 370000000
+    },
+    {
+      "timestamp": 1791576442,
+      "date": "2026-10-09",
+      "price": 37000000,
+      "price_toman": 37000000,
+      "price_irr": 370000000
+    },
+    {
+      "timestamp": 1791662840,
+      "date": "2026-10-10",
+      "price": 38000000,
+      "price_toman": 38000000,
+      "price_irr": 380000000
+    },
+    {
+      "timestamp": 1791749246,
+      "date": "2026-10-11",
+      "price": 37000000,
+      "price_toman": 37000000,
+      "price_irr": 370000000
+    },
+    {
+      "timestamp": 1791835644,
+      "date": "2026-10-12",
+      "price": 37000000,
+      "price_toman": 37000000,
+      "price_irr": 370000000
+    },
+    {
+      "timestamp": 1791922049,
+      "date": "2026-10-13",
+      "price": 35000000,
+      "price_toman": 35000000,
+      "price_irr": 350000000
+    },
+    {
+      "timestamp": 1792008469,
+      "date": "2026-10-14",
+      "price": 37000000,
+      "price_toman": 37000000,
+      "price_irr": 370000000
+    },
+    {
+      "timestamp": 1792015664,
+      "date": "2026-10-15",
       "price": 37000000,
       "price_toman": 37000000,
       "price_irr": 370000000

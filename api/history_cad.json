@@ -3,14 +3,14 @@
   "title": "دلار کانادا",
   "unit": "تومان",
   "timezone": "Asia/Tehran",
-  "updated_at": "2026-10-08 14:08:05",
-  "total_records": 1172,
+  "updated_at": "2026-10-15 01:37:43",
+  "total_records": 1179,
   "latest": {
-    "timestamp": 1791455885,
-    "date": "2026-10-08",
-    "price": 188600,
-    "price_toman": 188600,
-    "price_irr": 1886000
+    "timestamp": 1792015663,
+    "date": "2026-10-15",
+    "price": 186600,
+    "price_toman": 186600,
+    "price_irr": 1866000
   },
   "history": [
     {
@@ -8211,11 +8211,60 @@
       "price_irr": 1854000
     },
     {
-      "timestamp": 1791455885,
+      "timestamp": 1791490043,
       "date": "2026-10-08",
-      "price": 188600,
-      "price_toman": 188600,
-      "price_irr": 1886000
+      "price": 188000,
+      "price_toman": 188000,
+      "price_irr": 1880000
+    },
+    {
+      "timestamp": 1791576442,
+      "date": "2026-10-09",
+      "price": 188500,
+      "price_toman": 188500,
+      "price_irr": 1885000
+    },
+    {
+      "timestamp": 1791662840,
+      "date": "2026-10-10",
+      "price": 186700,
+      "price_toman": 186700,
+      "price_irr": 1867000
+    },
+    {
+      "timestamp": 1791749247,
+      "date": "2026-10-11",
+      "price": 186400,
+      "price_toman": 186400,
+      "price_irr": 1864000
+    },
+    {
+      "timestamp": 1791835644,
+      "date": "2026-10-12",
+      "price": 183900,
+      "price_toman": 183900,
+      "price_irr": 1839000
+    },
+    {
+      "timestamp": 1791922050,
+      "date": "2026-10-13",
+      "price": 183200,
+      "price_toman": 183200,
+      "price_irr": 1832000
+    },
+    {
+      "timestamp": 1792008469,
+      "date": "2026-10-14",
+      "price": 186600,
+      "price_toman": 186600,
+      "price_irr": 1866000
+    },
+    {
+      "timestamp": 1792015663,
+      "date": "2026-10-15",
+      "price": 186600,
+      "price_toman": 186600,
+      "price_irr": 1866000
     }
   ]
 }

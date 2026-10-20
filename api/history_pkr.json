@@ -3,14 +3,14 @@
   "title": "روپیه پاکستان",
   "unit": "تومان",
   "timezone": "Asia/Tehran",
-  "updated_at": "2026-10-08 14:08:08",
-  "total_records": 1172,
+  "updated_at": "2026-10-15 01:37:47",
+  "total_records": 1179,
   "latest": {
-    "timestamp": 1791455888,
-    "date": "2026-10-08",
-    "price": 972,
-    "price_toman": 972,
-    "price_irr": 9720
+    "timestamp": 1792015667,
+    "date": "2026-10-15",
+    "price": 959,
+    "price_toman": 959,
+    "price_irr": 9590
   },
   "history": [
     {
@@ -8211,11 +8211,60 @@
       "price_irr": 9550
     },
     {
-      "timestamp": 1791455888,
+      "timestamp": 1791490045,
       "date": "2026-10-08",
-      "price": 972,
-      "price_toman": 972,
-      "price_irr": 9720
+      "price": 965,
+      "price_toman": 965,
+      "price_irr": 9650
+    },
+    {
+      "timestamp": 1791576444,
+      "date": "2026-10-09",
+      "price": 971,
+      "price_toman": 971,
+      "price_irr": 9710
+    },
+    {
+      "timestamp": 1791662841,
+      "date": "2026-10-10",
+      "price": 961,
+      "price_toman": 961,
+      "price_irr": 9610
+    },
+    {
+      "timestamp": 1791749248,
+      "date": "2026-10-11",
+      "price": 959,
+      "price_toman": 959,
+      "price_irr": 9590
+    },
+    {
+      "timestamp": 1791835645,
+      "date": "2026-10-12",
+      "price": 949,
+      "price_toman": 949,
+      "price_irr": 9490
+    },
+    {
+      "timestamp": 1791922054,
+      "date": "2026-10-13",
+      "price": 941,
+      "price_toman": 941,
+      "price_irr": 9410
+    },
+    {
+      "timestamp": 1792008472,
+      "date": "2026-10-14",
+      "price": 959,
+      "price_toman": 959,
+      "price_irr": 9590
+    },
+    {
+      "timestamp": 1792015667,
+      "date": "2026-10-15",
+      "price": 959,
+      "price_toman": 959,
+      "price_irr": 9590
     }
   ]
 }

@@ -3,14 +3,14 @@
   "title": "مثقال طلا (آبشده)",
   "unit": "تومان",
   "timezone": "Asia/Tehran",
-  "updated_at": "2026-10-08 14:08:05",
-  "total_records": 1169,
+  "updated_at": "2026-10-15 01:37:43",
+  "total_records": 1176,
   "latest": {
-    "timestamp": 1791455885,
-    "date": "2026-10-08",
-    "price": 114270000,
-    "price_toman": 114270000,
-    "price_irr": 1142700000
+    "timestamp": 1792015663,
+    "date": "2026-10-15",
+    "price": 113220000,
+    "price_toman": 113220000,
+    "price_irr": 1132200000
   },
   "history": [
     {
@@ -10526,11 +10526,60 @@
       "bubble_percent": 0.71
     },
     {
-      "timestamp": 1791455885,
+      "timestamp": 1791490042,
       "date": "2026-10-08",
-      "price": 114270000,
-      "price_toman": 114270000,
-      "price_irr": 1142700000
+      "price": 113950000,
+      "price_toman": 113950000,
+      "price_irr": 1139500000
+    },
+    {
+      "timestamp": 1791576442,
+      "date": "2026-10-09",
+      "price": 114830000,
+      "price_toman": 114830000,
+      "price_irr": 1148300000
+    },
+    {
+      "timestamp": 1791662839,
+      "date": "2026-10-10",
+      "price": 114450000,
+      "price_toman": 114450000,
+      "price_irr": 1144500000
+    },
+    {
+      "timestamp": 1791749247,
+      "date": "2026-10-11",
+      "price": 113810000,
+      "price_toman": 113810000,
+      "price_irr": 1138100000
+    },
+    {
+      "timestamp": 1791835644,
+      "date": "2026-10-12",
+      "price": 112280000,
+      "price_toman": 112280000,
+      "price_irr": 1122800000
+    },
+    {
+      "timestamp": 1791922049,
+      "date": "2026-10-13",
+      "price": 111380000,
+      "price_toman": 111380000,
+      "price_irr": 1113800000
+    },
+    {
+      "timestamp": 1792008469,
+      "date": "2026-10-14",
+      "price": 113220000,
+      "price_toman": 113220000,
+      "price_irr": 1132200000
+    },
+    {
+      "timestamp": 1792015663,
+      "date": "2026-10-15",
+      "price": 113220000,
+      "price_toman": 113220000,
+      "price_irr": 1132200000
     }
   ]
 }

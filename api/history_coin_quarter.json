@@ -3,14 +3,14 @@
   "title": "ربع سکه",
   "unit": "تومان",
   "timezone": "Asia/Tehran",
-  "updated_at": "2026-10-08 14:08:05",
-  "total_records": 1165,
+  "updated_at": "2026-10-15 01:37:44",
+  "total_records": 1172,
   "latest": {
-    "timestamp": 1791455885,
-    "date": "2026-10-08",
-    "price": 76500000,
-    "price_toman": 76500000,
-    "price_irr": 765000000
+    "timestamp": 1792015664,
+    "date": "2026-10-15",
+    "price": 76000000,
+    "price_toman": 76000000,
+    "price_irr": 760000000
   },
   "history": [
     {
@@ -10490,11 +10490,60 @@
       "bubble_percent": 18.86
     },
     {
-      "timestamp": 1791455885,
+      "timestamp": 1791490043,
       "date": "2026-10-08",
       "price": 76500000,
       "price_toman": 76500000,
       "price_irr": 765000000
+    },
+    {
+      "timestamp": 1791576443,
+      "date": "2026-10-09",
+      "price": 76500000,
+      "price_toman": 76500000,
+      "price_irr": 765000000
+    },
+    {
+      "timestamp": 1791662840,
+      "date": "2026-10-10",
+      "price": 76500000,
+      "price_toman": 76500000,
+      "price_irr": 765000000
+    },
+    {
+      "timestamp": 1791749247,
+      "date": "2026-10-11",
+      "price": 75500000,
+      "price_toman": 75500000,
+      "price_irr": 755000000
+    },
+    {
+      "timestamp": 1791835644,
+      "date": "2026-10-12",
+      "price": 74500000,
+      "price_toman": 74500000,
+      "price_irr": 745000000
+    },
+    {
+      "timestamp": 1791922050,
+      "date": "2026-10-13",
+      "price": 71500000,
+      "price_toman": 71500000,
+      "price_irr": 715000000
+    },
+    {
+      "timestamp": 1792008469,
+      "date": "2026-10-14",
+      "price": 76000000,
+      "price_toman": 76000000,
+      "price_irr": 760000000
+    },
+    {
+      "timestamp": 1792015664,
+      "date": "2026-10-15",
+      "price": 76000000,
+      "price_toman": 76000000,
+      "price_irr": 760000000
     }
   ]
 }

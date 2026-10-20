@@ -3,14 +3,14 @@
   "title": "لیر ترکیه",
   "unit": "تومان",
   "timezone": "Asia/Tehran",
-  "updated_at": "2026-10-08 14:08:05",
-  "total_records": 1172,
+  "updated_at": "2026-10-15 01:37:43",
+  "total_records": 1179,
   "latest": {
-    "timestamp": 1791455885,
-    "date": "2026-10-08",
-    "price": 5550,
-    "price_toman": 5550,
-    "price_irr": 55500
+    "timestamp": 1792015663,
+    "date": "2026-10-15",
+    "price": 5460,
+    "price_toman": 5460,
+    "price_irr": 54600
   },
   "history": [
     {
@@ -8211,11 +8211,60 @@
       "price_irr": 54600
     },
     {
-      "timestamp": 1791455885,
+      "timestamp": 1791490042,
       "date": "2026-10-08",
-      "price": 5550,
-      "price_toman": 5550,
-      "price_irr": 55500
+      "price": 5520,
+      "price_toman": 5520,
+      "price_irr": 55200
+    },
+    {
+      "timestamp": 1791576442,
+      "date": "2026-10-09",
+      "price": 5530,
+      "price_toman": 5530,
+      "price_irr": 55300
+    },
+    {
+      "timestamp": 1791662839,
+      "date": "2026-10-10",
+      "price": 5480,
+      "price_toman": 5480,
+      "price_irr": 54800
+    },
+    {
+      "timestamp": 1791749246,
+      "date": "2026-10-11",
+      "price": 5470,
+      "price_toman": 5470,
+      "price_irr": 54700
+    },
+    {
+      "timestamp": 1791835644,
+      "date": "2026-10-12",
+      "price": 5410,
+      "price_toman": 5410,
+      "price_irr": 54100
+    },
+    {
+      "timestamp": 1791922049,
+      "date": "2026-10-13",
+      "price": 5360,
+      "price_toman": 5360,
+      "price_irr": 53600
+    },
+    {
+      "timestamp": 1792008469,
+      "date": "2026-10-14",
+      "price": 5460,
+      "price_toman": 5460,
+      "price_irr": 54600
+    },
+    {
+      "timestamp": 1792015663,
+      "date": "2026-10-15",
+      "price": 5460,
+      "price_toman": 5460,
+      "price_irr": 54600
     }
   ]
 }

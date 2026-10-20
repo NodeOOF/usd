@@ -3,14 +3,14 @@
   "title": "سامانی تاجیکستان",
   "unit": "تومان",
   "timezone": "Asia/Tehran",
-  "updated_at": "2026-10-08 14:08:08",
-  "total_records": 1172,
+  "updated_at": "2026-10-15 01:37:46",
+  "total_records": 1179,
   "latest": {
-    "timestamp": 1791455888,
-    "date": "2026-10-08",
-    "price": 29160,
-    "price_toman": 29160,
-    "price_irr": 291600
+    "timestamp": 1792015666,
+    "date": "2026-10-15",
+    "price": 28800,
+    "price_toman": 28800,
+    "price_irr": 288000
   },
   "history": [
     {
@@ -8211,11 +8211,60 @@
       "price_irr": 286400
     },
     {
-      "timestamp": 1791455888,
+      "timestamp": 1791490045,
       "date": "2026-10-08",
-      "price": 29160,
-      "price_toman": 29160,
-      "price_irr": 291600
+      "price": 29000,
+      "price_toman": 29000,
+      "price_irr": 290000
+    },
+    {
+      "timestamp": 1791576444,
+      "date": "2026-10-09",
+      "price": 29240,
+      "price_toman": 29240,
+      "price_irr": 292400
+    },
+    {
+      "timestamp": 1791662841,
+      "date": "2026-10-10",
+      "price": 28920,
+      "price_toman": 28920,
+      "price_irr": 289200
+    },
+    {
+      "timestamp": 1791749249,
+      "date": "2026-10-11",
+      "price": 28880,
+      "price_toman": 28880,
+      "price_irr": 288800
+    },
+    {
+      "timestamp": 1791835645,
+      "date": "2026-10-12",
+      "price": 28500,
+      "price_toman": 28500,
+      "price_irr": 285000
+    },
+    {
+      "timestamp": 1791922053,
+      "date": "2026-10-13",
+      "price": 28220,
+      "price_toman": 28220,
+      "price_irr": 282200
+    },
+    {
+      "timestamp": 1792008472,
+      "date": "2026-10-14",
+      "price": 28800,
+      "price_toman": 28800,
+      "price_irr": 288000
+    },
+    {
+      "timestamp": 1792015666,
+      "date": "2026-10-15",
+      "price": 28800,
+      "price_toman": 28800,
+      "price_irr": 288000
     }
   ]
 }

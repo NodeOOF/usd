@@ -3,14 +3,14 @@
   "title": "دلار آمریکا",
   "unit": "تومان",
   "timezone": "Asia/Tehran",
-  "updated_at": "2026-10-08 14:08:05",
-  "total_records": 1172,
+  "updated_at": "2026-10-15 01:37:42",
+  "total_records": 1179,
   "latest": {
-    "timestamp": 1791455885,
-    "date": "2026-10-08",
-    "price": 268996,
-    "price_toman": 268996,
-    "price_irr": 2689960
+    "timestamp": 1792015662,
+    "date": "2026-10-15",
+    "price": 265719,
+    "price_toman": 265719,
+    "price_irr": 2657190
   },
   "history": [
     {
@@ -8211,11 +8211,60 @@
       "price_irr": 2643830
     },
     {
-      "timestamp": 1791455885,
+      "timestamp": 1791490042,
       "date": "2026-10-08",
-      "price": 268996,
-      "price_toman": 268996,
-      "price_irr": 2689960
+      "price": 267409,
+      "price_toman": 267409,
+      "price_irr": 2674090
+    },
+    {
+      "timestamp": 1791576442,
+      "date": "2026-10-09",
+      "price": 268908,
+      "price_toman": 268908,
+      "price_irr": 2689080
+    },
+    {
+      "timestamp": 1791662839,
+      "date": "2026-10-10",
+      "price": 266109,
+      "price_toman": 266109,
+      "price_irr": 2661090
+    },
+    {
+      "timestamp": 1791749245,
+      "date": "2026-10-11",
+      "price": 265705,
+      "price_toman": 265705,
+      "price_irr": 2657050
+    },
+    {
+      "timestamp": 1791835643,
+      "date": "2026-10-12",
+      "price": 262708,
+      "price_toman": 262708,
+      "price_irr": 2627080
+    },
+    {
+      "timestamp": 1791922049,
+      "date": "2026-10-13",
+      "price": 260496,
+      "price_toman": 260496,
+      "price_irr": 2604960
+    },
+    {
+      "timestamp": 1792008468,
+      "date": "2026-10-14",
+      "price": 265712,
+      "price_toman": 265712,
+      "price_irr": 2657120
+    },
+    {
+      "timestamp": 1792015662,
+      "date": "2026-10-15",
+      "price": 265719,
+      "price_toman": 265719,
+      "price_irr": 2657190
     }
   ]
 }

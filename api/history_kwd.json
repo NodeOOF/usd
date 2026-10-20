@@ -3,14 +3,14 @@
   "title": "دینار کویت",
   "unit": "تومان",
   "timezone": "Asia/Tehran",
-  "updated_at": "2026-10-08 14:08:08",
-  "total_records": 1172,
+  "updated_at": "2026-10-15 01:37:46",
+  "total_records": 1179,
   "latest": {
-    "timestamp": 1791455888,
-    "date": "2026-10-08",
-    "price": 864880,
-    "price_toman": 864880,
-    "price_irr": 8648800
+    "timestamp": 1792015666,
+    "date": "2026-10-15",
+    "price": 855080,
+    "price_toman": 855080,
+    "price_irr": 8550800
   },
   "history": [
     {
@@ -8211,11 +8211,60 @@
       "price_irr": 8518400
     },
     {
-      "timestamp": 1791455888,
+      "timestamp": 1791490045,
       "date": "2026-10-08",
-      "price": 864880,
-      "price_toman": 864880,
-      "price_irr": 8648800
+      "price": 860300,
+      "price_toman": 860300,
+      "price_irr": 8603000
+    },
+    {
+      "timestamp": 1791576444,
+      "date": "2026-10-09",
+      "price": 864840,
+      "price_toman": 864840,
+      "price_irr": 8648400
+    },
+    {
+      "timestamp": 1791662841,
+      "date": "2026-10-10",
+      "price": 855520,
+      "price_toman": 855520,
+      "price_irr": 8555200
+    },
+    {
+      "timestamp": 1791749249,
+      "date": "2026-10-11",
+      "price": 854240,
+      "price_toman": 854240,
+      "price_irr": 8542400
+    },
+    {
+      "timestamp": 1791835645,
+      "date": "2026-10-12",
+      "price": 843320,
+      "price_toman": 843320,
+      "price_irr": 8433200
+    },
+    {
+      "timestamp": 1791922053,
+      "date": "2026-10-13",
+      "price": 838980,
+      "price_toman": 838980,
+      "price_irr": 8389800
+    },
+    {
+      "timestamp": 1792008472,
+      "date": "2026-10-14",
+      "price": 851960,
+      "price_toman": 851960,
+      "price_irr": 8519600
+    },
+    {
+      "timestamp": 1792015666,
+      "date": "2026-10-15",
+      "price": 855080,
+      "price_toman": 855080,
+      "price_irr": 8550800
     }
   ]
 }
